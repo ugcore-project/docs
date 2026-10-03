@@ -4,7 +4,7 @@
 
 - Public documentation for UgCore, a server-authoritative, headless, modular FiveM framework in Lua 5.4.
 - Built on [Mintlify](https://mintlify.com). Pages are MDX files with YAML frontmatter. Configuration lives in `docs.json`.
-- The framework source is the `ug-core` repository. Its `CLAUDE.md` is the source of truth. When a page and the code disagree, the code wins and the page is fixed.
+- The framework source is the `ug-core` repository. The code is the source of truth. When a page and the code disagree, the code wins and the page is fixed.
 - Custom styles live in `style.css` (classes prefixed `ug-`). React snippets live in `snippets/`.
 
 ## Structure
