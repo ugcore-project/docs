@@ -1,0 +1,47 @@
+---
+title: "Convars"
+description: "Override any config option from server.cfg."
+icon: "terminal"
+---
+
+Convars win over config files. Names follow two patterns:
+
+- `ug-core:<Key>` for `config/core.lua`
+- `ug-core:<Config>:<Key>` for every other config
+
+Both parts are PascalCase: `maxCharacters` in `config/characters.lua` becomes `ug-core:Characters:MaxCharacters`.
+
+```bash server.cfg
+set ug-core:Debug true
+set ug-core:Locale "pt"
+set ug-core:Guard:KickScore 30
+set ug-core:Modules:Gangs false
+```
+
+## Value rules
+
+- Booleans take `true`, `false`, `1` or `0`.
+- Numbers and integers go through `tonumber`, then the option's checks.
+- Tables and vectors cannot be set by convar.
+- An invalid convar is a boot error, like an invalid config value.
+
+## Every convar
+
+| Convar | Type | Default |
+| --- | --- | --- |
+| `ug-core:Locale` | string | `en` |
+| `ug-core:Debug` | boolean | `false` |
+| `ug-core:Guard:DecayPerMinute` | number | `1` |
+| `ug-core:Guard:WarnScore` | integer | `10` |
+| `ug-core:Guard:KickScore` | integer | `25` |
+| `ug-core:Guard:BanScore` | integer | `0` |
+| `ug-core:Guard:BudgetMax` | integer | `40` |
+| `ug-core:Guard:BudgetPer` | integer | `1000` |
+| `ug-core:Modules:<Module>` | boolean | `true` |
+| `ug-core:Identity:PrimaryIdentifier` | string | `license` |
+| `ug-core:Players:PersistDeathState` | boolean | `true` |
+| `ug-core:Characters:MaxCharacters` | integer | `4` |
+
+`<Module>` is any optional module: `Characters`, `Accounts`, `Jobs`, `Gangs`, `Sessions`, `Commands`, `Locale`.
+
+<Tip>Each generated config file lists the convar of every option.</Tip>

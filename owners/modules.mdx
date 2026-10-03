@@ -1,0 +1,75 @@
+---
+title: "Modules"
+description: "Enable only the features your server needs."
+icon: "puzzle-piece"
+---
+
+ug-core ships ten modules. Three are required, the rest are yours to turn off.
+
+## Available modules
+
+| Module | Required | Depends on | What it does |
+| --- | --- | --- | --- |
+| `identity` | Yes | | Player identifiers and bans. |
+| `players` | Yes | identity | Connected players, metadata, death state and injuries. |
+| `permissions` | Yes | identity | Permissions per identifier, applied as ACEs. |
+| `characters` | | players | Multiple characters per player. |
+| `accounts` | | characters | Cash, bank and custom accounts with a ledger. |
+| `jobs` | | characters | Jobs with grades and duty. |
+| `gangs` | | characters | Gangs with grades. |
+| `sessions` | | players | Instances on routing buckets. |
+| `commands` | | players | Chat commands with typed arguments. |
+| `locale` | | | Translations of core messages. |
+
+## Enable and disable
+
+`config/modules.lua` lists every optional module, enabled by default:
+
+```lua config/modules.lua
+return {
+    accounts = true,
+    characters = true,
+    commands = true,
+    gangs = false,
+    jobs = true,
+    locale = true,
+    sessions = false,
+}
+```
+
+Required modules are never listed. You can also use a convar, such as `set ug-core:Modules:Gangs false`.
+
+## What disabling does
+
+<Check>A disabled module has no config file, no tables, no events and no namespace.</Check>
+<Check>Disabling never deletes data. Turn it back on and everything is still there.</Check>
+<Check>Resources that use a disabled module get a clear error: `UgCore.Gangs belongs to disabled module "gangs". Enable it in config/modules.lua.`</Check>
+
+## Dependencies
+
+An enabled module with a disabled dependency stops boot with a message that tells you what to do:
+
+```text
+[ERROR] accounts requires characters. Enable characters or disable accounts.
+```
+
+Dependencies always load first. Cycles abort boot.
+
+## Without characters
+
+When `characters` is disabled, players are loaded as soon as they join. Accounts, jobs and gangs need characters, so they must be disabled too.
+
+<Note>
+  With `characters` enabled, players are only loaded once a character selector, such as `ug-multicharacter`, loads a character. Until then, calls that need a loaded player return `not_loaded`.
+</Note>
+
+## See what's running
+
+```text
+> ug modules
+  accounts       enabled   enabled in config/modules.lua
+  characters     enabled   enabled in config/modules.lua
+  gangs          disabled  disabled in config/modules.lua
+  identity       enabled   required
+  ...
+```

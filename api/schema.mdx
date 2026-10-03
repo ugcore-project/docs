@@ -1,0 +1,76 @@
+---
+title: "UgCore.Schema"
+sidebarTitle: "Schema"
+description: "Bounded validators for every value a client sends."
+icon: "shield-check"
+---
+
+<Badge color="purple">Shared</Badge> Runs in your resource. See the [Schemas guide](/developers/schemas) for patterns.
+
+Every rule is bounded. Validated input has a known maximum size.
+
+## Builders
+
+| Builder | Options | Notes |
+| --- | --- | --- |
+| `String(opts)` | `max` **required**, `min`, `pattern`, `multiline`, `validate` | Counts UTF-8 characters. Rejects invalid UTF-8 and control characters. |
+| `Number(opts?)` | `min`, `max`, `validate` | Rejects NaN and infinity. |
+| `Integer(opts?)` | `min`, `max`, `validate` | Normalizes `5.0` to `5`. |
+| `Boolean(opts?)` | `validate` | |
+| `Vector2/3/4(opts?)` | `maxComponent`, `validate` | Checks the native vector type and finite components. |
+| `Enum(values, opts?)` | `validate` | Values are strings, numbers or booleans. |
+| `Array(item, opts)` | `max` **required**, `min`, `validate` | Rejects holes and non-integer keys. |
+| `Map(key, value, opts)` | `max` **required**, `min`, `validate` | Keys: `String`, `Integer`, `Number`, `Enum` or `Boolean`. |
+| `Object(fields, opts?)` | `strict` (default `true`), `validate` | Strict rejects unknown keys. Non-strict drops them. |
+| `Optional(rule)` | | Allows `nil`. Not allowed inside `Array` or `Map`. |
+
+`validate` is `fun(value): boolean, string?`. It runs after the built-in checks inside `pcall`.
+
+<Warning>
+  Unknown options raise with a suggestion. `String`, `Array` and `Map` without `max` raise at load time.
+</Warning>
+
+## Define
+
+```lua
+UgCore.Schema.Define(rules) -> schema
+```
+
+<ResponseField name="rules" type="UgSchemaRule[]" required>One rule per argument. Optional rules MUST be trailing.</ResponseField>
+
+## Validate
+
+```lua
+UgCore.Schema.Validate(schema, ...) -> ok, args, detail
+```
+
+<ResponseField name="ok" type="boolean" />
+<ResponseField name="args" type="table?">Fresh values with `n` set to the declared count. Use `table.unpack(args, 1, args.n)`.</ResponseField>
+<ResponseField name="detail" type="string?">Failure path, such as `arg 1.items[2].name: MUST be a string`. For server logs only.</ResponseField>
+
+Trailing nils are tolerated. Extra values are rejected.
+
+## Check
+
+```lua
+UgCore.Schema.Check(rule, value) -> ok, value, detail
+```
+
+Validates one value against one rule.
+
+## Example
+
+```lua
+local S = UgCore.Schema
+
+local schema = S.Define({
+    S.String({ min = 1, max = 32, pattern = '^[%w_]+$' }),
+    S.Array(S.Object({
+        item = S.String({ max = 64 }),
+        count = S.Integer({ min = 1, max = 100 }),
+    }), { max = 20 }),
+    S.Optional(S.Boolean()),
+})
+
+local ok, args, detail = S.Validate(schema, 'shop_1', { { item = 'water', count = 2 } })
+```

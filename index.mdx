@@ -1,20 +1,190 @@
 ---
-title: "Introduction"
-description: "Welcome to your project"
+title: "UgCore"
+sidebarTitle: "Home"
+description: "A server-authoritative, headless and modular FiveM framework."
+mode: "custom"
+icon: "house"
 ---
 
-Write a short description of your product here. What it does, who it's for, and what they can accomplish with it.
+import { BootConsole } from "/snippets/boot-console.jsx";
 
-<Tip>
-  Ready to make this your own? Start by editing this page. Update your `docs.json` file to customize your site. Then fill out the [Quickstart](/quickstart) page.
-</Tip>
+<div className="ug-hero ug-hex-grid">
+  <div className="mx-auto max-w-6xl px-6 pb-12 pt-20 lg:pt-28">
+    <div className="grid items-center gap-12 lg:grid-cols-2">
+      <div>
+        <span className="ug-pill text-zinc-700 dark:text-zinc-200">
+          <span className="h-2 w-2 rounded-full" style={{ background: "#22D3EE" }} />
+          Early access · Lua 5.4 · OneSync
+        </span>
+        <h1 className="mt-6 text-5xl font-bold tracking-tight text-zinc-950 dark:text-white sm:text-6xl">
+          The core your server <span className="ug-gradient-text">can trust</span>.
+        </h1>
+        <p className="mt-6 max-w-xl text-lg leading-8 text-zinc-600 dark:text-zinc-400">
+          UgCore is a FiveM framework built server-first. Clients send intent, the server decides. Every net event is validated, rate limited and scored. Owners enable only the modules they need, and developers get a typed API.
+        </p>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <a href="/quickstart" className="rounded-xl px-5 py-3 text-sm font-semibold text-white no-underline" style={{ background: "linear-gradient(100deg, #7C5CFF, #22D3EE)" }}>
+            Build your first resource
+          </a>
+          <a href="/installation" className="rounded-xl border border-zinc-300 px-5 py-3 text-sm font-semibold text-zinc-800 no-underline dark:border-zinc-700 dark:text-zinc-100">
+            Install UgCore
+          </a>
+          <a href="/api/overview" className="rounded-xl px-5 py-3 text-sm font-semibold text-zinc-700 no-underline dark:text-zinc-300">
+            API reference →
+          </a>
+        </div>
+        <div className="mt-10 grid max-w-md grid-cols-3 gap-6">
+          <div>
+            <div className="text-2xl font-bold text-zinc-950 dark:text-white">10</div>
+            <div className="text-xs text-zinc-500">modules, enable what you need</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-zinc-950 dark:text-white">4</div>
+            <div className="text-xs text-zinc-500">layers of client protection</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-zinc-950 dark:text-white">0</div>
+            <div className="text-xs text-zinc-500">UI dependencies in the core</div>
+          </div>
+        </div>
+      </div>
+      <BootConsole />
+    </div>
+  </div>
+</div>
 
-<Card title="Quickstart" icon="rocket" href="/quickstart">
-  This card links to the quickstart page in your project.
-</Card>
-<Card title="Components" icon="puzzle-piece" href="https://mintlify.com/docs/components">
-  Add cards, callouts, steps, tabs, and more to design and structure your pages.
-</Card>
-<Card title="Settings" icon="gear" href="https://mintlify.com/docs/organize/settings">
-  Set your site name, branding, and navigation in the `docs.json` file.
-</Card>
+<div className="mx-auto max-w-6xl px-6 py-16">
+  <h2 className="text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">
+    Built different, <span className="ug-gradient-text">on purpose</span>
+  </h2>
+  <p className="mt-3 max-w-2xl text-zinc-600 dark:text-zinc-400">
+    Most frameworks trust the client and patch holes later. UgCore starts from the opposite end.
+  </p>
+
+  <div className="mt-10">
+    <Columns cols={3}>
+      <Card title="Server-authoritative" icon="shield-halved" href="/concepts/security">
+        Prices, amounts and outcomes are computed on the server. Positions are read from the ped, never from the client.
+      </Card>
+      <Card title="Validated by default" icon="filter" href="/developers/schemas">
+        No net event or callback registers without a bounded schema and a rate limit. Unbounded input is impossible to accept.
+      </Card>
+      <Card title="Guard scoring" icon="gauge-high" href="/owners/guard">
+        Suspicious behavior adds to a decaying score per player. Thresholds warn, kick or ban, and your anticheat can hook in.
+      </Card>
+      <Card title="Headless" icon="ghost" href="/architecture">
+        The core draws nothing. It returns result codes and emits events, so any UI resource can sit on top.
+      </Card>
+      <Card title="Modular" icon="puzzle-piece" href="/owners/modules">
+        Ten modules, from accounts to sessions. Disabled modules leave no tables, no events and no namespace behind.
+      </Card>
+      <Card title="Owner-friendly config" icon="sliders" href="/owners/configuration">
+        One `config/` folder, generated on first boot and never overwritten. Typos get suggestions, bad values stop boot with every error listed.
+      </Card>
+    </Columns>
+  </div>
+</div>
+
+<div className="mx-auto max-w-6xl px-6 py-16">
+  <div className="grid items-start gap-10 lg:grid-cols-5">
+    <div className="lg:col-span-2">
+      <h2 className="text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">
+        A callback in <span className="ug-gradient-text">eight lines</span>
+      </h2>
+      <p className="mt-4 text-zinc-600 dark:text-zinc-400">
+        Declare what you accept and how often. UgCore runs the global budget, the concurrency cap, the rate limit, the loaded and permission checks and the schema before your handler sees anything.
+      </p>
+      <p className="mt-4 text-zinc-600 dark:text-zinc-400">
+        Bad input never reaches your code. It reaches the player's Guard score.
+      </p>
+      <a href="/developers/callbacks" className="mt-6 inline-block text-sm font-semibold no-underline" style={{ color: "#9F8BFF" }}>
+        Learn callbacks →
+      </a>
+    </div>
+    <div className="lg:col-span-3">
+
+<CodeGroup>
+
+```lua server.lua
+local S = UgCore.Schema
+
+UgCore.Callback.Register('Withdraw', {
+    schema = S.Define({ S.Integer({ min = 1, max = 100000 }) }),
+    rate = { max = 3, per = 5000 },
+    requirePlayer = true,
+}, function(source, amount)
+    local ok, balance, errorCode = UgCore.Accounts.Remove(source, 'bank', amount, 'ATM withdrawal')
+
+    return { ok = ok, balance = balance, error = errorCode }
+end)
+```
+
+```lua client.lua
+local ok, result, errorCode = UgCore.Callback.Await('my-bank:Withdraw', 500)
+
+if not ok then
+    -- errorCode is one of: rate_limited, invalid_args, not_loaded, timeout, ...
+    return
+end
+
+print(('New balance: %d'):format(result.balance))
+```
+
+```lua fxmanifest.lua
+fx_version 'cerulean'
+game 'gta5'
+lua54 'yes'
+
+ug_core_version '1.0.0'
+
+dependency 'ug-core'
+
+shared_script '@ug-core/import.lua'
+server_script 'server.lua'
+client_script 'client.lua'
+```
+
+</CodeGroup>
+
+    </div>
+  </div>
+</div>
+
+<div className="mx-auto max-w-6xl px-6 py-16">
+  <h2 className="text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">Pick your path</h2>
+  <div className="mt-8 grid gap-6 md:grid-cols-2">
+    <a href="/owners/configuration" className="ug-glow-card block p-7 no-underline">
+      <div className="text-sm font-semibold" style={{ color: "#22D3EE" }}>SERVER OWNERS</div>
+      <div className="mt-2 text-xl font-bold text-zinc-950 dark:text-white">Run a server on UgCore</div>
+      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+        Install, configure modules, set permissions, tune Guard and read the console.
+      </p>
+    </a>
+    <a href="/developers/importing" className="ug-glow-card block p-7 no-underline">
+      <div className="text-sm font-semibold" style={{ color: "#9F8BFF" }}>DEVELOPERS</div>
+      <div className="mt-2 text-xl font-bold text-zinc-950 dark:text-white">Build resources on UgCore</div>
+      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+        Import the API, register callbacks, hook into actions and react to events.
+      </p>
+    </a>
+  </div>
+</div>
+
+<div className="mx-auto max-w-6xl px-6 pb-24 pt-8">
+  <div className="ug-glow-card px-8 py-12 text-center">
+    <h2 className="text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">
+      Ready to <span className="ug-gradient-text">boot</span>?
+    </h2>
+    <p className="mx-auto mt-3 max-w-xl text-zinc-600 dark:text-zinc-400">
+      You need FXServer with OneSync, oxmysql and MySQL 8.0 or MariaDB 10.6. The rest is one folder.
+    </p>
+    <div className="mt-8 flex justify-center gap-3">
+      <a href="/installation" className="rounded-xl px-5 py-3 text-sm font-semibold text-white no-underline" style={{ background: "linear-gradient(100deg, #7C5CFF, #22D3EE)" }}>
+        Install UgCore
+      </a>
+      <a href="https://github.com/ugcore-project/ug-core" className="rounded-xl border border-zinc-300 px-5 py-3 text-sm font-semibold text-zinc-800 no-underline dark:border-zinc-700 dark:text-zinc-100">
+        View on GitHub
+      </a>
+    </div>
+  </div>
+</div>

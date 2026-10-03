@@ -1,0 +1,72 @@
+---
+title: "Enums"
+description: "Every magic value of the framework, in one place."
+icon: "list-ol"
+---
+
+<Badge color="purple">Shared</Badge>
+
+Compare against enums, never against raw strings. Your editor autocompletes them and flags typos.
+
+```lua
+if UgCore.Players.GetDeathState(source) == UgCore.Enums.DeathState.Downed then
+    -- ...
+end
+```
+
+## Core enums
+
+<AccordionGroup>
+  <Accordion title="Enums.Lifecycle" icon="timeline" defaultOpen>
+    `Booting`, `Configured`, `Initializing`, `Starting`, `Ready`, `Stopping`, `Stopped`. Values equal their names.
+  </Accordion>
+  <Accordion title="Enums.Errors" icon="circle-exclamation">
+    | Key | Value |
+    | --- | --- |
+    | `InvalidArgs` | `invalid_args` |
+    | `NotFound` | `not_found` |
+    | `NotLoaded` | `not_loaded` |
+    | `RateLimited` | `rate_limited` |
+    | `NoPermission` | `no_permission` |
+    | `InsufficientFunds` | `insufficient_funds` |
+    | `Timeout` | `timeout` |
+    | `InternalError` | `internal_error` |
+  </Accordion>
+  <Accordion title="Enums.Violations and Enums.ViolationWeights" icon="shield-halved">
+    `InvalidPayload` (5), `RateLimited` (1), `ConcurrencyExceeded` (2), `UnknownCallback` (3), `NotLoaded` (2), `NoPermission` (3), `OutOfRange` (5), `InvalidDeathState` (5). Values equal their names.
+
+    ```lua
+    UgCore.Enums.ViolationWeights[UgCore.Enums.Violations.OutOfRange] -- 5
+    ```
+  </Accordion>
+  <Accordion title="Enums.Events.<Group>" icon="bell">
+    Event names by group: `Lifecycle`, `Players`, `Guard`, and one group per module that emits events. Values are `ug-core:<Group>:<Key>`.
+
+    ```lua
+    UgCore.Enums.Events.Players.Downed -- 'ug-core:Players:Downed'
+    ```
+
+    See [Events reference](/reference/events).
+  </Accordion>
+  <Accordion title="Enums.Hooks.<Group>" icon="anchor">
+    Hook names by group. Values are `<Group>:<Key>`.
+
+    ```lua
+    UgCore.Enums.Hooks.Accounts.BeforeRemove -- 'Accounts:BeforeRemove'
+    ```
+
+    See [Hooks reference](/reference/hooks).
+  </Accordion>
+</AccordionGroup>
+
+## Module enums
+
+Modules add their own enums and event and hook groups. In your resource, they appear once ug-core has replicated its enabled modules, so read them after `UgCore.Lifecycle.On('Ready', ...)`. Enums of disabled modules never exist.
+
+The `players` module, always enabled, adds:
+
+| Enum | Values |
+| --- | --- |
+| `Enums.DeathState` | `Alive`, `Downed`, `Dead` |
+| `Enums.BodyRegion` | `Head`, `Neck`, `Torso`, `LeftArm`, `RightArm`, `LeftLeg`, `RightLeg`, `Unknown` |
+| `Enums.DamageCategory` | `Gunshot`, `Stab`, `Blunt`, `Explosion`, `Fire`, `Fall`, `Vehicle`, `Drowning`, `Animal`, `Unknown` |

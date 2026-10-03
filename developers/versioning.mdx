@@ -1,0 +1,37 @@
+---
+title: "Version requirements"
+description: "Make your resource refuse to run on a ug-core that is too old."
+icon: "code-compare"
+---
+
+ug-core follows semantic versioning. Breaking changes to exports, config or database schema bump the major version.
+
+## Declare it in the manifest
+
+The simplest way. Your resource does not start against an older ug-core:
+
+```lua fxmanifest.lua
+ug_core_version '1.2.0'
+```
+
+```text
+[ug-core] my-bank requires ug-core 1.2.0 or newer, found 1.0.0. Update ug-core.
+```
+
+## Check it in code
+
+```lua
+UgCore.Version.Require('1.2.0')          -- raises when older
+UgCore.Version.IsAtLeast('1.3.0')        -- true or false, to adapt instead
+UgCore.Version.Get()                     -- '1.4.2'
+```
+
+Versions compare as numbers: `1.10.0` is newer than `1.9.9`. Suffixes such as `-beta.1` are ignored.
+
+## Newer major versions
+
+When ug-core has a newer major version than you require, `Require` does not fail. It logs one warning, because the new major version may have broken something you use:
+
+```text
+[WARN] my-bank was built for ug-core 1.x, found 2.1.0. Check the breaking changes of ug-core 2.0.0.
+```

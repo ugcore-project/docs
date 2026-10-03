@@ -1,0 +1,57 @@
+---
+title: "UgCore.Permissions"
+sidebarTitle: "Permissions"
+description: "Persistent ACE grants."
+icon: "key"
+---
+
+<Badge color="blue">Server</Badge> Required module. Proxied to ug-core. See [Permissions for owners](/owners/permissions).
+
+Permissions are FiveM ACEs. Grants are stored in the database and applied again on every boot and join.
+
+## Has
+
+```lua
+UgCore.Permissions.Has(source, permission) -> boolean
+```
+
+Checks the ACE, including ACEs from `server.cfg`.
+
+## Grant
+
+```lua
+UgCore.Permissions.Grant(target, permission, by?) -> ok, errorCode
+```
+
+**MUST run in a thread.** Applies the ACE right away.
+
+<ResponseField name="target" type="integer | string" required>A source or an identifier.</ResponseField>
+<ResponseField name="by" type="string">Who granted it. Up to 64 characters.</ResponseField>
+
+## Revoke
+
+```lua
+UgCore.Permissions.Revoke(target, permission) -> ok, removed, errorCode
+```
+
+**MUST run in a thread.** `removed` is `false` when it was not granted. ACEs from `server.cfg` stay.
+
+## GetAll
+
+```lua
+UgCore.Permissions.GetAll(target) -> string[]
+```
+
+Permissions granted with `Grant`, sorted. ACEs from `server.cfg` are not listed.
+
+## Example
+
+```lua
+CreateThread(function()
+    UgCore.Permissions.Grant(source, 'my-garage.admin', 'console')
+end)
+
+if UgCore.Permissions.Has(source, 'my-garage.admin') then
+    -- ...
+end
+```

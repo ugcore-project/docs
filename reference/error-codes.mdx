@@ -1,0 +1,36 @@
+---
+title: "Error codes"
+description: "Every code a function or a client can receive."
+icon: "circle-exclamation"
+---
+
+Mutating functions return `ok, errorCode` or `ok, value, errorCode`. Codes are plain strings from `UgCore.Enums.Errors`, typed as `UgErrorCode`. They are the only failure detail a client ever receives.
+
+| Enum | Value | Meaning |
+| --- | --- | --- |
+| `InvalidArgs` | `invalid_args` | Arguments failed validation, or the action is not valid in the current state. |
+| `NotFound` | `not_found` | The player, character, session or callback does not exist. |
+| `NotLoaded` | `not_loaded` | The player has no loaded character. |
+| `RateLimited` | `rate_limited` | Too many requests, or too many callbacks in flight. |
+| `NoPermission` | `no_permission` | Missing ACE, a hook cancelled, a limit was reached, or the player is downed or dead. |
+| `InsufficientFunds` | `insufficient_funds` | The account balance is too low. |
+| `Timeout` | `timeout` | A callback got no answer in time. |
+| `InternalError` | `internal_error` | A handler crashed or the database failed. Details are in the server console. |
+
+```lua
+local ok, balance, err = UgCore.Accounts.Remove(source, 'bank', 500)
+
+if err == UgCore.Enums.Errors.InsufficientFunds then
+    -- ...
+end
+```
+
+## Errors that raise
+
+Wrong API usage is a programmer error, not a result. It raises with a `[ug-core]` prefix and a trace pointing at your code:
+
+```text
+[ug-core] Schema.String requires options with "max"
+[ug-core] Hooks.Register: unknown hook "Acounts:BeforeAdd". Did you mean "Accounts:BeforeAdd"?
+[ug-core] UgCore.Accounts belongs to disabled module "accounts". Enable it in config/modules.lua.
+```

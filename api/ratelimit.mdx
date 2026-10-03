@@ -1,0 +1,66 @@
+---
+title: "UgCore.RateLimit"
+sidebarTitle: "RateLimit"
+description: "Token bucket limiters."
+icon: "gauge-high"
+---
+
+<Badge color="blue">Server</Badge> Runs in your resource.
+
+Net events and callbacks already have rate limits. Use this for your own checks, such as commands or server-side actions.
+
+## Create
+
+```lua
+UgCore.RateLimit.Create({ max, per }) -> limiter
+```
+
+<ResponseField name="max" type="integer" required>Burst size.</ResponseField>
+<ResponseField name="per" type="integer" required>Milliseconds to refill an empty bucket.</ResponseField>
+
+## limiter:Consume
+
+```lua
+limiter:Consume(key) -> allowed, retryAfter
+```
+
+<ResponseField name="key" type="integer | string" required>Usually the player source.</ResponseField>
+<ResponseField name="allowed" type="boolean" />
+<ResponseField name="retryAfter" type="integer">Milliseconds until a token is available. `0` when allowed.</ResponseField>
+
+## limiter:Reset
+
+```lua
+limiter:Reset(key)
+```
+
+Called for you on `playerDropped`.
+
+## limiter:Prune
+
+```lua
+limiter:Prune() -> pruned
+```
+
+Drops full buckets. Behavior is unchanged. Called for you every 60 seconds.
+
+## limiter:Clear
+
+```lua
+limiter:Clear()
+```
+
+Drops every bucket.
+
+## Example
+
+```lua
+local limiter = UgCore.RateLimit.Create({ max = 3, per = 10000 })
+
+local allowed, retryAfter = limiter:Consume(source)
+
+if not allowed then
+    UgCore.Guard.Flag(source, UgCore.Enums.Violations.RateLimited, 'my-shop:Rob')
+    return
+end
+```

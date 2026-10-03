@@ -1,0 +1,120 @@
+---
+title: "UgCore.Players"
+sidebarTitle: "Players"
+description: "Connected players, metadata and death state."
+icon: "users"
+---
+
+<Badge color="blue">Server</Badge> Required module. Proxied to ug-core. On clients, use [`UgCore.LocalPlayer`](/api/localplayer).
+
+## Lookup
+
+```lua
+UgCore.Players.Get(source) -> UgPlayer?
+UgCore.Players.GetAll() -> UgPlayer[]
+UgCore.Players.GetByIdentifier(identifier) -> UgPlayer?
+UgCore.Players.GetByCharacterId(characterId) -> UgPlayer?
+```
+
+<ResponseField name="UgPlayer" type="table">
+  <Expandable title="fields" defaultOpen>
+    <ResponseField name="source" type="integer" />
+    <ResponseField name="name" type="string" />
+    <ResponseField name="identifier" type="string">Primary identifier.</ResponseField>
+    <ResponseField name="characterId" type="integer?">The loaded character.</ResponseField>
+    <ResponseField name="joinedAt" type="integer">Unix seconds.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+`GetAll` is sorted by source.
+
+## Metadata
+
+Session metadata. It lives while the player is connected.
+
+```lua
+UgCore.Players.SetMetadata(source, key, value, replicate?) -> ok, errorCode
+UgCore.Players.GetMetadata(source, key?) -> any
+```
+
+<ResponseField name="key" type="string" required>camelCase.</ResponseField>
+<ResponseField name="value" type="any">`nil` deletes the key.</ResponseField>
+<ResponseField name="replicate" type="boolean">Copies the key to the `ug-core:Metadata` statebag. Every client can read it, so it MUST NOT hold secrets.</ResponseField>
+
+`GetMetadata` without a key returns every key.
+
+## Kick
+
+```lua
+UgCore.Players.Kick(source, reason?) -> ok, errorCode
+```
+
+<ResponseField name="reason" type="string">Shown to the player. A generic message when nil.</ResponseField>
+
+## Death state
+
+See the [Death system](/concepts/death-system) for states, rules and the downed flow.
+
+### Read
+
+```lua
+UgCore.Players.GetDeathState(source) -> 'Alive' | 'Downed' | 'Dead'
+UgCore.Players.IsDead(source) -> boolean
+UgCore.Players.IsDowned(source) -> boolean
+UgCore.Players.GetInjuries(source) -> UgInjury[]
+UgCore.Players.GetCauseOfDeath(source) -> UgCauseOfDeath?
+```
+
+<ResponseField name="UgInjury" type="table">
+  <Expandable title="fields">
+    <ResponseField name="region" type="UgBodyRegion" />
+    <ResponseField name="category" type="UgDamageCategory" />
+    <ResponseField name="weapon" type="integer?">Weapon hash of the last hit.</ResponseField>
+    <ResponseField name="attacker" type="integer?">Player source of the last hit, when confirmed.</ResponseField>
+    <ResponseField name="hits" type="integer" />
+    <ResponseField name="lastAt" type="integer">Unix seconds.</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="UgCauseOfDeath" type="table">
+  <Expandable title="fields">
+    <ResponseField name="region" type="UgBodyRegion" />
+    <ResponseField name="category" type="UgDamageCategory" />
+    <ResponseField name="weapon" type="integer?" />
+    <ResponseField name="killer" type="integer?">Only when a recorded `weaponDamageEvent` confirms it.</ResponseField>
+    <ResponseField name="at" type="integer">Unix seconds.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Change
+
+```lua
+UgCore.Players.ClearInjuries(source, region?) -> ok, errorCode
+UgCore.Players.Down(source, cause?) -> ok, errorCode
+UgCore.Players.Kill(source, cause?) -> ok, errorCode
+UgCore.Players.Revive(source, options?) -> ok, errorCode
+UgCore.Players.Respawn(source, coords?) -> ok, errorCode
+```
+
+| Function | From | To | Hook |
+| --- | --- | --- | --- |
+| `Down` | `Alive` | `Downed` | `Players:BeforeDown` |
+| `Kill` | `Alive`, `Downed` | `Dead` | |
+| `Revive` | `Downed`, `Dead` | `Alive`, in place | `Players:BeforeRevive` |
+| `Respawn` | `Downed`, `Dead` | `Alive`, at `coords` | `Players:BeforeRespawn` |
+
+From any other state they return `invalid_args`. A cancelled hook returns `no_permission`.
+
+<ResponseField name="Revive options" type="UgReviveOptions">
+  <Expandable title="fields">
+    <ResponseField name="by" type="integer">Player source who revived.</ResponseField>
+    <ResponseField name="reason" type="string" />
+    <ResponseField name="health" type="integer" default="200">101 to 200.</ResponseField>
+    <ResponseField name="clearInjuries" type="boolean" />
+  </Expandable>
+</ResponseField>
+<ResponseField name="coords" type="vector4">Respawn position. Defaults to `respawn.coords` in `config/players.lua`. Respawn always clears injuries.</ResponseField>
+
+```lua
+-- ug-ambulance, after its own job, item and distance checks
+local ok, err = UgCore.Players.Revive(target, { by = source, reason = 'cpr', clearInjuries = false })
+```

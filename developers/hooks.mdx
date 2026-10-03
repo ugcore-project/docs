@@ -1,0 +1,71 @@
+---
+title: "Hooks"
+description: "Cancel or change core actions before they happen."
+icon: "anchor"
+---
+
+Hooks run before an action. A handler can let it through, change it, or cancel it. Events, by contrast, only report after.
+
+## Register
+
+```lua server.lua
+UgCore.Hooks.Register('Accounts:BeforeRemove', function(payload)
+    -- payload: { source, account, amount, reason }
+    if payload.account == 'bank' and payload.amount > 50000 then
+        return false -- cancel
+    end
+end)
+```
+
+| Return | Effect |
+| --- | --- |
+| `false` | Cancels the action. Later handlers do not run. |
+| a table | Replaces the payload for later handlers. Actions that support changes use it, see the table below. |
+| anything else | Continues unchanged. |
+
+<Warning>
+  Your resource receives a **copy** of the payload through exports. Editing it in place does nothing: return the changed table.
+</Warning>
+
+```lua
+UgCore.Hooks.Register('Characters:BeforeCreate', function(payload)
+    payload.name = payload.name:gsub('^%l', string.upper)
+
+    return payload
+end)
+```
+
+## Order
+
+```lua
+UgCore.Hooks.Register('Players:BeforeRevive', handler, { priority = -10 })
+```
+
+Lower priority runs first, default `0`. Ties run in registration order.
+
+## Safety
+
+- A crashing handler is logged and skipped. It never cancels, so a bug cannot block core actions.
+- Hooks belong to the resource that registered them, and are removed when it stops.
+- Unknown hook names raise with a suggestion: `Did you mean "Players:BeforeDown"?`
+- `UgCore.Hooks.Unregister(id)` removes one.
+
+## Every hook
+
+| Hook | Payload | Cancel means |
+| --- | --- | --- |
+| `Guard:BeforeAction` | `source, action, score, flags` | No warn, kick or ban. Set `action` to a milder one instead. |
+| `Players:BeforeDown` | `source, cause` | The player is not downed. |
+| `Players:BeforeBleedout` | `source` | Bleedout is postponed by 10 seconds, for example during CPR. |
+| `Players:BeforeRevive` | `source, by, reason, health, clearInjuries` | No revive. |
+| `Players:BeforeRespawn` | `source, coords` | No respawn, for example until hospital check-in. |
+| `Characters:BeforeCreate` | `source, name, data` | No character. Change `name` or `data` to adjust it. |
+| `Characters:BeforeDelete` | `source, characterId` | No deletion. |
+| `Accounts:BeforeAdd` | `source, account, amount, reason` | No money added. |
+| `Accounts:BeforeRemove` | `source, account, amount, reason` | No money removed. |
+| `Accounts:BeforeTransfer` | `source, targetCharacterId, account, amount, reason` | No transfer. |
+| `Jobs:BeforeSet` | `source, name, grade` | Job unchanged. |
+| `Gangs:BeforeSet` | `source, name, grade` | Gang unchanged. |
+| `Sessions:BeforeJoin` | `source, sessionId` | The player stays where they are. |
+
+Cancelled actions return `false, 'no_permission'` to the caller.

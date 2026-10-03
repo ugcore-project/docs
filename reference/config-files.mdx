@@ -1,0 +1,91 @@
+---
+title: "Config files"
+description: "Every option of every config file."
+icon: "file-code"
+---
+
+Files live in `ug-core/config/` and are generated on first boot. A disabled module has no config file. See [Configuration](/owners/configuration) for how values resolve.
+
+The **Side** column says who can read the value: `server` only, or `shared` with clients through `GlobalState['ug-core:Config']`.
+
+## core
+
+| Option | Type | Default | Side | Notes |
+| --- | --- | --- | --- | --- |
+| `locale` | string | `'en'` | shared | 2 to 10 characters. A file in `locales/`. |
+| `debug` | boolean | `false` | shared | Debug logs on the server and in F8. |
+
+## guard
+
+| Option | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `decayPerMinute` | number | `1` | Score removed per minute. |
+| `warnScore` | integer | `10` | Logs a warning with recent flags. `0` disables. |
+| `kickScore` | integer | `25` | Kicks. `0` disables. |
+| `banScore` | integer | `0` | Bans. Needs `identity`. `0` disables. |
+| `budgetMax` | integer | `40` | Net events and callbacks per player, across every resource. |
+| `budgetPer` | integer | `1000` | Ms to refill the budget. At least 100. |
+
+## modules
+
+One boolean per optional module, all `true` by default: `characters`, `accounts`, `jobs`, `gangs`, `sessions`, `commands`, `locale`. Required modules are not listed.
+
+## identity
+
+| Option | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `primaryIdentifier` | string | `'license'` | `license`, `license2`, `steam`, `discord` or `fivem`. Players without it cannot connect. |
+
+## players
+
+| Option | Type | Default | Side |
+| --- | --- | --- | --- |
+| `downed` | table | see below | shared |
+| `dead` | table | `{ animation = { dict = 'dead', name = 'dead_a' } }` | shared |
+| `instantDeath` | table | `{ headshot = true, categories = { 'Explosion' } }` | server |
+| `respawn` | table | `{ auto = false, delay = 5000, coords = vector4(298.5, -584.6, 43.3, 70.0) }` | server |
+| `persistDeathState` | boolean | `true` | server |
+
+```lua config/players.lua
+return {
+    downed = {
+        enabled = true,          -- downed state before death
+        duration = 300000,       -- bleedout in ms
+        killOnDamage = true,     -- damage while downed kills
+        animation = { dict = 'combat@damage@writhe', name = 'writhe_loop' }, -- or false
+    },
+    respawn = {
+        auto = false,
+        delay = 5000,
+        coords = vector4(298.5, -584.6, 43.3, 70.0),
+    },
+}
+```
+
+<Tip>PVP and racing servers set `downed.enabled = false` and `respawn.auto = true`.</Tip>
+
+## characters
+
+| Option | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `maxCharacters` | integer | `4` | 1 to 32. Deleted characters do not count. |
+
+## accounts
+
+| Option | Type | Default | Side |
+| --- | --- | --- | --- |
+| `accounts` | table | `cash` 500, `bank` 5000 | shared |
+
+Each account is `{ label, startingBalance, allowNegative }`, keyed by a camelCase name. 1 to 32 accounts.
+
+## jobs
+
+Data config. Your file replaces the defaults. `unemployed` MUST exist. See [Jobs](/api/jobs).
+
+```lua
+name = { label, defaultDuty?, grades = { { name, label, salary, boss? }, ... } }
+```
+
+## gangs
+
+Data config. `none` MUST exist. Same shape as jobs, without `defaultDuty`. See [Gangs](/api/gangs).

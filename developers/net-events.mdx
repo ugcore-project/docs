@@ -1,0 +1,50 @@
+---
+title: "Net events"
+description: "Fire-and-forget messages between client and server, with the same protection as callbacks."
+icon: "tower-broadcast"
+---
+
+Use a net event when the client tells the server something and needs no answer.
+
+<Warning>
+  Never use `RegisterNetEvent` directly in a UgCore resource. Unvalidated, unlimited net events are the most common hole in FiveM servers.
+</Warning>
+
+## Client to server
+
+```lua server.lua
+local S = UgCore.Schema
+
+UgCore.Network.Register('ReportAfk', {
+    schema = S.Define({ S.Boolean() }),
+    rate = { max = 2, per = 10000 },
+    requirePlayer = true,
+}, function(source, afk)
+    UgCore.Players.SetMetadata(source, 'afk', afk, true)
+end)
+```
+
+```lua client.lua
+UgCore.Network.TriggerServer('my-afk:ReportAfk', true)
+```
+
+The event is registered as `<your resource>:<name>`. It takes the same options as [callbacks](/developers/callbacks): `schema`, `rate`, `requirePlayer`, `requireAlive` and `permission`. Rejected events are dropped and flagged, with no reply.
+
+## Server to client
+
+```lua client.lua
+UgCore.Network.Register('ShowRank', function(rank)
+    print('Your rank: ' .. rank)
+end)
+```
+
+```lua server.lua
+UgCore.Network.TriggerClient(source, 'my-ranks:ShowRank', 'Gold')
+UgCore.Network.TriggerClients('my-ranks:ShowRank', 'Gold') -- every player
+```
+
+Clients only receive net events from the server. Trigger functions take the full event name.
+
+## Before Ready
+
+Net events and callbacks that arrive before ug-core is ready are dropped silently. This only happens while ug-core restarts with players online.

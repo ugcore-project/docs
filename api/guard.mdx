@@ -1,0 +1,60 @@
+---
+title: "UgCore.Guard"
+sidebarTitle: "Guard"
+description: "Suspicion scoring and server-side distance checks."
+icon: "user-shield"
+---
+
+<Badge color="blue">Server</Badge> Proxied to ug-core. See [Guard for owners](/owners/guard) and [Security](/concepts/security).
+
+## Flag
+
+```lua
+UgCore.Guard.Flag(source, violation, detail?)
+```
+
+<ResponseField name="violation" type="UgViolation" required>A value of `UgCore.Enums.Violations`.</ResponseField>
+<ResponseField name="detail" type="string">Written to server logs only.</ResponseField>
+
+Adds the violation weight to the score, emits `ug-core:Guard:Flagged` and runs warn, kick or ban when a threshold is passed.
+
+| Violation | Weight |
+| --- | --- |
+| `InvalidPayload` | 5 |
+| `RateLimited` | 1 |
+| `ConcurrencyExceeded` | 2 |
+| `UnknownCallback` | 3 |
+| `NotLoaded` | 2 |
+| `NoPermission` | 3 |
+| `OutOfRange` | 5 |
+| `InvalidDeathState` | 5 |
+
+## GetScore
+
+```lua
+UgCore.Guard.GetScore(source) -> score
+```
+
+<ResponseField name="score" type="number">After decay. `0` for unknown players.</ResponseField>
+
+## IsNear
+
+```lua
+UgCore.Guard.IsNear(source, coords, maxDistance) -> boolean
+```
+
+<ResponseField name="coords" type="vector3" required>The position of the action, known by the server.</ResponseField>
+<ResponseField name="maxDistance" type="number" required />
+
+Reads the ped position on the server through OneSync. Never pass coordinates the client sent.
+
+```lua
+if not UgCore.Guard.IsNear(source, SHOP_COORDS, 3.0) then
+    UgCore.Guard.Flag(source, UgCore.Enums.Violations.OutOfRange, 'my-shop:Buy')
+    return
+end
+```
+
+## Replacing actions
+
+Actions run through the `Guard:BeforeAction` hook. An anticheat MAY cancel or change them. See [Hooks](/api/hooks).

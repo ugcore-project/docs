@@ -1,47 +1,152 @@
 ---
 title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+description: "Build a resource on UgCore: a validated callback, a chat command and an event listener."
+icon: "rocket"
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
+You will build `my-greeter`, a resource that:
 
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
+- answers a client callback with data only the server knows,
+- registers a chat command with typed, validated arguments,
+- reacts when a player's death state changes.
 
-## Prerequisites
-
-Before you begin, you must have:
-
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
-
-## Get started
+<Info>
+  You need a server with `ug-core` running. See [Installation](/installation).
+</Info>
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+  <Step title="Create the manifest">
+    Create `resources/my-greeter/fxmanifest.lua`:
 
-    ```bash
-    npm install your-package
+    ```lua fxmanifest.lua
+    fx_version 'cerulean'
+    game 'gta5'
+    lua54 'yes'
+
+    -- Refuse to start against an older ug-core.
+    ug_core_version '1.0.0'
+
+    dependency 'ug-core'
+
+    shared_script '@ug-core/import.lua'
+    server_script 'server.lua'
+    client_script 'client.lua'
+    ```
+
+    `@ug-core/import.lua` defines the global `UgCore` in your resource. `lua54 'yes'` is required.
+  </Step>
+
+  <Step title="Register a callback">
+    Create `server.lua`. The schema accepts one optional string of up to 32 characters. The rate limit allows 3 calls per 5 seconds per player:
+
+    ```lua server.lua
+    local S = UgCore.Schema
+
+    UgCore.Callback.Register('Greet', {
+        schema = S.Define({ S.Optional(S.String({ max = 32 })) }),
+        rate = { max = 3, per = 5000 },
+    }, function(source, mood)
+        local player = UgCore.Players.Get(source)
+
+        return {
+            name = player and player.name or 'stranger',
+            mood = mood or 'neutral',
+            serverTime = os.time(),
+        }
+    end)
+    ```
+
+    UgCore registers it as `my-greeter:Greet`. Before your handler runs, the server checks the global budget, the concurrency cap, the rate limit and the schema.
+  </Step>
+
+  <Step title="Call it from the client">
+    Create `client.lua`. `Callback.Await` blocks the current thread until the server answers, for up to 10 seconds:
+
+    ```lua client.lua
+    RegisterCommand('greet', function(_, args)
+        CreateThread(function()
+            local ok, result, errorCode = UgCore.Callback.Await('my-greeter:Greet', args[1])
+
+            if not ok then
+                print('Greeting failed: ' .. errorCode)
+                return
+            end
+
+            print(('Hello %s, you seem %s. Server time: %d'):format(result.name, result.mood, result.serverTime))
+        end)
+    end, false)
+    ```
+
+    <Tip>
+      Clients receive error codes only, never server details. See [Error codes](/reference/error-codes).
+    </Tip>
+  </Step>
+
+  <Step title="Add a validated chat command">
+    Back in `server.lua`, add a command with typed arguments. Requires the `commands` module, enabled by default:
+
+    ```lua server.lua
+    UgCore.Commands.Register('wave', {
+        help = 'Wave at another player',
+        args = {
+            { name = 'target', type = 'player', help = 'Server id of the player' },
+            { name = 'message', type = 'text', optional = true, max = 64 },
+        },
+        rate = { max = 2, per = 5000 },
+    }, function(source, args)
+        local target = UgCore.Players.Get(args.target)
+
+        print(('%d waves at %s: %s'):format(source, target.name, args.message or '👋'))
+    end)
+    ```
+
+    `type = 'player'` only accepts the id of a connected player. Bad input emits `ug-core:Commands:Failed` for your chat resource to display. The core itself shows nothing to players.
+  </Step>
+
+  <Step title="Listen to an event">
+    UgCore emits events when things happen. Events from `ug-core` are only accepted when ug-core itself sent them:
+
+    ```lua server.lua
+    UgCore.Events.On('ug-core:Players:DeathStateChanged', function(source, newState, oldState)
+        print(('Player %d went from %s to %s'):format(source, oldState, newState))
+    end)
     ```
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
 
-    ```bash
-    your-cli init
-    ```
-  </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
+  <Step title="Start it">
+    Add `ensure my-greeter` after `ensure ug-core` in `server.cfg`, restart, then type `/greet happy` in game. F8 shows:
 
-    ```bash
-    your-cli start
+    ```text F8
+    Hello Alex, you seem happy. Server time: 1790000000
     ```
   </Step>
 </Steps>
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+## Try breaking it
 
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
-</Tip>
+Send bad input on purpose and watch the server handle it:
+
+| You do | What happens |
+| --- | --- |
+| `/greet` with 40 characters | The client gets `invalid_args`. The server logs the reason at Debug and adds 5 to your Guard score. |
+| `/greet` 10 times quickly | Calls past the limit get `rate_limited`, and each adds 1 to your Guard score. |
+| `/wave 999` | `ug-core:Commands:Failed` fires with `invalid_args` for argument 1. |
+
+Run `ug guard <your id>` in the server console to see your score and the recent flags.
+
+## Next steps
+
+<Columns cols={2}>
+  <Card title="Importing UgCore" icon="file-import" href="/developers/importing">
+    What runs in your resource and what goes through exports.
+  </Card>
+  <Card title="Callbacks" icon="arrow-right-arrow-left" href="/developers/callbacks">
+    Options, errors, and server-to-client callbacks.
+  </Card>
+  <Card title="Schemas" icon="filter" href="/developers/schemas">
+    Every validator, with its bounds and rules.
+  </Card>
+  <Card title="Hooks" icon="anchor" href="/developers/hooks">
+    Cancel or change core actions before they happen.
+  </Card>
+</Columns>

@@ -1,0 +1,63 @@
+---
+title: "UgCore.Lifecycle"
+sidebarTitle: "Lifecycle"
+description: "The boot state of ug-core."
+icon: "timeline"
+---
+
+<Badge color="purple">Shared</Badge> In your resource, a mirror kept in sync by lifecycle events.
+
+States, in order: `Booting`, `Configured`, `Initializing`, `Starting`, `Ready`, `Stopping`, `Stopped`. States only move forward and MAY be skipped.
+
+## GetState
+
+```lua
+UgCore.Lifecycle.GetState() -> state
+```
+
+<ResponseField name="state" type="UgLifecycleState">The current state, such as `'Ready'`.</ResponseField>
+
+## IsReady
+
+```lua
+UgCore.Lifecycle.IsReady() -> boolean
+```
+
+## HasReached
+
+```lua
+UgCore.Lifecycle.HasReached(state) -> boolean
+```
+
+`false` for states not reached yet and for skipped states.
+
+## On
+
+```lua
+UgCore.Lifecycle.On(state, handler)
+```
+
+<ResponseField name="state" type="UgLifecycleState" required>Raises for unknown states.</ResponseField>
+<ResponseField name="handler" type="fun()" required>Runs when ug-core reaches `state`.</ResponseField>
+
+Sticky: runs immediately when the state was already reached. Never runs when the state was skipped. A failing handler is logged and does not stop others.
+
+## Await
+
+```lua
+UgCore.Lifecycle.Await(state, timeout?) -> reached
+```
+
+**MUST run in a thread.**
+
+<ResponseField name="state" type="UgLifecycleState" required />
+<ResponseField name="timeout" type="integer">Milliseconds. Waits forever when nil.</ResponseField>
+<ResponseField name="reached" type="boolean">`false` on timeout or when the state was skipped.</ResponseField>
+
+```lua
+CreateThread(function()
+    if UgCore.Lifecycle.Await('Ready', 30000) then
+        -- safe to use every module
+    end
+end)
+```

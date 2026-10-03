@@ -1,0 +1,95 @@
+---
+title: "UgCore.Accounts"
+sidebarTitle: "Accounts"
+description: "Cash, bank and custom accounts with a ledger."
+icon: "wallet"
+---
+
+<Badge color="blue">Server</Badge> <Badge color="green">Client</Badge> Optional module. Requires `characters`.
+
+Balances belong to the loaded character. Every change writes a ledger row in the same transaction. Accounts are defined in `config/accounts.lua`:
+
+```lua config/accounts.lua
+return {
+    accounts = {
+        cash = { label = 'Cash', startingBalance = 500, allowNegative = false },
+        bank = { label = 'Bank', startingBalance = 5000, allowNegative = false },
+        crypto = { label = 'Crypto', startingBalance = 0, allowNegative = false },
+    },
+}
+```
+
+## Server
+
+### GetBalance / GetAll
+
+```lua
+UgCore.Accounts.GetBalance(source, account) -> integer?
+UgCore.Accounts.GetAll(source) -> table<string, integer>?
+```
+
+`nil` when no character is loaded.
+
+### Add / Remove / Set
+
+```lua
+UgCore.Accounts.Add(source, account, amount, reason?) -> ok, balance, errorCode
+UgCore.Accounts.Remove(source, account, amount, reason?) -> ok, balance, errorCode
+UgCore.Accounts.Set(source, account, balance, reason?) -> ok, balance, errorCode
+```
+
+<ResponseField name="amount" type="integer" required>Positive.</ResponseField>
+<ResponseField name="reason" type="string">Stored in the ledger.</ResponseField>
+<ResponseField name="balance" type="integer?">The new balance.</ResponseField>
+<ResponseField name="errorCode" type="UgErrorCode?">
+  `not_loaded` without a character, `insufficient_funds` unless the account allows negative balances, `no_permission` when a hook cancelled.
+</ResponseField>
+
+`Set` records the difference in the ledger. `Add` and `Remove` run the `Accounts:BeforeAdd` and `Accounts:BeforeRemove` hooks.
+
+### Transfer
+
+```lua
+UgCore.Accounts.Transfer(source, targetCharacterId, account, amount, reason?) -> ok, balance, errorCode
+```
+
+Moves money to another character, online or offline, in one transaction. Both ledgers get a row. `balance` is the sender's. Runs `Accounts:BeforeTransfer`.
+
+### GetLedger
+
+```lua
+UgCore.Accounts.GetLedger(source, account, limit?) -> ok, entries, errorCode
+```
+
+<ResponseField name="limit" type="integer" default="25">1 to 100.</ResponseField>
+<ResponseField name="entries" type="UgLedgerEntry[]">
+  Newest first.
+  <Expandable title="fields">
+    <ResponseField name="amount" type="integer">Signed change.</ResponseField>
+    <ResponseField name="balanceAfter" type="integer" />
+    <ResponseField name="reason" type="string?" />
+    <ResponseField name="relatedCharacterId" type="integer?">The other side of a transfer.</ResponseField>
+    <ResponseField name="createdAt" type="integer">Unix seconds.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Client
+
+```lua
+UgCore.Accounts.GetBalance(account) -> integer?
+UgCore.Accounts.GetAll() -> table<string, integer>
+```
+
+The local player's balances, pushed by the server on every change.
+
+## Example
+
+```lua
+local ok, balance, err = UgCore.Accounts.Remove(source, 'cash', price, 'shop:water')
+
+if not ok then
+    return err -- 'insufficient_funds'
+end
+```
+
+Listen to `ug-core:Accounts:Changed` with `(source, account, balance, delta, reason)` to update a HUD.

@@ -1,0 +1,104 @@
+---
+title: "Importing UgCore"
+description: "One shared script gives your resource the whole API."
+icon: "file-import"
+---
+
+## Add the import
+
+```lua fxmanifest.lua
+fx_version 'cerulean'
+game 'gta5'
+lua54 'yes'
+
+ug_core_version '1.0.0'
+dependency 'ug-core'
+
+shared_script '@ug-core/import.lua'
+```
+
+<Warning>
+  `lua54 'yes'` is required. Start your resource after `ug-core`, and never call `exports['ug-core']` directly: the import does it for you, with checks.
+</Warning>
+
+The import defines one global in your resource: `UgCore`.
+
+## What runs where
+
+The import loads part of ug-core into your resource and proxies the rest to ug-core's exports:
+
+<Columns cols={2}>
+  <Card title="Local, in your resource" icon="bolt">
+    `Callback`, `Network`, `Events`, `Schema`, `Logger`, `Enums`, `Modules`, `Version`, `Lifecycle`, and `RateLimit` on the server.
+
+    No export call per request. `Logger` prints in your resource's console.
+  </Card>
+  <Card title="Proxied to ug-core" icon="arrow-right-arrow-left">
+    `Config`, `Guard` and `Hooks` on the server, `Config` on clients, and every enabled module namespace: `Players`, `Accounts`, `Jobs` and the rest.
+
+    Data crosses the export boundary as a copy.
+  </Card>
+</Columns>
+
+Your callbacks and net events run in your resource, but share central state with ug-core: the Guard score of each player and the global request budget.
+
+## Errors you can get
+
+The `UgCore` root is read-only and checks every name you use:
+
+```lua
+UgCore.Internal         -- error: UgCore.Internal is private to ug-core.
+UgCore.Bank             -- error: UgCore.Bank is not a ug-core namespace.
+UgCore.Gangs            -- error: UgCore.Gangs belongs to disabled module "gangs". Enable it in config/modules.lua.
+UgCore.Guard.Falg       -- error: UgCore.Guard.Falg does not exist.
+UgCore.LocalPlayer      -- on the server: UgCore.LocalPlayer exists on clients only.
+UgCore.Accounts = {}    -- error: UgCore is read-only. Cannot set UgCore.Accounts.
+```
+
+Errors point to the line in your resource that caused them.
+
+## Waiting for ug-core
+
+If your resource starts while ug-core is still booting, module namespaces raise `UgCore.Accounts is not available until ug-core is ready`. Wait first:
+
+```lua server.lua
+CreateThread(function()
+    if not UgCore.Lifecycle.Await('Ready', 30000) then
+        UgCore.Logger.Error('ug-core did not become ready.')
+        return
+    end
+
+    -- Safe to use every module here.
+end)
+```
+
+`UgCore.Lifecycle.On('Ready', handler)` does the same without blocking, and runs right away if ug-core is already ready.
+
+## Optional modules
+
+Check before using a module your resource can live without:
+
+```lua
+if UgCore.Modules.IsEnabled('gangs') then
+    local gang = UgCore.Gangs.Get(source)
+end
+```
+
+`UgCore.Modules.Require('accounts')` raises a clear error when a module you cannot live without is disabled.
+
+## Editor support
+
+UgCore is fully annotated for the Lua language server. Add the ug-core folder to your library to get autocomplete, types and typo checks. Add it next to the FiveM natives in your VS Code settings:
+
+```json settings.json
+{
+  "Lua.workspace.library": [
+    "...your FiveM natives entries...",
+    "C:/server/resources/[ug]/ug-core"
+  ]
+}
+```
+
+<Note>
+  A `workspace.library` in a `.luarc.json` replaces the list from your editor settings, including the FiveM natives. Keep library paths in one place.
+</Note>

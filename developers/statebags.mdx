@@ -1,0 +1,67 @@
+---
+title: "Statebags"
+description: "Read player state without a single export call."
+icon: "layer-group"
+---
+
+Data that is read often replicates through statebags. Reading a statebag costs nothing: no export, no network round trip.
+
+<Tip>
+  Prefer statebags over API calls for read-heavy data such as job, duty, loaded state and death state. Exports copy tables on every call.
+</Tip>
+
+## Player statebags
+
+Set by the server only, on `Player(source).state`:
+
+| Key | Value | Module |
+| --- | --- | --- |
+| `ug-core:Loaded` | `true` once a character is loaded, or at join without characters | players |
+| `ug-core:Player` | `{ name, characterId? }` | players |
+| `ug-core:Metadata` | Metadata set with `replicate = true` | players |
+| `ug-core:DeathState` | `'Alive'`, `'Downed'` or `'Dead'` | players |
+| `ug-core:Injuries` | List of [injuries](/concepts/death-system#injuries) | players |
+| `ug-core:Job` | `{ name, label, grade, gradeName, gradeLabel, salary, boss, onDuty }` | jobs |
+| `ug-core:Gang` | `{ name, label, grade, gradeName, gradeLabel, salary, boss }` | gangs |
+| `ug-core:Session` | Session id, or nil in the shared world | sessions |
+
+<Warning>
+  Player statebags reach **every** client. Never put secrets in replicated metadata.
+</Warning>
+
+## Read them
+
+<CodeGroup>
+
+```lua Server
+local job = Player(source).state['ug-core:Job']
+
+if job and job.name == 'police' and job.onDuty then
+    -- ...
+end
+```
+
+```lua Client
+local state = LocalPlayer.state['ug-core:DeathState']
+
+-- Or through UgCore, which returns copies:
+local downed = UgCore.LocalPlayer.IsDowned()
+local job = UgCore.Jobs.Get()
+```
+
+</CodeGroup>
+
+## React to changes
+
+```lua client.lua
+AddStateBagChangeHandler('ug-core:Job', ('player:%d'):format(GetPlayerServerId(PlayerId())), function(_, _, job)
+    print('New job: ' .. (job and job.label or 'none'))
+end)
+```
+
+## Global state
+
+| Key | Value |
+| --- | --- |
+| `GlobalState['ug-core:Config']` | Client and shared config values. |
+| `GlobalState['ug-core:Modules']` | Enabled modules, their files and namespaces. |

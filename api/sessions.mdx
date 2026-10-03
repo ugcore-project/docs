@@ -1,0 +1,68 @@
+---
+title: "UgCore.Sessions"
+sidebarTitle: "Sessions"
+description: "Isolated worlds on routing buckets."
+icon: "layer-group"
+---
+
+<Badge color="blue">Server</Badge> Optional module. Proxied to ug-core.
+
+A session is a routing bucket owned by ug-core: an instance for an apartment, a race or a heist. Buckets are allocated from 1000 up. Bucket 0 is the shared world. A player is in at most one session.
+
+## Create
+
+```lua
+UgCore.Sessions.Create(options?) -> ok, sessionId, errorCode
+```
+
+<ResponseField name="name" type="string">Up to 64 characters.</ResponseField>
+<ResponseField name="lockdown" type="'strict' | 'relaxed' | 'inactive'" default="strict">Client entity creation in the bucket.</ResponseField>
+<ResponseField name="population" type="boolean" default="false">Ambient peds and vehicles.</ResponseField>
+<ResponseField name="persistent" type="boolean" default="false">Keeps the session when the last member leaves.</ResponseField>
+
+## Destroy
+
+```lua
+UgCore.Sessions.Destroy(sessionId) -> ok, errorCode
+```
+
+Moves every member back to the shared world.
+
+## Join / Leave
+
+```lua
+UgCore.Sessions.Join(source, sessionId) -> ok, errorCode
+UgCore.Sessions.Leave(source) -> ok, errorCode
+```
+
+`Join` leaves the current session first. `Sessions:BeforeJoin` MAY cancel. `Leave` returns `not_found` when the player is in no session. An empty session that is not persistent is destroyed.
+
+## Get / GetMembers / GetSession
+
+```lua
+UgCore.Sessions.Get(sessionId) -> UgSession?
+UgCore.Sessions.GetMembers(sessionId) -> integer[]
+UgCore.Sessions.GetSession(source) -> integer?
+```
+
+<ResponseField name="UgSession" type="table">
+  <Expandable title="fields">
+    <ResponseField name="id" type="integer" />
+    <ResponseField name="name" type="string?" />
+    <ResponseField name="bucket" type="integer" />
+    <ResponseField name="lockdown" type="string" />
+    <ResponseField name="population" type="boolean" />
+    <ResponseField name="persistent" type="boolean" />
+    <ResponseField name="members" type="integer[]" />
+  </Expandable>
+</ResponseField>
+
+The client reads its session id from the `ug-core:Session` statebag.
+
+## Example
+
+```lua
+local ok, sessionId = UgCore.Sessions.Create({ name = 'apartment:' .. characterId })
+
+UgCore.Sessions.Join(source, sessionId)
+```

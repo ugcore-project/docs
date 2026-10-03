@@ -1,0 +1,50 @@
+---
+title: "Events"
+description: "React to what happens in the framework."
+icon: "bell"
+---
+
+Events are after-the-fact notifications. They cannot block or change anything. Use [hooks](/developers/hooks) for that.
+
+## Listen
+
+```lua
+local id = UgCore.Events.On('ug-core:Accounts:Changed', function(source, account, balance, delta, reason)
+    print(('%d: %s is now %d (%+d)'):format(source, account, balance, delta))
+end)
+
+UgCore.Events.Once('ug-core:Lifecycle:Ready', function()
+    print('ug-core is ready')
+end)
+
+UgCore.Events.Off(id)
+```
+
+Use the enum values instead of strings to get autocomplete and typo checks:
+
+```lua
+UgCore.Events.On(UgCore.Enums.Events.Players.Downed, function(source, cause) end)
+```
+
+## Emit your own
+
+Event names MUST start with your resource name:
+
+```lua
+UgCore.Events.Emit('my-shop:Purchased', source, itemName)   -- ok
+UgCore.Events.Emit('ug-core:Players:Loaded', source)        -- error
+```
+
+Events are local events: every resource on the same side receives them.
+
+## Spoofing protection
+
+`ug-core:*` events are reserved. A handler registered with `UgCore.Events.On` drops a `ug-core:*` event unless ug-core itself triggered it. Another resource cannot fake a death, a payment or a lifecycle change to your code.
+
+<Tip>
+  Plain `AddEventHandler` does not have this protection. Always use `UgCore.Events.On` for `ug-core:*` events.
+</Tip>
+
+## Every event
+
+See [Events reference](/reference/events) for each event with its arguments.

@@ -1,0 +1,66 @@
+---
+title: "Testing"
+description: "The two checks every change passes."
+icon: "flask-vial"
+---
+
+Every change MUST pass both checks. CI runs them on every pull request.
+
+## 1. LuaLS strict check
+
+Zero problems, with the CfxLua natives available:
+
+```bash
+lua-language-server --check . --checklevel=Information --configpath=.luarc.json
+```
+
+<Warning>
+  Never set `workspace.library` in `.luarc.json`. It replaces the natives library that the CfxLua VS Code extension adds. Ignore patterns MUST be anchored with a leading slash, such as `/config/*`.
+</Warning>
+
+## 2. Runtime tests
+
+Plain Lua 5.4 scripts in `tests/`, one suite per feature. They mock natives (`LoadResourceFile`, `GetConvar`, `GetGameTimer`, KVP, `GlobalState`, statebags, `json`, vectors, oxmysql) and load files in manifest order.
+
+```bash
+for suite in tests/*.lua; do [ "$suite" = tests/helpers.lua ] || lua5.4 "$suite" || exit 1; done
+```
+
+A suite exits with code 1 on any failure.
+
+### Writing a test
+
+```lua tests/myfeature.lua
+---@type TestHelpers
+local H = dofile('tests/helpers.lua')
+
+H.LoadManifest('server')
+
+H.Test('Consume allows a burst of max, then refuses', function()
+    local limiter = UgCore.RateLimit.Create({ max = 2, per = 1000 })
+
+    H.Equal({ limiter:Consume(1) }, { true, 0 })
+    H.Equal({ limiter:Consume(1) }, { true, 0 })
+    H.Equal({ limiter:Consume(1) }, { false, 500 })
+end)
+
+H.Test('Schema.String requires max', function()
+    H.Raises(function()
+        UgCore.Schema.String(H.Any({}))
+    end, 'requires options with "max"')
+end)
+
+H.Done()
+```
+
+- `H.LoadManifest(side)` loads shared scripts, then that side's scripts.
+- Pass wrong-type arguments through `H.Any(value)`, since LuaLS ignores `--[[@as T]]` on literals.
+- Test functional behavior only. Cosmetic output, such as the boot banner, is verified on a running server.
+
+## 3. Repository check
+
+CI also runs `.github/scripts/check-repository.lua`. It checks the manifest against the files in the repository and the license header of every Lua file.
+
+```bash
+lua5.4 .github/scripts/check-repository.lua
+```

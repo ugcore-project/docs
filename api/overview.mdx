@@ -1,0 +1,63 @@
+---
+title: "API overview"
+description: "Conventions shared by every UgCore function."
+icon: "book"
+---
+
+Everything public lives under the `UgCore` global. Each namespace has a page in this reference.
+
+<Columns cols={3}>
+  <Card title="Core" icon="microchip" href="/api/enums">
+    Enums, Events, Lifecycle, Config, Logger, Version, Modules.
+  </Card>
+  <Card title="Networking and security" icon="shield-halved" href="/api/schema">
+    Schema, RateLimit, Callback, Network, Guard, Hooks.
+  </Card>
+  <Card title="Modules" icon="puzzle-piece" href="/api/players">
+    Identity, Players, LocalPlayer, Permissions, Characters, Accounts, Jobs, Gangs, Sessions, Commands, Locale.
+  </Card>
+</Columns>
+
+## Where a function runs
+
+Each function is marked with where it exists:
+
+<Badge color="blue">Server</Badge> only on the server. <Badge color="green">Client</Badge> only on clients. <Badge color="purple">Shared</Badge> on both, with the same signature.
+
+Some namespaces exist on both sides with different functions, such as `Accounts`: the client side reads the local player's data.
+
+## Return values
+
+Functions that change state return `ok` first, then a value, then an error code:
+
+```lua
+local ok, balance, errorCode = UgCore.Accounts.Remove(source, 'bank', 500)
+
+if not ok then
+    -- errorCode: 'insufficient_funds', 'not_loaded', 'no_permission', ...
+end
+```
+
+Each slot always has one type: `ok` is a boolean, the value is `nil` on failure, the error code is `nil` on success. Error codes are listed in [Error codes](/reference/error-codes).
+
+## Errors
+
+Wrong API usage raises an error that points to your line and starts with `[ug-core]`:
+
+```text
+my-bank/server.lua:12: [ug-core] Accounts.Add: amount MUST be an integer from 1 to 1000000000000
+```
+
+Problems that depend on players or data never raise: they return an error code.
+
+## Threads
+
+Functions that touch the database or wait for a client are marked **MUST run in a thread**. Callback handlers, net event handlers and event handlers already run in one. Elsewhere, wrap the call in `CreateThread`.
+
+## Copies
+
+Tables returned by UgCore are copies. Changing them changes nothing in UgCore. Calls through exports copy both ways.
+
+## Typing
+
+Every function is annotated for the Lua language server. Your editor shows parameters, return types and enum values, and flags typos such as `UgCore.Players.Gt` as errors.

@@ -1,0 +1,40 @@
+---
+title: "Hooks"
+description: "Every hook and its payload."
+icon: "anchor"
+---
+
+Register with [`UgCore.Hooks.Register`](/api/hooks). Names live in `UgCore.Enums.Hooks.<Group>.<Key>`. Return `false` to cancel. The cancelled function returns `no_permission`.
+
+| Hook | Payload | Reads changes |
+| --- | --- | --- |
+| `Players:BeforeDown` | `{ source, cause }` | No |
+| `Players:BeforeBleedout` | `{ source }` | No |
+| `Players:BeforeRespawn` | `{ source, coords }` | No |
+| `Players:BeforeRevive` | `{ source, by, reason, health, clearInjuries }` | No |
+| `Guard:BeforeAction` | `{ source, action, score, flags }` | `action`, downgrade only |
+| `Characters:BeforeCreate` | `{ source, name, data }` | `name`, `data` |
+| `Characters:BeforeDelete` | `{ source, characterId }` | No |
+| `Accounts:BeforeAdd` | `{ source, account, amount, reason }` | No |
+| `Accounts:BeforeRemove` | `{ source, account, amount, reason }` | No |
+| `Accounts:BeforeTransfer` | `{ source, targetCharacterId, account, amount, reason }` | No |
+| `Jobs:BeforeSet` | `{ source, name, grade }` | No |
+| `Gangs:BeforeSet` | `{ source, name, grade }` | No |
+| `Sessions:BeforeJoin` | `{ source, sessionId }` | No |
+
+"Reads changes" lists the fields ug-core reads back from a returned table. Other hooks only allow or cancel.
+
+## Notes
+
+- `Players:BeforeBleedout` cancelled means the bleedout retries later. Use it to keep a player downed during CPR.
+- `Guard:BeforeAction` `action` is `'warn'`, `'kick'` or `'ban'`. A hook MAY lower it, such as `ban` to `kick`, never raise it. `flags` are the recent flags, oldest first.
+- `Characters:BeforeCreate` MAY fill `data`, for example a starting phone number.
+
+```lua
+UgCore.Hooks.Register(UgCore.Enums.Hooks.Guard.BeforeAction, function(payload)
+    if payload.action == 'ban' then
+        payload.action = 'kick'
+        return payload
+    end
+end)
+```

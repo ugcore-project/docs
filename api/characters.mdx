@@ -1,0 +1,82 @@
+---
+title: "UgCore.Characters"
+sidebarTitle: "Characters"
+description: "Multiple characters per player."
+icon: "id-card"
+---
+
+<Badge color="blue">Server</Badge> Optional module. Proxied to ug-core.
+
+ug-core stores and loads characters. A multicharacter resource such as `ug-multicharacter` shows the menu and calls this API.
+
+<Note>Without this module, players are loaded at join and there is no character data.</Note>
+
+## GetAll
+
+```lua
+UgCore.Characters.GetAll(source) -> ok, characters, errorCode
+```
+
+<ResponseField name="characters" type="UgCharacter[]">
+  Ordered by creation.
+  <Expandable title="UgCharacter">
+    <ResponseField name="id" type="integer" />
+    <ResponseField name="name" type="string">Display name.</ResponseField>
+    <ResponseField name="data" type="table">Fields such as first name and birth date, set by your character creator.</ResponseField>
+    <ResponseField name="createdAt" type="integer">Unix seconds.</ResponseField>
+    <ResponseField name="lastPlayed" type="integer?">Unix seconds.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Create
+
+```lua
+UgCore.Characters.Create(source, { name, data? }) -> ok, characterId, errorCode
+```
+
+<ResponseField name="name" type="string" required>1 to 64 characters.</ResponseField>
+<ResponseField name="data" type="table">JSON data, up to 16 KB encoded.</ResponseField>
+
+Invalid input returns `invalid_args` instead of raising, since it usually comes from a player. Returns `no_permission` when `maxCharacters` is reached or `Characters:BeforeCreate` cancelled.
+
+## Load
+
+```lua
+UgCore.Characters.Load(source, characterId) -> ok, errorCode
+```
+
+Loads an owned character. A loaded character is unloaded first. Sets `ug-core:Loaded`, restores death state when persisted, and loads accounts, job and gang.
+
+## Unload
+
+```lua
+UgCore.Characters.Unload(source) -> ok, errorCode
+```
+
+Saves and unloads. The player goes back to not loaded and alive.
+
+## Delete
+
+```lua
+UgCore.Characters.Delete(source, characterId) -> ok, errorCode
+```
+
+Soft delete. The loaded character cannot be deleted. `Characters:BeforeDelete` MAY cancel.
+
+## GetActive
+
+```lua
+UgCore.Characters.GetActive(source) -> UgCharacter?
+```
+
+## Example
+
+```lua
+UgCore.Callback.Register('Select', {
+    schema = UgCore.Schema.Define({ UgCore.Schema.Integer({ min = 1, max = 2147483647 }) }),
+    rate = { max = 2, per = 2000 },
+}, function(source, characterId)
+    local ok, err = UgCore.Characters.Load(source, characterId)
+    return { ok = ok, error = err }
+end)
+```

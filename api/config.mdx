@@ -1,0 +1,38 @@
+---
+title: "UgCore.Config"
+sidebarTitle: "Config"
+description: "Read resolved configuration values."
+icon: "sliders"
+---
+
+<Badge color="purple">Shared</Badge> Server reads every value. Clients read `client` and `shared` values only.
+
+## Get
+
+```lua
+UgCore.Config.Get(name, key?) -> value
+```
+
+<ResponseField name="name" type="string" required>Config name, such as `'core'` or `'accounts'`. Unknown names raise.</ResponseField>
+<ResponseField name="key" type="string">
+  Option key. Without it, returns the whole config. Unknown setting keys raise with a suggestion. For data configs such as `jobs`, `key` is an entry id and MAY be missing.
+</ResponseField>
+<ResponseField name="value" type="any">A deep copy of the resolved value.</ResponseField>
+
+```lua
+local debug = UgCore.Config.Get('core', 'debug')
+local accounts = UgCore.Config.Get('accounts', 'accounts')
+local police = UgCore.Config.Get('jobs', 'police')
+```
+
+<Note>
+  Values resolve from the default in code, then the owner file, then the convar. See [Configuration](/owners/configuration).
+</Note>
+
+## Errors
+
+```text
+[ug-core] Config.Get: unknown config "acounts"
+[ug-core] Config.Get: unknown option "core.debgu". Did you mean "debug"?
+[ug-core] Config.Get: unknown or server-only config "guard"     -- on a client
+```

@@ -1,54 +1,192 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mintlify Starter Kit",
+  "theme": "maple",
+  "name": "UgCore",
+  "description": "A server-authoritative, headless and modular FiveM framework.",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#7C5CFF",
+    "light": "#9F8BFF",
+    "dark": "#6342F5"
   },
   "favicon": "/favicon.svg",
-  "navigation": {
-    "pages": [
-      {
-        "group": "Getting Started",
-        "pages": [
-          "index",
-          "quickstart"
-        ]
-      }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
   "logo": {
     "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "dark": "/logo/dark.svg",
+    "href": "/"
+  },
+  "appearance": {
+    "default": "dark"
+  },
+  "background": {
+    "decoration": "gradient",
+    "color": {
+      "light": "#FBFAFF",
+      "dark": "#0A0814"
+    }
+  },
+  "fonts": {
+    "heading": {
+      "family": "Space Grotesk",
+      "weight": 600
+    },
+    "body": {
+      "family": "Inter"
+    }
+  },
+  "icons": {
+    "library": "fontawesome"
+  },
+  "styling": {
+    "eyebrows": "breadcrumbs",
+    "codeblocks": "dark"
+  },
+  "banner": {
+    "content": "UgCore is in **early access**. APIs can still change before the first public release. Follow progress on [GitHub](https://github.com/ugcore-project).",
+    "dismissible": true
+  },
+  "search": {
+    "prompt": "Search UgCore docs..."
   },
   "navbar": {
     "links": [
       {
-        "label": "Support",
-        "href": "mailto:support@mintlify.com"
+        "label": "API reference",
+        "href": "/api/overview"
       }
     ],
     "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://app.mintlify.com"
+      "type": "github",
+      "href": "https://github.com/ugcore-project/ug-core"
     }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "icon": "book-open",
+        "groups": [
+          {
+            "group": "Getting started",
+            "pages": [
+              "index",
+              "introduction",
+              "installation",
+              "quickstart",
+              "architecture"
+            ]
+          },
+          {
+            "group": "For server owners",
+            "pages": [
+              "owners/configuration",
+              "owners/modules",
+              "owners/database",
+              "owners/permissions",
+              "owners/guard",
+              "owners/console",
+              "owners/troubleshooting"
+            ]
+          },
+          {
+            "group": "For developers",
+            "pages": [
+              "developers/importing",
+              "developers/callbacks",
+              "developers/net-events",
+              "developers/schemas",
+              "developers/events",
+              "developers/hooks",
+              "developers/lifecycle",
+              "developers/statebags",
+              "developers/versioning"
+            ]
+          },
+          {
+            "group": "Concepts",
+            "pages": [
+              "concepts/security",
+              "concepts/death-system"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API reference",
+        "icon": "code",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api/overview"
+            ]
+          },
+          {
+            "group": "Core",
+            "pages": [
+              "api/enums",
+              "api/events",
+              "api/lifecycle",
+              "api/config",
+              "api/logger",
+              "api/version",
+              "api/modules"
+            ]
+          },
+          {
+            "group": "Networking and security",
+            "pages": [
+              "api/schema",
+              "api/ratelimit",
+              "api/callback",
+              "api/network",
+              "api/guard",
+              "api/hooks"
+            ]
+          },
+          {
+            "group": "Modules",
+            "pages": [
+              "api/identity",
+              "api/players",
+              "api/localplayer",
+              "api/permissions",
+              "api/characters",
+              "api/accounts",
+              "api/jobs",
+              "api/gangs",
+              "api/sessions",
+              "api/commands",
+              "api/locale"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/error-codes",
+              "reference/events",
+              "reference/hooks",
+              "reference/statebags",
+              "reference/convars",
+              "reference/config-files"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Contributing",
+        "icon": "code-pull-request",
+        "groups": [
+          {
+            "group": "Contributing",
+            "pages": [
+              "contributing/overview",
+              "contributing/conventions",
+              "contributing/testing"
+            ]
+          }
+        ]
+      }
+    ]
   },
   "contextual": {
     "options": [
@@ -57,16 +195,41 @@
       "chatgpt",
       "claude",
       "perplexity",
-      "mcp",
       "cursor",
       "vscode"
     ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
+      "github": "https://github.com/ugcore-project"
+    },
+    "links": [
+      {
+        "header": "Docs",
+        "items": [
+          {
+            "label": "Quickstart",
+            "href": "/quickstart"
+          },
+          {
+            "label": "API reference",
+            "href": "/api/overview"
+          }
+        ]
+      },
+      {
+        "header": "Project",
+        "items": [
+          {
+            "label": "ug-core on GitHub",
+            "href": "https://github.com/ugcore-project/ug-core"
+          },
+          {
+            "label": "Contributing",
+            "href": "/contributing/overview"
+          }
+        ]
+      }
+    ]
   }
 }

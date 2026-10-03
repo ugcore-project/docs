@@ -1,0 +1,83 @@
+---
+title: "Introduction"
+description: "What UgCore is, who it is for and what makes it different."
+icon: "sparkles"
+---
+
+UgCore is a FiveM framework for roleplay and gameplay servers. Its core resource, `ug-core`, gives you players, characters, money, jobs, permissions and more, behind an API that treats every client as hostile until proven otherwise.
+
+## Why UgCore
+
+FiveM clients can be modified. Anything a client sends can be forged: a price, an amount, a position, an outcome. UgCore is built around one rule:
+
+<Note>
+  **Clients send intent, never results.** The server computes prices, amounts, rewards and outcomes, and reads positions from the ped on the server.
+</Note>
+
+On top of that rule, UgCore adds:
+
+<Columns cols={2}>
+  <Card title="Layered protection" icon="layer-group" href="/concepts/security">
+    Schemas, rate limits, server authority and Guard scoring. Each layer works even when the others fail.
+  </Card>
+  <Card title="A headless core" icon="ghost" href="/architecture">
+    No NUI, no notifications, no drawing. The core returns result codes and emits events for UI resources.
+  </Card>
+  <Card title="Modules you choose" icon="puzzle-piece" href="/owners/modules">
+    Turn off accounts, gangs or sessions in one file. Disabled modules leave nothing behind.
+  </Card>
+  <Card title="A typed API" icon="code" href="/api/overview">
+    Every function is annotated for the Lua language server, so editors catch typos and wrong types as you write.
+  </Card>
+</Columns>
+
+## Who these docs are for
+
+<Tabs>
+  <Tab title="Server owners" icon="server">
+    You run a server and want a stable, secure base. Start with [Installation](/installation), then read [Configuration](/owners/configuration) and [Modules](/owners/modules).
+  </Tab>
+  <Tab title="Developers" icon="laptop-code">
+    You write resources for UgCore servers. Start with the [Quickstart](/quickstart), then [Importing UgCore](/developers/importing) and the [API reference](/api/overview).
+  </Tab>
+  <Tab title="Contributors" icon="code-pull-request">
+    You want to work on `ug-core` itself. Read [Contributing](/contributing/overview) for the conventions, tests and CI.
+  </Tab>
+</Tabs>
+
+## The ecosystem
+
+UgCore is split into resources with strict boundaries:
+
+| Resource | Role |
+| --- | --- |
+| `ug-core` | The framework: state, validation, networking, modules. Headless. |
+| `ug-lib` | UI components and pure utilities. No network, no state. |
+| Feature resources | `ug-multicharacter`, `ug-spawn`, `ug-hud` and others. They use both. |
+
+`ug-core` and `ug-lib` never depend on each other. `ug-core` depends only on OneSync and `oxmysql`.
+
+## What's inside
+
+<Tree>
+  <Tree.Folder name="ug-core" defaultOpen>
+    <Tree.Folder name="core" defaultOpen>
+      <Tree.File name="shared · schema, events, lifecycle, enums" />
+      <Tree.File name="server · config, guard, network, database, modules" />
+      <Tree.File name="client · config, network, callbacks" />
+    </Tree.Folder>
+    <Tree.Folder name="modules" defaultOpen>
+      <Tree.File name="identity · players · permissions (required)" />
+      <Tree.File name="characters · accounts · jobs · gangs" />
+      <Tree.File name="sessions · commands · locale" />
+    </Tree.Folder>
+    <Tree.File name="import.lua" />
+    <Tree.Folder name="config">
+      <Tree.File name="generated on first boot" />
+    </Tree.Folder>
+  </Tree.Folder>
+</Tree>
+
+<Card title="Install UgCore" icon="download" href="/installation" horizontal>
+  Get `ug-core` running on your server in a few minutes.
+</Card>

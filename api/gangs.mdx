@@ -1,0 +1,50 @@
+---
+title: "UgCore.Gangs"
+sidebarTitle: "Gangs"
+description: "Gangs and grades."
+icon: "people-group"
+---
+
+<Badge color="blue">Server</Badge> <Badge color="green">Client</Badge> Optional module. Requires `characters`.
+
+Gangs work like [jobs](/api/jobs) without duty. They are defined in `config/gangs.lua`, which only has `none` by default. `none` MUST exist.
+
+```lua config/gangs.lua
+return {
+    none = {
+        label = 'None',
+        grades = { { name = 'none', label = 'None', salary = 0 } },
+    },
+    ballas = {
+        label = 'Ballas',
+        grades = {
+            { name = 'member', label = 'Member', salary = 0 },
+            { name = 'leader', label = 'Leader', salary = 0, boss = true },
+        },
+    },
+}
+```
+
+## Server
+
+```lua
+UgCore.Gangs.Get(source) -> UgAssignment?
+UgCore.Gangs.Set(source, name, grade?) -> ok, errorCode
+UgCore.Gangs.SetGrade(source, grade) -> ok, errorCode
+UgCore.Gangs.Exists(name, grade?) -> boolean
+UgCore.Gangs.GetDefinition(name) -> { label, grades }?
+```
+
+`Set` and `SetGrade` **MUST run in a thread**. `Gangs:BeforeSet` MAY cancel. `UgAssignment` has the same fields as for jobs, without `onDuty`.
+
+## Client
+
+```lua
+UgCore.Gangs.Get() -> UgAssignment?
+```
+
+Read from the `ug-core:Gang` statebag.
+
+## Events
+
+- `ug-core:Gangs:Changed` with `(source, gang, previous)`

@@ -1,0 +1,51 @@
+---
+title: "Contributing"
+description: "Help build UgCore."
+icon: "code-pull-request"
+---
+
+UgCore is open source under the GNU GPL. Issues and pull requests are welcome at [github.com/ugcore-project](https://github.com/ugcore-project).
+
+## Before you start
+
+<Steps>
+  <Step title="Open or find an issue">
+    Describe the bug or the feature first. Large changes SHOULD be agreed on before you write code.
+  </Step>
+  <Step title="Branch off dev">
+    The default branch is `dev`. Name branches `<type>/<issue>-<short-description>`, such as `feat/205-character-slot-selection`.
+  </Step>
+  <Step title="Follow the conventions">
+    Read [Conventions](/contributing/conventions). `CLAUDE.md` in the repository is the full source of truth.
+  </Step>
+  <Step title="Pass both checks">
+    LuaLS strict check with zero problems, and every test suite. See [Testing](/contributing/testing).
+  </Step>
+  <Step title="Open a pull request">
+    The title MUST be a Conventional Commit, such as `feat(accounts): add loan accounts`. CI checks it.
+  </Step>
+</Steps>
+
+## Design rules that never bend
+
+<AccordionGroup>
+  <Accordion title="Server authoritative" icon="server">
+    Clients send intent, never results. Prices, amounts and outcomes are computed on the server.
+  </Accordion>
+  <Accordion title="Headless" icon="eye-slash">
+    No NUI, no notifications, no drawing. ug-core returns codes and emits events. UI resources display them.
+  </Accordion>
+  <Accordion title="No ug-lib dependency" icon="link-slash">
+    ug-core and ug-lib never depend on each other. Runtime dependencies are OneSync and oxmysql only.
+  </Accordion>
+  <Accordion title="One global" icon="globe">
+    `UgCore` is the only global. Private code lives in `UgCore.Internal`.
+  </Accordion>
+  <Accordion title="Every net event validated" icon="shield-halved">
+    Through `UgCore.Network` or `UgCore.Callback`, with a schema and a rate limit. No raw `RegisterNetEvent`.
+  </Accordion>
+</AccordionGroup>
+
+## Versioning
+
+UgCore follows semantic versioning. Breaking changes to exports, config or database schema are MAJOR. Deprecated functions warn for one full MAJOR before removal.

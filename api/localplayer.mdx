@@ -1,0 +1,37 @@
+---
+title: "UgCore.LocalPlayer"
+sidebarTitle: "LocalPlayer"
+description: "The local player, from statebags."
+icon: "user"
+---
+
+<Badge color="green">Client</Badge> Reads statebags only. No network call.
+
+```lua
+UgCore.LocalPlayer.GetData() -> { name, characterId? }?
+UgCore.LocalPlayer.IsLoaded() -> boolean
+UgCore.LocalPlayer.GetMetadata(key?) -> any
+UgCore.LocalPlayer.GetDeathState() -> 'Alive' | 'Downed' | 'Dead'
+UgCore.LocalPlayer.IsDead() -> boolean
+UgCore.LocalPlayer.IsDowned() -> boolean
+UgCore.LocalPlayer.GetInjuries() -> UgInjury[]
+```
+
+<ResponseField name="GetMetadata" type="any">Replicated metadata only. Every replicated key when `key` is nil.</ResponseField>
+<ResponseField name="GetInjuries" type="UgInjury[]">Same shape as on the [server](/api/players#read).</ResponseField>
+
+## Example
+
+```lua
+CreateThread(function()
+    while true do
+        if UgCore.LocalPlayer.IsDowned() then
+            -- show your own downed UI
+        end
+
+        Wait(500)
+    end
+end)
+```
+
+<Tip>To react instantly, watch the statebag with `AddStateBagChangeHandler('ug-core:DeathState', ...)`. See [Statebags](/developers/statebags).</Tip>

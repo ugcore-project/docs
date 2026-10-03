@@ -1,0 +1,78 @@
+---
+title: "Guard"
+description: "Scores suspicious behavior per player and acts on thresholds you set."
+icon: "shield-halved"
+---
+
+Guard is UgCore's built-in watchdog. Every rejected request, every invalid payload and every check a resource fails adds to the player's score. Scores decay over time. When a score crosses a threshold, Guard acts.
+
+## Violations and weights
+
+| Violation | Weight | Raised when |
+| --- | --- | --- |
+| `InvalidPayload` | 5 | Arguments fail the schema, or a request is malformed. |
+| `RateLimited` | 1 | A request goes past a rate limit or the global budget. |
+| `ConcurrencyExceeded` | 2 | More than 4 callbacks are in flight for the player. |
+| `UnknownCallback` | 3 | A request targets an unregistered callback. |
+| `NotLoaded` | 2 | A request needs a loaded player and the player is not. |
+| `NoPermission` | 3 | A request needs an ACE the player lacks. |
+| `OutOfRange` | 5 | A resource found the player too far from an action. |
+| `InvalidDeathState` | 5 | A downed or dead player moved away. |
+
+Resources report their own checks with `UgCore.Guard.Flag`.
+
+## Thresholds
+
+```lua config/guard.lua
+return {
+    decayPerMinute = 1, -- score removed per minute
+    warnScore = 10,     -- logs a warning with recent flags
+    kickScore = 25,     -- kicks the player
+    banScore = 0,       -- bans the player, 0 disables it
+    budgetMax = 40,     -- requests per player across every resource...
+    budgetPer = 1000,   -- ...per this many ms
+}
+```
+
+`0` disables an action. Bans are off by default: turn them on once you trust your thresholds.
+
+## What players see
+
+Nothing that helps them. Kicks show "You were disconnected from the server." and bans "You are banned from this server." The detail stays in your console:
+
+```text
+[WARN] Guard: kicking player 7 at score 25. Recent: InvalidPayload, InvalidPayload, RateLimited, ...
+```
+
+Run `ug guard <id>` for the full picture:
+
+```text
+> ug guard 7
+  player 7 score 12
+     41s ago  InvalidPayload       ug-banking:Deposit arg 1: MUST be an integer, got "lots"
+      3s ago  RateLimited          ug-banking:Deposit
+```
+
+## The global budget
+
+Each player gets one budget shared by every UgCore net event and callback, from every resource: 40 requests per second by default. Traffic past it is dropped before any handler runs, and flagged.
+
+## Plug in your anticheat
+
+Every action goes through the `Guard:BeforeAction` hook first. An external anticheat can cancel it or pick a milder action, never a harsher one:
+
+```lua
+UgCore.Hooks.Register('Guard:BeforeAction', function(payload)
+    -- payload: { source, action = 'warn'|'kick'|'ban', score, flags }
+    if payload.action == 'ban' then
+        payload.action = 'kick' -- softer while you review
+
+        -- Another resource gets a copy through exports, so return the changed payload.
+        return payload
+    end
+end)
+```
+
+## Recommended server hardening
+
+Guard watches UgCore traffic. Also lock down entity creation from clients with FXServer's `sv_entityLockdown` convar. Check the [Cfx documentation](https://docs.fivem.net/docs/server-manual/server-commands/) for the current values before setting it.

@@ -1,0 +1,52 @@
+---
+title: "Permissions"
+description: "Grant permissions per identifier. They are applied as ACEs, so every check agrees."
+icon: "key"
+---
+
+UgCore permissions are FiveM ACEs. A grant runs `add_ace identifier.<id> <permission> allow`, so ACE checks everywhere, including `IsPlayerAceAllowed` in other resources, see it.
+
+## Setup
+
+ug-core needs permission to run `add_ace` and `remove_ace`:
+
+```bash server.cfg
+add_ace resource.ug-core command allow
+```
+
+Without it, boot prints `ug-core cannot run add_ace. Add add_ace resource.ug-core command allow to server.cfg.` in red, and grants cannot be applied.
+
+## Two ways to give permissions
+
+<Tabs>
+  <Tab title="server.cfg">
+    Classic ACEs and principals keep working:
+
+    ```bash server.cfg
+    add_principal identifier.license:abc123 group.admin
+    add_ace group.admin ug.admin allow
+    ```
+  </Tab>
+  <Tab title="UgCore API">
+    Resources such as admin menus grant and revoke at runtime. Grants are stored in `ug_permissions` and applied again on every boot:
+
+    ```lua
+    UgCore.Permissions.Grant('license:abc123', 'ug.admin', 'console')
+    UgCore.Permissions.Revoke(source, 'ug.admin')
+    ```
+  </Tab>
+</Tabs>
+
+`UgCore.Permissions.Has(source, permission)` is a plain ACE check, so both ways count.
+
+## Permissions used by ug-core
+
+| ACE | Allows |
+| --- | --- |
+| `ug.admin` | The `ug` console command in game. |
+
+Resources declare their own permissions on callbacks, net events and commands with the `permission` option.
+
+## Safety
+
+Permission names and identifiers end up in a server command, so UgCore only accepts letters, digits, dots, dashes and underscores for permissions, and `type:value` identifiers. Anything else raises before reaching `ExecuteCommand`.

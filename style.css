@@ -1,0 +1,130 @@
+/* UgCore docs theme additions. Mintlify loads every .css file in the docs root on every page. */
+
+:root {
+  --ug-violet: #7c5cff;
+  --ug-violet-light: #9f8bff;
+  --ug-cyan: #22d3ee;
+  --ug-ink: #0a0814;
+}
+
+/* Gradient text for headings and accents. */
+.ug-gradient-text {
+  background: linear-gradient(100deg, var(--ug-violet-light) 0%, var(--ug-violet) 45%, var(--ug-cyan) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Landing hero glow behind the title. */
+.ug-hero {
+  position: relative;
+  isolation: isolate;
+}
+
+.ug-hero::before {
+  content: "";
+  position: absolute;
+  inset: -120px -10% auto -10%;
+  height: 520px;
+  z-index: -1;
+  background:
+    radial-gradient(40% 55% at 30% 35%, rgba(124, 92, 255, 0.35), transparent 70%),
+    radial-gradient(35% 45% at 72% 30%, rgba(34, 211, 238, 0.22), transparent 70%);
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+/* Hexagon grid texture for the hero. */
+.ug-hex-grid {
+  background-image:
+    linear-gradient(30deg, rgba(124, 92, 255, 0.06) 12%, transparent 12.5%, transparent 87%, rgba(124, 92, 255, 0.06) 87.5%),
+    linear-gradient(150deg, rgba(124, 92, 255, 0.06) 12%, transparent 12.5%, transparent 87%, rgba(124, 92, 255, 0.06) 87.5%),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.04) 2%, transparent 2.5%, transparent 97%, rgba(34, 211, 238, 0.04) 97.5%);
+  background-size: 48px 84px;
+}
+
+/* Glowing border card used on the landing page. */
+.ug-glow-card {
+  position: relative;
+  border-radius: 1rem;
+  border: 1px solid rgba(124, 92, 255, 0.25);
+  background: linear-gradient(180deg, rgba(124, 92, 255, 0.08), rgba(124, 92, 255, 0.02));
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ug-glow-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(124, 92, 255, 0.6);
+  box-shadow: 0 12px 40px -12px rgba(124, 92, 255, 0.45);
+}
+
+/* Boot console on the landing page. */
+.ug-console {
+  border-radius: 1rem;
+  border: 1px solid rgba(159, 139, 255, 0.25);
+  background: #0d0b1a;
+  box-shadow:
+    0 30px 80px -20px rgba(124, 92, 255, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.ug-console-line {
+  white-space: pre;
+  animation: ug-line-in 0.25s ease-out both;
+}
+
+.ug-caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  vertical-align: -0.15em;
+  background: var(--ug-cyan);
+  animation: ug-blink 1s steps(1) infinite;
+}
+
+@keyframes ug-line-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ug-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Pills used for status and side markers. */
+.ug-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(124, 92, 255, 0.35);
+  background: rgba(124, 92, 255, 0.1);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Cards across the docs lift slightly on hover. */
+a.card:hover,
+[data-component-name="card"]:hover {
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ug-console-line,
+  .ug-caret,
+  .ug-glow-card {
+    animation: none;
+    transition: none;
+  }
+}

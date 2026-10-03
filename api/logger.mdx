@@ -1,0 +1,30 @@
+---
+title: "UgCore.Logger"
+sidebarTitle: "Logger"
+description: "Leveled console output."
+icon: "scroll"
+---
+
+<Badge color="purple">Shared</Badge> Runs in your resource and prints in its console.
+
+```lua
+UgCore.Logger.Debug(message, ...)
+UgCore.Logger.Info(message, ...)
+UgCore.Logger.Warn(message, ...)
+UgCore.Logger.Error(message, ...)
+```
+
+<ResponseField name="message" type="any" required>Converted with `tostring`.</ResponseField>
+<ResponseField name="..." type="any">When present, formatted into `message` with `string.format`.</ResponseField>
+
+```lua
+UgCore.Logger.Info('%d players online', #GetPlayers())
+UgCore.Logger.Warn('Shop %s is closed', shopId)
+```
+
+```text
+[INFO] 12 players online
+[WARN] Shop downtown is closed
+```
+
+`Debug` prints only when debug is on: `debug = true` in `config/core.lua`, or `set ug-core:Debug true`.

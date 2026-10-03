@@ -1,0 +1,77 @@
+---
+title: "Events"
+description: "Every event ug-core emits."
+icon: "bell"
+---
+
+Subscribe with [`UgCore.Events.On`](/api/events). Names live in `UgCore.Enums.Events.<Group>.<Key>`. Events are emitted on the server unless noted.
+
+<Info>`ug-core:*` events from any resource other than ug-core are dropped by `On` and `Once`.</Info>
+
+## Lifecycle
+
+<Badge color="purple">Server and client</Badge>
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Lifecycle:Changed` | `(newState, oldState)` |
+| `ug-core:Lifecycle:Ready` | `()` |
+| `ug-core:Lifecycle:Stopping` | `()` |
+
+## Players
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Players:Loaded` | `(source)` |
+| `ug-core:Players:Injured` | `(source, injury)` |
+| `ug-core:Players:Downed` | `(source, cause)` |
+| `ug-core:Players:Died` | `(source, cause)` |
+| `ug-core:Players:Revived` | `(source, by, reason)` |
+| `ug-core:Players:Respawned` | `(source, coords)` |
+| `ug-core:Players:DeathStateChanged` | `(source, newState, oldState, cause)` |
+
+## Guard
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Guard:Flagged` | `(source, violation, score)` |
+
+## Characters
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Characters:Created` | `(source, characterId)` |
+| `ug-core:Characters:Deleted` | `(source, characterId)` |
+| `ug-core:Characters:Loaded` | `(source, characterId)` |
+| `ug-core:Characters:Unloaded` | `(source, characterId)` |
+
+## Accounts
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Accounts:Changed` | `(source, account, balance, delta, reason)` |
+
+## Jobs and gangs
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Jobs:Changed` | `(source, job, previous)` |
+| `ug-core:Jobs:DutyChanged` | `(source, onDuty)` |
+| `ug-core:Gangs:Changed` | `(source, gang, previous)` |
+
+## Sessions
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Sessions:Created` | `(sessionId)` |
+| `ug-core:Sessions:Destroyed` | `(sessionId)` |
+| `ug-core:Sessions:Joined` | `(source, sessionId)` |
+| `ug-core:Sessions:Left` | `(source, sessionId)` |
+
+## Commands
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Commands:Failed` | `(source, name, errorCode, argIndex)` |
+
+`argIndex` is set when an argument failed to parse.

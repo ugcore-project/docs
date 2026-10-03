@@ -1,55 +1,49 @@
-# Mintlify Starter Kit
+# UgCore documentation
 
-Use the starter kit to get your docs deployed and ready to customize.
-
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
-
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
-
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
-
-## AI-assisted writing
-
-Set up your AI coding tool to work with Mintlify:
-
-```bash
-npx skills add https://mintlify.com/docs
-```
-
-This command installs Mintlify's documentation skill for your configured AI tools like Claude Code, Cursor, Windsurf, and others. The skill includes component reference, writing standards, and workflow guidance.
-
-See the [AI tools guides](/ai-tools) for tool-specific setup.
+Public documentation for [UgCore](https://github.com/ugcore-project), the secure, headless and modular FiveM framework. Built with [Mintlify](https://mintlify.com).
 
 ## Development
 
-Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview your documentation changes locally. To install, use the following command:
+Install the [Mintlify CLI](https://www.npmjs.com/package/mint):
 
-```
+```bash
 npm i -g mint
 ```
 
-Run the following command at the root of your documentation, where your `docs.json` is located:
+Run it at the root of this repository, where `docs.json` is:
 
-```
+```bash
 mint dev
 ```
 
-View your local preview at `http://localhost:3000`.
+The preview runs at `http://localhost:3000`.
 
-## Publishing changes
+Check for broken links before you push:
 
-Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app) to propagate changes from your repo to your deployment. Changes are deployed to production automatically after pushing to the default branch.
+```bash
+mint broken-links
+```
 
-## Need help?
+## Layout
 
-### Troubleshooting
+| Path | Content |
+| --- | --- |
+| `index.mdx` | Landing page |
+| `owners/` | Guides for server owners |
+| `developers/` | Guides for resource developers |
+| `concepts/` | Security model and death system |
+| `api/` | One page per `UgCore` namespace |
+| `reference/` | Error codes, events, hooks, statebags, convars, config files |
+| `contributing/` | How to contribute to ug-core |
+| `snippets/` | React components, such as the animated boot console |
+| `style.css` | Custom styles |
 
-- If your dev environment isn't running: Run `mint update` to ensure you have the most recent version of the CLI.
-- If a page loads as a 404: Make sure you are running in a folder with a valid `docs.json`.
+Writing rules for people and AI tools are in [AGENTS.md](AGENTS.md).
 
-### Resources
-- [Mintlify documentation](https://mintlify.com/docs)
+## Publishing
+
+Changes pushed to the default branch deploy automatically through the Mintlify GitHub app.
+
+## License
+
+See [LICENSE](LICENSE).

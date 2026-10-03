@@ -1,0 +1,121 @@
+---
+title: "Installation"
+description: "Install ug-core on an FXServer with OneSync and oxmysql."
+icon: "download"
+---
+
+## Requirements
+
+<Columns cols={2}>
+  <Card title="FXServer with OneSync" icon="server">
+    `ug-core` declares `/onesync` as a dependency and refuses to start without it.
+  </Card>
+  <Card title="oxmysql" icon="database">
+    The only resource `ug-core` depends on. Start it before `ug-core`.
+  </Card>
+  <Card title="MySQL 8.0 or MariaDB 10.6+" icon="server">
+    Older servers abort boot with a clear message.
+  </Card>
+  <Card title="Lua 5.4" icon="code">
+    Every resource that imports UgCore MUST set `lua54 'yes'`.
+  </Card>
+</Columns>
+
+## Install
+
+<Steps>
+  <Step title="Download ug-core">
+    Clone or download the repository into your resources folder:
+
+    ```bash
+    cd resources/[ug]
+    git clone https://github.com/ugcore-project/ug-core.git
+    ```
+  </Step>
+
+  <Step title="Configure server.cfg">
+    Add the database connection, start `oxmysql` before `ug-core`, and let `ug-core` manage ACEs:
+
+    ```bash server.cfg
+    set mysql_connection_string "mysql://user:password@localhost:3306/ugcore"
+
+    ensure oxmysql
+    ensure ug-core
+
+    # Lets the permissions module apply grants as ACEs.
+    add_ace resource.ug-core command allow
+
+    # Lets admins use the `ug` console command in game.
+    add_ace group.admin ug.admin allow
+    ```
+
+    <Warning>
+      Without `add_ace resource.ug-core command allow`, permission grants cannot be applied. ug-core reports it in red at boot.
+    </Warning>
+  </Step>
+
+  <Step title="Start the server">
+    On the first start, ug-core prints its banner, generates every config file and creates its tables:
+
+    ```text Server console
+      _   _  ____    ____
+     | | | |/ ___|  / ___|___  _ __ ___
+     | | | | |  _  | |   / _ \| '__/ _ \
+     | |_| | |_| | | |__| (_) | | |  __/
+      \___/ \____|  \____\___/|_|  \___|
+
+     ug-core v1.0.0 · LuaGLM 5.4 · OneSync on
+
+    [INFO] Config: generated config/core.lua.
+    [INFO] Config: generated config/modules.lua.
+    ...
+    [INFO] Database: connected to MariaDB 10.11.6.
+    [INFO] Database: applied identity v1.0.0.
+    ...
+    [INFO] ug-core v1.0.0 ready in 61 ms. 10 modules enabled.
+    ```
+  </Step>
+
+  <Step title="Check it">
+    Run these inspection commands from the server console:
+
+    ```text
+    ug modules
+    ug database
+    ug config core
+    ```
+
+    See [The ug console](/owners/console) for every subcommand.
+  </Step>
+</Steps>
+
+## What happens on first boot
+
+<AccordionGroup>
+  <Accordion title="Config files are generated" icon="file-code">
+    Every missing `config/<name>.lua` is written with each option's description, type, limits and default. ug-core never edits these files again. Delete one to restore its defaults.
+  </Accordion>
+  <Accordion title="Tables are created" icon="table">
+    Each enabled module applies its migrations in version order. Applied versions are tracked in `ug_migrations`.
+  </Accordion>
+  <Accordion title="Connections wait for Ready" icon="hourglass-half">
+    Players who connect during boot see "The server is starting. Please wait." until ug-core is ready, for at most 60 seconds.
+  </Accordion>
+</AccordionGroup>
+
+## If boot fails
+
+ug-core collects every configuration and database error, prints them all, then stops cleanly:
+
+```text
+[ERROR] config/core.lua: debug MUST be a boolean, got "yes"
+[ERROR] Boot aborted: 1 error(s).
+[INFO] Lifecycle: Stopping (3 ms)
+[INFO] Lifecycle: Stopped (0 ms)
+```
+
+Fix the reported values and run `restart ug-core`. See [Troubleshooting](/owners/troubleshooting) for common errors.
+
+<Card title="Next: build your first resource" icon="rocket" href="/quickstart" horizontal>
+  Write a resource that uses UgCore in five minutes.
+</Card>

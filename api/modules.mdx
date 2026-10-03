@@ -1,0 +1,42 @@
+---
+title: "UgCore.Modules"
+sidebarTitle: "Modules"
+description: "Which modules are enabled."
+icon: "puzzle-piece"
+---
+
+<Badge color="purple">Shared</Badge> Runs in your resource.
+
+## IsEnabled
+
+```lua
+UgCore.Modules.IsEnabled(name) -> boolean
+```
+
+```lua
+if UgCore.Modules.IsEnabled('jobs') then
+    local job = UgCore.Jobs.Get(source)
+end
+```
+
+## GetEnabled
+
+```lua
+UgCore.Modules.GetEnabled() -> names
+```
+
+<ResponseField name="names" type="string[]">Enabled modules in load order.</ResponseField>
+
+## Require
+
+```lua
+UgCore.Modules.Require(name)
+```
+
+Raises when the module is not enabled:
+
+```text
+[ug-core] Modules.Require: module "accounts" is not enabled. Enable it in config/modules.lua.
+```
+
+Empty until ug-core has loaded its modules. Use `UgCore.Lifecycle.On('Ready', ...)` first.

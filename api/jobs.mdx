@@ -1,0 +1,100 @@
+---
+title: "UgCore.Jobs"
+sidebarTitle: "Jobs"
+description: "Jobs, grades and duty."
+icon: "briefcase"
+---
+
+<Badge color="blue">Server</Badge> <Badge color="green">Client</Badge> Optional module. Requires `characters`.
+
+Jobs are defined in `config/jobs.lua`, a data config. Every character has exactly one job and falls back to `unemployed`.
+
+```lua config/jobs.lua
+return {
+    unemployed = {
+        label = 'Unemployed',
+        grades = { { name = 'unemployed', label = 'Unemployed', salary = 0 } },
+    },
+    police = {
+        label = 'Police',
+        defaultDuty = false,
+        grades = {
+            { name = 'recruit', label = 'Recruit', salary = 100 },
+            { name = 'officer', label = 'Officer', salary = 150 },
+            { name = 'sergeant', label = 'Sergeant', salary = 200 },
+            { name = 'chief', label = 'Chief', salary = 300, boss = true },
+        },
+    },
+}
+```
+
+Grades are 1-based indexes into `grades`.
+
+## Server
+
+### Get
+
+```lua
+UgCore.Jobs.Get(source) -> UgAssignment?
+```
+
+<ResponseField name="UgAssignment" type="table">
+  `nil` without a loaded character.
+  <Expandable title="fields" defaultOpen>
+    <ResponseField name="name" type="string" />
+    <ResponseField name="label" type="string" />
+    <ResponseField name="grade" type="integer" />
+    <ResponseField name="gradeName" type="string" />
+    <ResponseField name="gradeLabel" type="string" />
+    <ResponseField name="salary" type="integer" />
+    <ResponseField name="boss" type="boolean" />
+    <ResponseField name="onDuty" type="boolean" />
+  </Expandable>
+</ResponseField>
+
+### Set / SetGrade
+
+```lua
+UgCore.Jobs.Set(source, name, grade?) -> ok, errorCode
+UgCore.Jobs.SetGrade(source, grade) -> ok, errorCode
+```
+
+**MUST run in a thread.** `grade` defaults to 1. Unknown jobs and grades return `invalid_args`. `Jobs:BeforeSet` MAY cancel.
+
+### SetDuty / IsOnDuty
+
+```lua
+UgCore.Jobs.SetDuty(source, onDuty) -> ok, errorCode
+UgCore.Jobs.IsOnDuty(source) -> boolean
+```
+
+### Exists / GetDefinition
+
+```lua
+UgCore.Jobs.Exists(name, grade?) -> boolean
+UgCore.Jobs.GetDefinition(name) -> { label, grades, defaultDuty? }?
+```
+
+## Client
+
+```lua
+UgCore.Jobs.Get() -> UgAssignment?
+UgCore.Jobs.IsOnDuty() -> boolean
+```
+
+Read from the `ug-core:Job` statebag.
+
+## Events
+
+- `ug-core:Jobs:Changed` with `(source, job, previous)`
+- `ug-core:Jobs:DutyChanged` with `(source, onDuty)`
+
+## Example
+
+```lua
+local job = UgCore.Jobs.Get(source)
+
+if not job or job.name ~= 'police' or not job.onDuty then
+    return false, UgCore.Enums.Errors.NoPermission
+end
+```

@@ -1,0 +1,92 @@
+---
+title: "The ug console"
+description: "Inspect the framework from the server console."
+icon: "terminal"
+---
+
+`ug` is a server console command for looking inside UgCore. It works from the server console, and in game for players with the `ug.admin` ACE. Output always goes to the server console.
+
+```bash server.cfg
+add_ace group.admin ug.admin allow
+```
+
+## Subcommands
+
+<AccordionGroup>
+  <Accordion title="ug modules" icon="puzzle-piece" defaultOpen>
+    Every installed module, whether it is enabled, and why.
+
+    ```text
+    > ug modules
+      accounts       enabled   enabled in config/modules.lua
+      gangs          disabled  disabled in config/modules.lua
+      identity       enabled   required
+    ```
+  </Accordion>
+
+  <Accordion title="ug config <name>" icon="sliders">
+    Resolved values of a config and where each came from: `default`, `file` or the convar.
+
+    ```text
+    > ug config core
+    config/core.lua
+      locale = 'pt' (file)
+      debug = true (convar ug-core:Debug)
+    ```
+
+    Without a name, it lists every config.
+  </Accordion>
+
+  <Accordion title="ug lifecycle" icon="timeline">
+    Every lifecycle state with the time spent in the previous one.
+
+    ```text
+    > ug lifecycle
+      Booting      +0 ms
+      Configured   +14 ms
+      Initializing +1 ms
+      Starting     +38 ms
+      Ready        +2 ms
+    ```
+  </Accordion>
+
+  <Accordion title="ug database" icon="database">
+    Database server version, applied migrations per module, and cache usage.
+
+    ```text
+    > ug database
+      server   MariaDB 10.11.6
+      accounts 1.0.0
+      core     no migrations
+    ```
+  </Accordion>
+
+  <Accordion title="ug guard <id>" icon="shield-halved">
+    A player's Guard score and recent flags with their details.
+
+    ```text
+    > ug guard 7
+      player 7 score 12
+         41s ago  InvalidPayload       ug-banking:Deposit arg 1: MUST be an integer, got "lots"
+    ```
+  </Accordion>
+
+  <Accordion title="ug hooks" icon="anchor">
+    Every registered hook, with the resource that registered it and its priority.
+
+    ```text
+    > ug hooks
+      Guard:BeforeAction       my-anticheat         priority 0
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Debug output
+
+Turn on debug logs in `config/core.lua` or with a convar:
+
+```bash server.cfg
+set ug-core:Debug true
+```
+
+Debug lines show rejected requests, dropped spoofed events and other details. They also appear in client F8.

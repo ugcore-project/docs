@@ -1,0 +1,67 @@
+---
+title: "UgCore.Commands"
+sidebarTitle: "Commands"
+description: "Typed, rate limited chat commands."
+icon: "terminal"
+---
+
+<Badge color="blue">Server</Badge> Optional module. Proxied to ug-core.
+
+## Register
+
+```lua
+UgCore.Commands.Register(name, options, handler)
+```
+
+<ResponseField name="name" type="string" required>Lowercase. Registers `/name`.</ResponseField>
+<ResponseField name="options" type="UgCommandOptions" required>
+  <Expandable title="fields" defaultOpen>
+    <ResponseField name="help" type="string" />
+    <ResponseField name="args" type="UgCommandArgument[]">Parsed and typed before the handler runs.</ResponseField>
+    <ResponseField name="permission" type="string">ACE the player MUST have.</ResponseField>
+    <ResponseField name="rate" type="{ max, per }" default="{ max = 3, per = 2000 }">Per player.</ResponseField>
+    <ResponseField name="requirePlayer" type="boolean">Requires a loaded player.</ResponseField>
+    <ResponseField name="console" type="boolean" default="true">Allowed from the server console.</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="handler" type="fun(source, args)" required>`args` is keyed by argument name. `source` is `0` for the console.</ResponseField>
+
+### Argument types
+
+| Type | Value |
+| --- | --- |
+| `string` | One word, up to `max` characters (default 64). |
+| `text` | The rest of the line, up to `max` characters (default 256). MUST be last. |
+| `integer` | A whole number. |
+| `number` | Any finite number. |
+| `boolean` | `true`, `false`, `1` or `0`. |
+| `player` | The source of a connected player. |
+
+Each argument has `name`, `type`, and optional `optional`, `max` and `help`. Optional arguments MUST be trailing.
+
+### Failures
+
+ug-core shows nothing to players. A failure emits `ug-core:Commands:Failed` with `(source, name, errorCode, argIndex)`, so a chat or notification resource can display it.
+
+## GetAll
+
+```lua
+UgCore.Commands.GetAll() -> UgCommandInfo[]
+```
+
+Commands sorted by name, with `name`, `help`, `permission` and `args`. Use it for chat suggestions, filtered by permission per player.
+
+## Example
+
+```lua
+UgCore.Commands.Register('givecash', {
+    help = 'Give cash to a player',
+    permission = 'ug.admin',
+    args = {
+        { name = 'target', type = 'player', help = 'Player id' },
+        { name = 'amount', type = 'integer', help = 'Amount' },
+    },
+}, function(source, args)
+    UgCore.Accounts.Add(args.target, 'cash', args.amount, 'admin:givecash')
+end)
+```

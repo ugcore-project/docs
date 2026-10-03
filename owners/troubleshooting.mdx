@@ -1,0 +1,65 @@
+---
+title: "Troubleshooting"
+description: "Common boot errors and what they mean."
+icon: "life-ring"
+---
+
+When boot fails, ug-core prints every error it found, then `Boot aborted: N error(s).`, then stops. Players who try to connect see "The server is not ready. Try again later."
+
+<AccordionGroup>
+  <Accordion title="convar ug-core:Debug: MUST be true, false, 1 or 0, got ...">
+    A convar in `server.cfg` has a value of the wrong type. Fix the `set` line. Booleans take `true`, `false`, `1` or `0`.
+  </Accordion>
+
+  <Accordion title="config/<name>.lua: <key> MUST be ...">
+    A value in a config file has the wrong type or is out of range. The message says what's expected. `ug config <name>` shows the current values.
+  </Accordion>
+
+  <Accordion title="config/<name>.lua:4: '}' expected near ...">
+    A Lua syntax error in a config file. The number after the file name is the line. Delete the file to restore the defaults if you're stuck.
+  </Accordion>
+
+  <Accordion title="Database: no connection after 30 s">
+    `oxmysql` did not connect. Check that `oxmysql` starts before `ug-core` and that `mysql_connection_string` is right.
+  </Accordion>
+
+  <Accordion title="Database: MySQL 8.0 or MariaDB 10.6+ is required">
+    Your database server is too old. Upgrade it.
+  </Accordion>
+
+  <Accordion title="<module> requires <dependency>. Enable <dependency> or disable <module>.">
+    You disabled a module another enabled module needs. Follow the message in `config/modules.lua`.
+  </Accordion>
+
+  <Accordion title="<module> migration 1.0.0 failed: ...">
+    A table could not be created or changed. The message includes the MySQL error. Fix the cause, often permissions of the database user, and restart.
+  </Accordion>
+
+  <Accordion title="config/jobs.lua MUST define &quot;unemployed&quot;">
+    Every character falls back to `unemployed`, so it must exist in your jobs. The same applies to `none` in `config/gangs.lua`.
+  </Accordion>
+
+  <Accordion title="ug-core cannot run add_ace">
+    Add `add_ace resource.ug-core command allow` to `server.cfg`. Boot continues, but permission grants cannot be applied.
+  </Accordion>
+</AccordionGroup>
+
+## Resources that use UgCore
+
+<AccordionGroup>
+  <Accordion title="[ug-core] import: cannot read core/shared/init.lua. Start ug-core before this resource.">
+    Your resource starts before `ug-core`. Add `dependency 'ug-core'` to its manifest and `ensure` it after `ug-core`.
+  </Accordion>
+
+  <Accordion title="<resource> requires ug-core X.Y.Z or newer, found ...">
+    The resource needs a newer ug-core. Update ug-core.
+  </Accordion>
+
+  <Accordion title="UgCore.<Ns> belongs to disabled module ...">
+    The resource uses a module you disabled. Enable it in `config/modules.lua`, or don't use that resource.
+  </Accordion>
+
+  <Accordion title="UgCore.<Ns> is not available until ug-core is ready">
+    The resource used a module before ug-core finished booting. Developers wait with `UgCore.Lifecycle.Await('Ready')`.
+  </Accordion>
+</AccordionGroup>

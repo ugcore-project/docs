@@ -1,0 +1,39 @@
+---
+title: "UgCore.Locale"
+sidebarTitle: "Locale"
+description: "Core messages in the server language."
+icon: "language"
+---
+
+<Badge color="purple">Shared</Badge> Optional module.
+
+ug-core's own messages live in `locales/<code>.json`. The language comes from `locale` in `config/core.lua`. Missing keys fall back to English.
+
+<Note>Locale holds core messages only, such as kick and ban texts. Your resources keep their own translations.</Note>
+
+## Get
+
+```lua
+UgCore.Locale.Get(key, vars?) -> text
+```
+
+<ResponseField name="key" type="string" required>Dotted path, such as `identity.bannedUntil`.</ResponseField>
+<ResponseField name="vars" type="table">Values for `{name}` placeholders.</ResponseField>
+<ResponseField name="text" type="string">The key itself when no locale has it.</ResponseField>
+
+```lua
+UgCore.Locale.Get('identity.missingIdentifier', { type = 'license' })
+-- A license identifier is required to join this server.
+```
+
+## GetCode
+
+```lua
+UgCore.Locale.GetCode() -> code
+```
+
+Such as `'en'`.
+
+## Adding a language
+
+Copy `locales/en.json` to `locales/<code>.json`, translate the values, and set `locale = '<code>'` in `config/core.lua`.

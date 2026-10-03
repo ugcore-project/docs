@@ -1,0 +1,48 @@
+---
+title: "UgCore.Version"
+sidebarTitle: "Version"
+description: "Require a minimum ug-core version."
+icon: "code-compare"
+---
+
+<Badge color="purple">Shared</Badge> Runs in your resource.
+
+## Get
+
+```lua
+UgCore.Version.Get() -> version
+```
+
+<ResponseField name="version" type="string">ug-core's manifest version, such as `'1.4.2'`.</ResponseField>
+
+## IsAtLeast
+
+```lua
+UgCore.Version.IsAtLeast(minimum) -> boolean
+```
+
+<ResponseField name="minimum" type="string" required>Such as `'1.2.0'`. Raises on malformed versions.</ResponseField>
+
+Compares major, minor and patch as numbers. Pre-release suffixes are ignored.
+
+## Require
+
+```lua
+UgCore.Version.Require(minimum)
+```
+
+Raises when ug-core is older:
+
+```text
+[ug-core] my-bank requires ug-core 1.2.0 or newer, found 1.0.0. Update ug-core.
+```
+
+Logs one warning when ug-core has a newer major version.
+
+## In the manifest
+
+```lua fxmanifest.lua
+ug_core_version '1.2.0'
+```
+
+The import checks it before defining `UgCore`. See [Version requirements](/developers/versioning).

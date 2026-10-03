@@ -1,0 +1,50 @@
+---
+title: "Database"
+description: "Requirements, migrations and what ug-core stores."
+icon: "database"
+---
+
+ug-core talks to MySQL or MariaDB through `oxmysql`, with prepared statements only.
+
+## Requirements
+
+- MySQL 8.0 or newer, or MariaDB 10.6 or newer. Older servers stop boot with `Database: MySQL 8.0 or MariaDB 10.6+ is required, found MySQL 5.7.44`.
+- `mysql_connection_string` set in `server.cfg`.
+- `oxmysql` started before `ug-core`.
+
+If the database does not answer within 30 seconds, boot stops with `Database: no connection after 30 s. Check oxmysql and mysql_connection_string`.
+
+## Migrations
+
+Each module creates and updates its own tables with versioned migrations. They run on boot, in version order, before the module loads. Applied versions are stored in `ug_migrations`:
+
+```text
+> ug database
+  server   MariaDB 10.11.6
+  accounts 1.0.0
+  characters 1.0.0
+  core     no migrations
+  identity 1.0.0
+```
+
+<Warning>
+  MySQL commits table changes statement by statement. If a migration fails halfway, boot stops and the migration is not recorded. Fix the cause and restart: migrations use `IF NOT EXISTS` so they can run again.
+</Warning>
+
+## Tables
+
+| Table | Module | Contents |
+| --- | --- | --- |
+| `ug_migrations` | core | Applied migration versions per module. |
+| `ug_bans`, `ug_ban_identifiers` | identity | Bans and the identifiers they cover. |
+| `ug_permissions` | permissions | Permissions granted per identifier. |
+| `ug_characters` | characters | Characters, their data and saved death state. Deleted characters stay, marked deleted. |
+| `ug_accounts`, `ug_ledger` | accounts | Balances and every change to them. |
+| `ug_character_jobs` | jobs | Job and grade per character. |
+| `ug_character_gangs` | gangs | Gang and grade per character. |
+
+Disabling a module never drops its tables.
+
+## Money is always traceable
+
+Every balance change writes a ledger row in the same transaction: amount, balance after, reason and the other character for transfers. If the write fails, the change is undone.
