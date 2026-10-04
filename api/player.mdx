@@ -1,0 +1,185 @@
+---
+title: "Player object"
+sidebarTitle: "Player object"
+description: "Get a player once, then work with it."
+icon: "user-gear"
+---
+
+<Badge color="blue">Server</Badge> Built in your resource. No extra export call.
+
+`UgCore.Players.Get`, `GetAll`, `GetByIdentifier` and `GetByCharacterId` return `UgPlayer` objects. Each method is a shortcut to a module function with the player's source filled in:
+
+```lua
+local player = UgCore.Players.Get(source)
+
+if not player then
+    return
+end
+
+local ok, balance, err = player:RemoveMoney('cash', 250, 'my-shop:water')
+
+if ok and player:GetJob().name == 'police' then
+    player:SetDuty(true)
+end
+```
+
+Both lines below do the same thing:
+
+```lua
+player:AddMoney('bank', 500, 'Paycheck')
+UgCore.Accounts.Add(player.source, 'bank', 500, 'Paycheck')
+```
+
+## How it behaves
+
+- **Same results.** A method returns exactly what the function it calls returns, including [error codes](/reference/error-codes). It validates and raises the same way.
+- **Live methods, snapshot fields.** Fields are copied when you call `Get`. Methods always act on the live player. Call `Get` again for fresh fields, such as `characterId` after a character change.
+- **Modules.** A method of a disabled module raises `UgCore.Jobs belongs to disabled module "jobs". Enable it in config/modules.lua.` Check [`UgCore.Modules.IsEnabled`](/developers/modules) first for optional modules.
+- **Dropped players.** Methods keep working on a stale object and return what the module returns for an unknown player, usually `not_found` or `not_loaded`. `player:IsOnline()` tells you.
+- **Threads.** Methods that touch the database MUST run in a thread, like the functions they call. They are marked below.
+
+## Fields
+
+| Field | Type | Value |
+| --- | --- | --- |
+| `source` | `integer` | Server id. |
+| `name` | `string` | Player name. |
+| `identifier` | `string` | Primary identifier, such as `license:abc`. |
+| `characterId` | `integer?` | Loaded character when the object was created. |
+| `joinedAt` | `integer` | Unix seconds. |
+
+## Methods
+
+### Player
+
+Always available. See [`UgCore.Players`](/api/players).
+
+| Method | Calls |
+| --- | --- |
+| `player:IsOnline() -> boolean` | `Players.Get(source) ~= nil` |
+| `player:IsLoaded() -> boolean` | `ug-core:Loaded` statebag |
+| `player:GetMetadata(key?)` | `Players.GetMetadata` |
+| `player:SetMetadata(key, value, replicate?) -> ok, errorCode` | `Players.SetMetadata` |
+| `player:Kick(reason?) -> ok, errorCode` | `Players.Kick` |
+| `player:GetDeathState()`, `IsDead()`, `IsDowned()` | `Players.GetDeathState`, `IsDead`, `IsDowned` |
+| `player:GetInjuries()`, `GetCauseOfDeath()` | `Players.GetInjuries`, `GetCauseOfDeath` |
+| `player:ClearInjuries(region?) -> ok, errorCode` | `Players.ClearInjuries` |
+| `player:Down(cause?)`, `Kill(cause?) -> ok, errorCode` | `Players.Down`, `Kill` |
+| `player:Revive(options?)`, `Respawn(coords?) -> ok, errorCode` | `Players.Revive`, `Respawn` |
+
+### Identity
+
+Always available. See [`UgCore.Identity`](/api/identity).
+
+| Method | Calls |
+| --- | --- |
+| `player:GetIdentifiers() -> string[]` | `Identity.GetIdentifiers` |
+| `player:IsBanned() -> banned, ban, errorCode` | `Identity.IsBanned`. Thread. |
+| `player:Ban(options?) -> ok, banId, errorCode` | `Identity.Ban`. Thread. |
+
+### Permissions
+
+Always available. See [`UgCore.Permissions`](/api/permissions).
+
+| Method | Calls |
+| --- | --- |
+| `player:HasPermission(permission) -> boolean` | `Permissions.Has` |
+| `player:GrantPermission(permission, by?) -> ok, errorCode` | `Permissions.Grant`. Thread. |
+| `player:RevokePermission(permission) -> ok, removed, errorCode` | `Permissions.Revoke`. Thread. |
+| `player:GetPermissions() -> string[]` | `Permissions.GetAll` |
+
+### Characters
+
+Needs the `characters` module. See [`UgCore.Characters`](/api/characters).
+
+| Method | Calls |
+| --- | --- |
+| `player:GetCharacter() -> UgCharacter?` | `Characters.GetActive` |
+| `player:GetCharacters() -> ok, characters, errorCode` | `Characters.GetAll`. Thread. |
+| `player:LoadCharacter(characterId) -> ok, errorCode` | `Characters.Load`. Thread. |
+| `player:UnloadCharacter() -> ok, errorCode` | `Characters.Unload`. Thread. |
+
+### Money
+
+Needs the `accounts` module. See [`UgCore.Accounts`](/api/accounts).
+
+| Method | Calls |
+| --- | --- |
+| `player:GetBalance(account) -> integer?` | `Accounts.GetBalance` |
+| `player:GetBalances() -> table<string, integer>?` | `Accounts.GetAll` |
+| `player:AddMoney(account, amount, reason?) -> ok, balance, errorCode` | `Accounts.Add`. Thread. |
+| `player:RemoveMoney(account, amount, reason?) -> ok, balance, errorCode` | `Accounts.Remove`. Thread. |
+| `player:SetMoney(account, balance, reason?) -> ok, balance, errorCode` | `Accounts.Set`. Thread. |
+| `player:TransferMoney(targetCharacterId, account, amount, reason?) -> ok, balance, errorCode` | `Accounts.Transfer`. Thread. |
+| `player:GetLedger(account, limit?) -> ok, entries, errorCode` | `Accounts.GetLedger`. Thread. |
+
+### Job
+
+Needs the `jobs` module. See [`UgCore.Jobs`](/api/jobs).
+
+| Method | Calls |
+| --- | --- |
+| `player:GetJob() -> UgAssignment?` | `Jobs.Get` |
+| `player:SetJob(name, grade?) -> ok, errorCode` | `Jobs.Set`. Thread. |
+| `player:SetJobGrade(grade) -> ok, errorCode` | `Jobs.SetGrade`. Thread. |
+| `player:SetDuty(onDuty) -> ok, errorCode` | `Jobs.SetDuty` |
+| `player:IsOnDuty() -> boolean` | `Jobs.IsOnDuty` |
+
+### Gang
+
+Needs the `gangs` module. See [`UgCore.Gangs`](/api/gangs).
+
+| Method | Calls |
+| --- | --- |
+| `player:GetGang() -> UgAssignment?` | `Gangs.Get` |
+| `player:SetGang(name, grade?) -> ok, errorCode` | `Gangs.Set`. Thread. |
+| `player:SetGangGrade(grade) -> ok, errorCode` | `Gangs.SetGrade`. Thread. |
+
+### Session
+
+Needs the `sessions` module. See [`UgCore.Sessions`](/api/sessions).
+
+| Method | Calls |
+| --- | --- |
+| `player:GetSession() -> integer?` | `Sessions.GetSession` |
+| `player:JoinSession(sessionId) -> ok, errorCode` | `Sessions.Join` |
+| `player:LeaveSession() -> ok, errorCode` | `Sessions.Leave` |
+
+### Security and network
+
+Always available.
+
+| Method | Calls |
+| --- | --- |
+| `player:Flag(violation, detail?)` | [`Guard.Flag`](/api/guard#flag) |
+| `player:GetScore() -> number` | [`Guard.GetScore`](/api/guard#getscore) |
+| `player:IsNear(coords, maxDistance) -> boolean` | [`Guard.IsNear`](/api/guard#isnear) |
+| `player:TriggerClient(name, ...)` | [`Network.TriggerClient`](/api/network#triggerclient) |
+| `player:AwaitCallback(name, options, ...) -> ok, value, errorCode` | [`Callback.Await`](/api/callback#await). Thread. |
+
+## Example
+
+A paycheck loop for on-duty players:
+
+```lua server.lua
+UgCore.Lifecycle.On('Ready', function()
+    UgCore.Modules.Require('accounts')
+    UgCore.Modules.Require('jobs')
+
+    CreateThread(function()
+        while true do
+            Wait(15 * 60000)
+
+            for _, player in ipairs(UgCore.Players.GetAll()) do
+                local job = player:GetJob()
+
+                if job and player:IsOnDuty() and job.salary > 0 then
+                    player:AddMoney('bank', job.salary, 'Paycheck')
+                end
+            end
+        end
+    end)
+end)
+```
+
+<Note>Groups are FiveM ACE principals, not a ug-core feature. Check them with `player:HasPermission`, after you give the group the permission in `server.cfg`, such as `add_ace group.admin my-shop.manage allow`.</Note>

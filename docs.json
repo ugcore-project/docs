@@ -149,6 +149,7 @@
             "pages": [
               "api/identity",
               "api/players",
+              "api/player",
               "api/localplayer",
               "api/permissions",
               "api/characters",

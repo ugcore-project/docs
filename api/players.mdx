@@ -25,12 +25,23 @@ UgCore.Players.GetByCharacterId(characterId) -> UgPlayer?
     <ResponseField name="source" type="integer" />
     <ResponseField name="name" type="string" />
     <ResponseField name="identifier" type="string">Primary identifier.</ResponseField>
-    <ResponseField name="characterId" type="integer?">The loaded character.</ResponseField>
+    <ResponseField name="characterId" type="integer?">The loaded character when the object was created.</ResponseField>
     <ResponseField name="joinedAt" type="integer">Unix seconds.</ResponseField>
   </Expandable>
 </ResponseField>
 
 `GetAll` is sorted by source.
+
+Each result is a [player object](/api/player) with methods for money, job, gang, permissions, death state and more:
+
+```lua
+local player = UgCore.Players.Get(source)
+
+if player then
+    player:AddMoney('cash', 100, 'Reward')
+    player:SetJob('police', 2)
+end
+```
 
 ## Metadata
 
