@@ -5,9 +5,15 @@ description: "Isolated worlds on routing buckets."
 icon: "layer-group"
 ---
 
-<Badge color="blue">Server</Badge> Optional module. Proxied to ug-core.
+import { ModuleInfo } from "/snippets/module-info.jsx";
 
-A session is a routing bucket owned by ug-core: an instance for an apartment, a race or a heist. Buckets are allocated from 1000 up. Bucket 0 is the shared world. A player is in at most one session.
+<Badge color="blue">Server</Badge> Proxied to ug-core.
+
+<ModuleInfo name="sessions" deps={["players"]} server="Sessions" />
+
+A session is a routing bucket owned by ug-core: an instance for an apartment, a race or a heist. Buckets are allocated from 1000 up, so they never clash with buckets other resources use below that. Bucket 0 is the shared world. A player is in at most one session.
+
+<Warning>Do not move players between buckets with `SetPlayerRoutingBucket` while they are in a session. Use `Join` and `Leave`.</Warning>
 
 ## Create
 
@@ -35,7 +41,7 @@ UgCore.Sessions.Join(source, sessionId) -> ok, errorCode
 UgCore.Sessions.Leave(source) -> ok, errorCode
 ```
 
-`Join` leaves the current session first. `Sessions:BeforeJoin` MAY cancel. `Leave` returns `not_found` when the player is in no session. An empty session that is not persistent is destroyed.
+`Join` leaves the current session first. `Leave` moves the player back to the shared world. An empty session that is not persistent is destroyed. Players also leave when they drop, and every session is destroyed when ug-core stops.
 
 ## Get / GetMembers / GetSession
 
@@ -57,12 +63,48 @@ UgCore.Sessions.GetSession(source) -> integer?
   </Expandable>
 </ResponseField>
 
-The client reads its session id from the `ug-core:Session` statebag.
+`GetMembers` returns an empty list for unknown sessions.
+
+## Errors
+
+| Function | Code | When |
+| --- | --- | --- |
+| `Destroy`, `Join` | `not_found` | The session does not exist. |
+| `Join` | `not_loaded` | The player is not connected. |
+| `Join` | `no_permission` | `Sessions:BeforeJoin` cancelled. |
+| `Leave` | `not_found` | The player is in no session. |
+
+Invalid options raise.
+
+## Events
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Sessions:Created` | `(sessionId)` |
+| `ug-core:Sessions:Destroyed` | `(sessionId)` |
+| `ug-core:Sessions:Joined` | `(source, sessionId)` |
+| `ug-core:Sessions:Left` | `(source, sessionId)` |
+
+## Hooks
+
+| Hook | Payload |
+| --- | --- |
+| `Sessions:BeforeJoin` | `{ source, sessionId }` |
+
+It allows or cancels. Changes to the payload are ignored.
+
+## Statebags
+
+| Key | Value |
+| --- | --- |
+| `ug-core:Session` | Session id, or `nil` in the shared world |
 
 ## Example
 
 ```lua
 local ok, sessionId = UgCore.Sessions.Create({ name = 'apartment:' .. characterId })
 
-UgCore.Sessions.Join(source, sessionId)
+if ok then
+    UgCore.Sessions.Join(source, sessionId)
+end
 ```

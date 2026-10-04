@@ -79,7 +79,41 @@ add_ace group.admin ug.admin allow
       Guard:BeforeAction       my-anticheat         priority 0
     ```
   </Accordion>
+
+  <Accordion title="ug version" icon="code-compare">
+    Checks GitHub again for the latest ug-core release. The answer prints when it arrives, within 3 seconds.
+
+    ```text
+    > ug version
+    ug-core v1.0.0. Update available: v1.0.0 -> v1.1.0. https://github.com/ugcore-project/ug-core/releases/tag/v1.1.0
+    ```
+  </Accordion>
 </AccordionGroup>
+
+## Version check
+
+On server start, ug-core asks GitHub for its latest release and shows the result in the boot banner:
+
+```text
+ ug-core v1.0.0 · LuaGLM 5.4 · OneSync on
+ Update available: v1.0.0 -> v1.1.0. https://github.com/ugcore-project/ug-core/releases/tag/v1.1.0
+```
+
+| Line | Meaning |
+| --- | --- |
+| `Up to date.` | You run the latest release. |
+| `Update available: vX -> vY.` | A newer release exists. Read its notes before you update: MAJOR versions have breaking changes. |
+| `Ahead of the latest release vY.` | You run a build newer than the latest release, such as the `dev` branch. |
+| `Version check unavailable.` | GitHub did not answer within 3 seconds, or there is no release yet. Boot continues normally. |
+| `Version check disabled.` | The check is turned off. |
+
+The check runs once per server start, not on `restart ug-core`. Pre-releases are ignored. Boot waits for it at most 3 seconds.
+
+It runs before config loads, so you turn it off with a convar only, for example on servers without internet access:
+
+```bash server.cfg
+set ug-core:VersionCheck false
+```
 
 ## Debug output
 

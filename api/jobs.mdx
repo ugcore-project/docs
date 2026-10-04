@@ -5,9 +5,13 @@ description: "Jobs, grades and duty."
 icon: "briefcase"
 ---
 
-<Badge color="blue">Server</Badge> <Badge color="green">Client</Badge> Optional module. Requires `characters`.
+import { ModuleInfo } from "/snippets/module-info.jsx";
 
-Jobs are defined in `config/jobs.lua`, a data config. Every character has exactly one job and falls back to `unemployed`.
+<Badge color="blue">Server</Badge> <Badge color="green">Client</Badge> Proxied to ug-core.
+
+<ModuleInfo name="jobs" deps={["characters"]} server="Jobs" client="Jobs" clientFunctions="Get, IsOnDuty" />
+
+Jobs are defined in `config/jobs.lua`, a data config. Every character has exactly one job. New characters start as `unemployed`, which MUST exist.
 
 ```lua config/jobs.lua
 return {
@@ -28,7 +32,7 @@ return {
 }
 ```
 
-Grades are 1-based indexes into `grades`.
+Grades are 1-based indexes into `grades`. Read every definition with `UgCore.Config.Get('jobs')`, on the server or the client.
 
 ## Server
 
@@ -59,7 +63,9 @@ UgCore.Jobs.Set(source, name, grade?) -> ok, errorCode
 UgCore.Jobs.SetGrade(source, grade) -> ok, errorCode
 ```
 
-**MUST run in a thread.** `grade` defaults to 1. Unknown jobs and grades return `invalid_args`. `Jobs:BeforeSet` MAY cancel.
+**MUST run in a thread.** `grade` defaults to 1. The job is saved with the character.
+
+<Note>`Set` and `SetGrade` reset duty to the job's `defaultDuty`.</Note>
 
 ### SetDuty / IsOnDuty
 
@@ -67,6 +73,8 @@ UgCore.Jobs.SetGrade(source, grade) -> ok, errorCode
 UgCore.Jobs.SetDuty(source, onDuty) -> ok, errorCode
 UgCore.Jobs.IsOnDuty(source) -> boolean
 ```
+
+Duty is session state. It starts at the job's `defaultDuty` when the character loads and is never saved.
 
 ### Exists / GetDefinition
 
@@ -82,12 +90,45 @@ UgCore.Jobs.Get() -> UgAssignment?
 UgCore.Jobs.IsOnDuty() -> boolean
 ```
 
-Read from the `ug-core:Job` statebag.
+Read from the `ug-core:Job` statebag of the local player.
+
+## Errors
+
+| Function | Code | When |
+| --- | --- | --- |
+| `Set`, `SetGrade` | `invalid_args` | The job or grade does not exist. |
+| `Set`, `SetGrade`, `SetDuty` | `not_loaded` | No character is loaded. |
+| `Set`, `SetGrade` | `no_permission` | `Jobs:BeforeSet` cancelled. |
+| `Set`, `SetGrade` | `internal_error` | The database failed. |
+
+`SetDuty` raises when `onDuty` is not a boolean.
 
 ## Events
 
-- `ug-core:Jobs:Changed` with `(source, job, previous)`
-- `ug-core:Jobs:DutyChanged` with `(source, onDuty)`
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Jobs:Changed` | `(source, job, previous)`, both `UgAssignment` |
+| `ug-core:Jobs:DutyChanged` | `(source, onDuty)` |
+
+## Hooks
+
+| Hook | Payload |
+| --- | --- |
+| `Jobs:BeforeSet` | `{ source, name, grade }` |
+
+Runs for `Set` and `SetGrade`. It allows or cancels. Changes to the payload are ignored.
+
+## Statebags
+
+| Key | Value |
+| --- | --- |
+| `ug-core:Job` | `UgAssignment` with `onDuty` |
+
+```lua client.lua
+AddStateBagChangeHandler('ug-core:Job', ('player:%d'):format(GetPlayerServerId(PlayerId())), function(_, _, job)
+    -- update your HUD
+end)
+```
 
 ## Example
 

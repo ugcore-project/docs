@@ -5,7 +5,11 @@ description: "Cash, bank and custom accounts with a ledger."
 icon: "wallet"
 ---
 
-<Badge color="blue">Server</Badge> <Badge color="green">Client</Badge> Optional module. Requires `characters`.
+import { ModuleInfo } from "/snippets/module-info.jsx";
+
+<Badge color="blue">Server</Badge> <Badge color="green">Client</Badge> Proxied to ug-core.
+
+<ModuleInfo name="accounts" deps={["characters"]} server="Accounts" client="Accounts" clientFunctions="GetBalance, GetAll" />
 
 Balances belong to the loaded character. Every change writes a ledger row in the same transaction. Accounts are defined in `config/accounts.lua`:
 
@@ -18,6 +22,8 @@ return {
     },
 }
 ```
+
+Read the account list with `UgCore.Config.Get('accounts', 'accounts')`, on the server or the client.
 
 ## Server
 
@@ -38,14 +44,12 @@ UgCore.Accounts.Remove(source, account, amount, reason?) -> ok, balance, errorCo
 UgCore.Accounts.Set(source, account, balance, reason?) -> ok, balance, errorCode
 ```
 
-<ResponseField name="amount" type="integer" required>Positive.</ResponseField>
-<ResponseField name="reason" type="string">Stored in the ledger.</ResponseField>
+<ResponseField name="account" type="string" required>An account from `config/accounts.lua`. Unknown accounts raise.</ResponseField>
+<ResponseField name="amount" type="integer" required>1 to 1,000,000,000,000.</ResponseField>
+<ResponseField name="reason" type="string">Up to 128 characters. Stored in the ledger.</ResponseField>
 <ResponseField name="balance" type="integer?">The new balance.</ResponseField>
-<ResponseField name="errorCode" type="UgErrorCode?">
-  `not_loaded` without a character, `insufficient_funds` unless the account allows negative balances, `no_permission` when a hook cancelled.
-</ResponseField>
 
-`Set` records the difference in the ledger. `Add` and `Remove` run the `Accounts:BeforeAdd` and `Accounts:BeforeRemove` hooks.
+`Set` records the difference in the ledger. It accepts negative balances only for accounts with `allowNegative`, and raises otherwise.
 
 ### Transfer
 
@@ -53,7 +57,7 @@ UgCore.Accounts.Set(source, account, balance, reason?) -> ok, balance, errorCode
 UgCore.Accounts.Transfer(source, targetCharacterId, account, amount, reason?) -> ok, balance, errorCode
 ```
 
-Moves money to another character, online or offline, in one transaction. Both ledgers get a row. `balance` is the sender's. Runs `Accounts:BeforeTransfer`.
+Moves money to another character, online or offline, in one transaction. Both ledgers get a row that points to the other character. `balance` is the sender's.
 
 ### GetLedger
 
@@ -80,16 +84,47 @@ UgCore.Accounts.GetBalance(account) -> integer?
 UgCore.Accounts.GetAll() -> table<string, integer>
 ```
 
-The local player's balances, pushed by the server on every change.
+The local player's balances, sent by the server to that player only, on load and on every change. Other players' balances never reach a client.
+
+## Errors
+
+| Function | Code | When |
+| --- | --- | --- |
+| `Add`, `Remove`, `Set`, `Transfer`, `GetLedger` | `not_loaded` | No character is loaded. |
+| `Add` | `no_permission` | `Accounts:BeforeAdd` cancelled. |
+| `Remove` | `no_permission` | `Accounts:BeforeRemove` cancelled. |
+| `Remove`, `Transfer` | `insufficient_funds` | The balance is too low and the account does not allow negative balances. |
+| `Transfer` | `invalid_args` | The target is the sender's own character. |
+| `Transfer` | `no_permission` | `Accounts:BeforeTransfer` cancelled. |
+| `Transfer` | `not_found` | The target character does not exist. |
+| Every mutating function | `internal_error` | The database failed. The balance is unchanged. |
+
+Unknown accounts, out-of-range amounts and long reasons raise.
+
+## Events
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Accounts:Changed` | `(source, account, balance, delta, reason)` |
+
+Server only. It fires for every change of an online character, including both sides of a transfer.
+
+## Hooks
+
+| Hook | Payload |
+| --- | --- |
+| `Accounts:BeforeAdd` | `{ source, account, amount, reason }` |
+| `Accounts:BeforeRemove` | `{ source, account, amount, reason }` |
+| `Accounts:BeforeTransfer` | `{ source, targetCharacterId, account, amount, reason }` |
+
+Hooks allow or cancel. Changes to the payload are ignored.
 
 ## Example
 
 ```lua
-local ok, balance, err = UgCore.Accounts.Remove(source, 'cash', price, 'shop:water')
+local ok, balance, err = UgCore.Accounts.Remove(source, 'cash', price, 'my-shop:water')
 
 if not ok then
-    return err -- 'insufficient_funds'
+    return err -- 'insufficient_funds', 'not_loaded', ...
 end
 ```
-
-Listen to `ug-core:Accounts:Changed` with `(source, account, balance, delta, reason)` to update a HUD.

@@ -5,9 +5,13 @@ description: "Gangs and grades."
 icon: "people-group"
 ---
 
-<Badge color="blue">Server</Badge> <Badge color="green">Client</Badge> Optional module. Requires `characters`.
+import { ModuleInfo } from "/snippets/module-info.jsx";
 
-Gangs work like [jobs](/api/jobs) without duty. They are defined in `config/gangs.lua`, which only has `none` by default. `none` MUST exist.
+<Badge color="blue">Server</Badge> <Badge color="green">Client</Badge> Proxied to ug-core.
+
+<ModuleInfo name="gangs" deps={["characters"]} server="Gangs" client="Gangs" clientFunctions="Get" />
+
+Gangs work like [jobs](/api/jobs) without duty. They are defined in `config/gangs.lua`, which only has `none` by default. `none` MUST exist: new characters start in it.
 
 ```lua config/gangs.lua
 return {
@@ -35,7 +39,7 @@ UgCore.Gangs.Exists(name, grade?) -> boolean
 UgCore.Gangs.GetDefinition(name) -> { label, grades }?
 ```
 
-`Set` and `SetGrade` **MUST run in a thread**. `Gangs:BeforeSet` MAY cancel. `UgAssignment` has the same fields as for jobs, without `onDuty`.
+`Set` and `SetGrade` **MUST run in a thread**. `UgAssignment` has the same fields as for [jobs](/api/jobs#get), without `onDuty`.
 
 ## Client
 
@@ -43,8 +47,33 @@ UgCore.Gangs.GetDefinition(name) -> { label, grades }?
 UgCore.Gangs.Get() -> UgAssignment?
 ```
 
-Read from the `ug-core:Gang` statebag.
+Read from the `ug-core:Gang` statebag of the local player.
+
+## Errors
+
+| Function | Code | When |
+| --- | --- | --- |
+| `Set`, `SetGrade` | `invalid_args` | The gang or grade does not exist. |
+| `Set`, `SetGrade` | `not_loaded` | No character is loaded. |
+| `Set`, `SetGrade` | `no_permission` | `Gangs:BeforeSet` cancelled. |
+| `Set`, `SetGrade` | `internal_error` | The database failed. |
 
 ## Events
 
-- `ug-core:Gangs:Changed` with `(source, gang, previous)`
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Gangs:Changed` | `(source, gang, previous)`, both `UgAssignment` |
+
+## Hooks
+
+| Hook | Payload |
+| --- | --- |
+| `Gangs:BeforeSet` | `{ source, name, grade }` |
+
+It allows or cancels. Changes to the payload are ignored.
+
+## Statebags
+
+| Key | Value |
+| --- | --- |
+| `ug-core:Gang` | `UgAssignment` |

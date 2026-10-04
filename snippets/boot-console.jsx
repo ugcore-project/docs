@@ -15,7 +15,8 @@ export const BootConsole = () => {
     { text: " | |_| | |_| | | |__| (_) | | |  __/", tone: "banner", delay: 60 },
     { text: "  \\___/ \\____|  \\____\\___/|_|  \\___|", tone: "banner", delay: 300 },
     { text: "", tone: "meta", delay: 60 },
-    { text: " ug-core v1.0.0 · LuaGLM 5.4 · OneSync on", tone: "meta", delay: 500 },
+    { text: " ug-core v1.0.0 · LuaGLM 5.4 · OneSync on", tone: "meta", delay: 350 },
+    { text: " Up to date.", tone: "ok", delay: 500 },
     { text: "", tone: "meta", delay: 80 },
     { tag: "[INFO]", text: " Lifecycle: Configured (14 ms)", tone: "info", delay: 220 },
     { tag: "[INFO]", text: " Lifecycle: Initializing (1 ms)", tone: "info", delay: 220 },
@@ -49,7 +50,7 @@ export const BootConsole = () => {
         <span className="h-3 w-3 rounded-full" style={{ background: "#28C840" }} />
         <span className="ml-3 text-xs" style={{ color: tones.muted }}>FXServer · script:ug-core</span>
       </div>
-      <div className="overflow-x-auto px-5 py-4 text-xs leading-6 sm:text-sm" style={{ minHeight: "29rem" }}>
+      <div className="overflow-x-auto px-5 py-4 text-xs leading-6 sm:text-sm" style={{ minHeight: "37rem" }}>
         {lines.slice(0, count).map((line, index) => (
           <div key={index} className="ug-console-line" style={{ color: tones[line.tone] }}>
             {line.tag ? <span style={{ color: tones.info, fontWeight: 600 }}>{line.tag}</span> : null}

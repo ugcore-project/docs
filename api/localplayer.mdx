@@ -5,7 +5,13 @@ description: "The local player, from statebags."
 icon: "user"
 ---
 
+import { ModuleInfo } from "/snippets/module-info.jsx";
+
 <Badge color="green">Client</Badge> Reads statebags only. No network call.
+
+<ModuleInfo name="players" required deps={["identity"]} server="Players" client="LocalPlayer" />
+
+`UgCore.LocalPlayer` is the client side of the [`players`](/api/players) module. On the server it raises `UgCore.LocalPlayer exists on clients only.`
 
 ```lua
 UgCore.LocalPlayer.GetData() -> { name, characterId? }?
@@ -17,21 +23,26 @@ UgCore.LocalPlayer.IsDowned() -> boolean
 UgCore.LocalPlayer.GetInjuries() -> UgInjury[]
 ```
 
-<ResponseField name="GetMetadata" type="any">Replicated metadata only. Every replicated key when `key` is nil.</ResponseField>
-<ResponseField name="GetInjuries" type="UgInjury[]">Same shape as on the [server](/api/players#read).</ResponseField>
+| Function | Statebag |
+| --- | --- |
+| `GetData` | `ug-core:Player` |
+| `IsLoaded` | `ug-core:Loaded` |
+| `GetMetadata` | `ug-core:Metadata`. Replicated keys only. Every key when `key` is nil. |
+| `GetDeathState`, `IsDead`, `IsDowned` | `ug-core:DeathState` |
+| `GetInjuries` | `ug-core:Injuries`. Same shape as on the [server](/api/players#read). |
 
-## Example
+## React to changes
 
-```lua
-CreateThread(function()
-    while true do
-        if UgCore.LocalPlayer.IsDowned() then
-            -- show your own downed UI
-        end
+Watch the statebag instead of polling:
 
-        Wait(500)
+```lua client.lua
+local bag = ('player:%d'):format(GetPlayerServerId(PlayerId()))
+
+AddStateBagChangeHandler('ug-core:DeathState', bag, function(_, _, state)
+    if state == UgCore.Enums.DeathState.Downed then
+        -- show your own downed UI
     end
 end)
 ```
 
-<Tip>To react instantly, watch the statebag with `AddStateBagChangeHandler('ug-core:DeathState', ...)`. See [Statebags](/developers/statebags).</Tip>
+<Note>Clients never change their own state. Revive, respawn and every other change happen on the server.</Note>

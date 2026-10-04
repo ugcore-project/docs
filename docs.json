@@ -91,6 +91,7 @@
             "group": "For developers",
             "pages": [
               "developers/importing",
+              "developers/modules",
               "developers/callbacks",
               "developers/net-events",
               "developers/schemas",

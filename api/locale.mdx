@@ -5,11 +5,15 @@ description: "Core messages in the server language."
 icon: "language"
 ---
 
-<Badge color="purple">Shared</Badge> Optional module.
+import { ModuleInfo } from "/snippets/module-info.jsx";
 
-ug-core's own messages live in `locales/<code>.json`. The language comes from `locale` in `config/core.lua`. Missing keys fall back to English.
+<Badge color="purple">Shared</Badge> Proxied to ug-core.
 
-<Note>Locale holds core messages only, such as kick and ban texts. Your resources keep their own translations.</Note>
+<ModuleInfo name="locale" server="Locale" client="Locale" clientFunctions="Get, GetCode" />
+
+ug-core's own messages live in `locales/<code>.json`. The language comes from `locale` in `config/core.lua`. Missing keys fall back to English. Without this module, ug-core uses its English messages.
+
+<Note>Locale holds core messages only, such as connection, kick and ban texts. Your resources keep their own translations, and can use `GetCode` to pick the same language.</Note>
 
 ## Get
 

@@ -45,3 +45,11 @@ set ug-core:Modules:Gangs false
 `<Module>` is any optional module: `Characters`, `Accounts`, `Jobs`, `Gangs`, `Sessions`, `Commands`, `Locale`.
 
 <Tip>Each generated config file lists the convar of every option.</Tip>
+
+## Convar-only settings
+
+These run before config loads, so they have no config file option.
+
+| Convar | Type | Default | Purpose |
+| --- | --- | --- | --- |
+| `ug-core:VersionCheck` | boolean | `true` | Checks GitHub for a newer release on server start. See [Version check](/owners/console#version-check). |

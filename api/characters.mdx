@@ -5,11 +5,15 @@ description: "Multiple characters per player."
 icon: "id-card"
 ---
 
-<Badge color="blue">Server</Badge> Optional module. Proxied to ug-core.
+import { ModuleInfo } from "/snippets/module-info.jsx";
 
-ug-core stores and loads characters. A multicharacter resource such as `ug-multicharacter` shows the menu and calls this API.
+<Badge color="blue">Server</Badge> Proxied to ug-core.
 
-<Note>Without this module, players are loaded at join and there is no character data.</Note>
+<ModuleInfo name="characters" deps={["players"]} server="Characters" />
+
+ug-core stores and loads characters. A multicharacter resource shows the menu and calls this API. Characters belong to the player's primary identifier.
+
+<Note>Without this module, players are loaded as soon as they join, and `accounts`, `jobs` and `gangs` cannot be enabled.</Note>
 
 ## GetAll
 
@@ -18,7 +22,7 @@ UgCore.Characters.GetAll(source) -> ok, characters, errorCode
 ```
 
 <ResponseField name="characters" type="UgCharacter[]">
-  Ordered by creation.
+  The player's live characters, ordered by creation.
   <Expandable title="UgCharacter">
     <ResponseField name="id" type="integer" />
     <ResponseField name="name" type="string">Display name.</ResponseField>
@@ -37,7 +41,7 @@ UgCore.Characters.Create(source, { name, data? }) -> ok, characterId, errorCode
 <ResponseField name="name" type="string" required>1 to 64 characters.</ResponseField>
 <ResponseField name="data" type="table">JSON data, up to 16 KB encoded.</ResponseField>
 
-Invalid input returns `invalid_args` instead of raising, since it usually comes from a player. Returns `no_permission` when `maxCharacters` is reached or `Characters:BeforeCreate` cancelled.
+Invalid input returns `invalid_args` instead of raising, since it usually comes from a player. New characters get the starting balances of every account.
 
 ## Load
 
@@ -45,7 +49,7 @@ Invalid input returns `invalid_args` instead of raising, since it usually comes 
 UgCore.Characters.Load(source, characterId) -> ok, errorCode
 ```
 
-Loads an owned character. A loaded character is unloaded first. Sets `ug-core:Loaded`, restores death state when persisted, and loads accounts, job and gang.
+Loads one of the player's characters. A loaded character is unloaded first. Then accounts, job and gang load, death state is restored when persisted, `ug-core:Loaded` becomes `true`, and `ug-core:Players:Loaded` fires.
 
 ## Unload
 
@@ -53,7 +57,7 @@ Loads an owned character. A loaded character is unloaded first. Sets `ug-core:Lo
 UgCore.Characters.Unload(source) -> ok, errorCode
 ```
 
-Saves and unloads. The player goes back to not loaded and alive.
+Saves and unloads. The player goes back to not loaded and alive. Characters also unload when the player drops.
 
 ## Delete
 
@@ -61,7 +65,7 @@ Saves and unloads. The player goes back to not loaded and alive.
 UgCore.Characters.Delete(source, characterId) -> ok, errorCode
 ```
 
-Soft delete. The loaded character cannot be deleted. `Characters:BeforeDelete` MAY cancel.
+Soft delete: the row stays in `ug_characters`. The loaded character cannot be deleted.
 
 ## GetActive
 
@@ -69,14 +73,57 @@ Soft delete. The loaded character cannot be deleted. `Characters:BeforeDelete` M
 UgCore.Characters.GetActive(source) -> UgCharacter?
 ```
 
+The loaded character. Use `UgCore.Players.Get(source).characterId` or the `ug-core:Player` statebag when you only need the id.
+
+## Errors
+
+| Function | Code | When |
+| --- | --- | --- |
+| `GetAll`, `Create`, `Load`, `Delete` | `not_found` | The player has no primary identifier. |
+| `GetAll`, `Create`, `Load`, `Delete` | `internal_error` | The database failed. |
+| `Create` | `invalid_args` | The name or data is invalid, also after a hook changed them. |
+| `Create` | `no_permission` | `maxCharacters` is reached, or `Characters:BeforeCreate` cancelled. |
+| `Load` | `invalid_args` | `characterId` is not an integer. |
+| `Load` | `not_found` | The character does not exist, is deleted, or belongs to someone else. |
+| `Load` | `internal_error` | A module failed to load its data for the character. |
+| `Unload` | `not_loaded` | No character is loaded. |
+| `Delete` | `invalid_args` | `characterId` is not an integer, or it is the loaded character. |
+| `Delete` | `not_found` | The character does not exist or belongs to someone else. |
+| `Delete` | `no_permission` | `Characters:BeforeDelete` cancelled. |
+
+## Events
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Characters:Created` | `(source, characterId)` |
+| `ug-core:Characters:Deleted` | `(source, characterId)` |
+| `ug-core:Characters:Loaded` | `(source, characterId)` |
+| `ug-core:Characters:Unloaded` | `(source, characterId)` |
+
+`Unloaded` also fires when the player drops.
+
+## Hooks
+
+| Hook | Payload | Notes |
+| --- | --- | --- |
+| `Characters:BeforeCreate` | `{ source, name, data }` | MAY change `name` and `data`, such as adding a phone number. Return the table. |
+| `Characters:BeforeDelete` | `{ source, characterId }` | Cancel to keep the character. |
+
+## Statebags
+
+The loaded character id is in `ug-core:Player` as `characterId`. See [Players](/api/players#statebags).
+
 ## Example
 
 ```lua
+local S = UgCore.Schema
+
 UgCore.Callback.Register('Select', {
-    schema = UgCore.Schema.Define({ UgCore.Schema.Integer({ min = 1, max = 2147483647 }) }),
+    schema = S.Define({ S.Integer({ min = 1, max = 2147483647 }) }),
     rate = { max = 2, per = 2000 },
 }, function(source, characterId)
     local ok, err = UgCore.Characters.Load(source, characterId)
+
     return { ok = ok, error = err }
 end)
 ```

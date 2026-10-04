@@ -5,7 +5,11 @@ description: "Connected players, metadata and death state."
 icon: "users"
 ---
 
-<Badge color="blue">Server</Badge> Required module. Proxied to ug-core. On clients, use [`UgCore.LocalPlayer`](/api/localplayer).
+import { ModuleInfo } from "/snippets/module-info.jsx";
+
+<Badge color="blue">Server</Badge> Proxied to ug-core. On clients, use [`UgCore.LocalPlayer`](/api/localplayer).
+
+<ModuleInfo name="players" required deps={["identity"]} server="Players" client="LocalPlayer" />
 
 ## Lookup
 
@@ -38,7 +42,7 @@ UgCore.Players.GetMetadata(source, key?) -> any
 ```
 
 <ResponseField name="key" type="string" required>camelCase.</ResponseField>
-<ResponseField name="value" type="any">`nil` deletes the key.</ResponseField>
+<ResponseField name="value" type="any">Data only: booleans, finite numbers, strings and bounded tables. `nil` deletes the key.</ResponseField>
 <ResponseField name="replicate" type="boolean">Copies the key to the `ug-core:Metadata` statebag. Every client can read it, so it MUST NOT hold secrets.</ResponseField>
 
 `GetMetadata` without a key returns every key.
@@ -102,8 +106,6 @@ UgCore.Players.Respawn(source, coords?) -> ok, errorCode
 | `Revive` | `Downed`, `Dead` | `Alive`, in place | `Players:BeforeRevive` |
 | `Respawn` | `Downed`, `Dead` | `Alive`, at `coords` | `Players:BeforeRespawn` |
 
-From any other state they return `invalid_args`. A cancelled hook returns `no_permission`.
-
 <ResponseField name="Revive options" type="UgReviveOptions">
   <Expandable title="fields">
     <ResponseField name="by" type="integer">Player source who revived.</ResponseField>
@@ -115,6 +117,58 @@ From any other state they return `invalid_args`. A cancelled hook returns `no_pe
 <ResponseField name="coords" type="vector4">Respawn position. Defaults to `respawn.coords` in `config/players.lua`. Respawn always clears injuries.</ResponseField>
 
 ```lua
--- ug-ambulance, after its own job, item and distance checks
+-- An ambulance resource, after its own job, item and distance checks
 local ok, err = UgCore.Players.Revive(target, { by = source, reason = 'cpr', clearInjuries = false })
 ```
+
+## Errors
+
+| Function | Code | When |
+| --- | --- | --- |
+| `SetMetadata`, `Kick`, `ClearInjuries` | `not_found` | The player is not connected. |
+| `Down`, `Kill`, `Revive`, `Respawn` | `not_found` | The player is not connected. |
+| `Down`, `Kill`, `Revive`, `Respawn` | `invalid_args` | The player is not in a state the transition starts from. |
+| `Down`, `Revive`, `Respawn` | `no_permission` | A hook cancelled. |
+
+Invalid keys, values, regions, options and coordinates raise.
+
+## Events
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Players:Loaded` | `(source)` |
+| `ug-core:Players:Injured` | `(source, injury)` |
+| `ug-core:Players:Downed` | `(source, cause)` |
+| `ug-core:Players:Died` | `(source, cause)` |
+| `ug-core:Players:Revived` | `(source, by, reason)` |
+| `ug-core:Players:Respawned` | `(source, coords)` |
+| `ug-core:Players:DeathStateChanged` | `(source, newState, oldState, cause)` |
+
+`Loaded` fires when a character is loaded, or at join without the `characters` module.
+
+## Hooks
+
+| Hook | Payload | Cancelling |
+| --- | --- | --- |
+| `Players:BeforeDown` | `{ source, cause }` | Keeps the player alive. `Down` returns `no_permission`. |
+| `Players:BeforeBleedout` | `{ source }` | Keeps the player downed. The bleedout retries later. |
+| `Players:BeforeRevive` | `{ source, by, reason, health, clearInjuries }` | `Revive` returns `no_permission`. |
+| `Players:BeforeRespawn` | `{ source, coords }` | `Respawn` returns `no_permission`. |
+
+## Statebags
+
+| Key | Value |
+| --- | --- |
+| `ug-core:Loaded` | `true` once the player is loaded |
+| `ug-core:Player` | `{ name, characterId? }` |
+| `ug-core:Metadata` | Metadata set with `replicate = true` |
+| `ug-core:DeathState` | `'Alive'`, `'Downed'` or `'Dead'` |
+| `ug-core:Injuries` | `UgInjury[]` |
+
+## Enums
+
+| Enum | Values |
+| --- | --- |
+| `UgCore.Enums.DeathState` | `Alive`, `Downed`, `Dead` |
+| `UgCore.Enums.BodyRegion` | `Head`, `Neck`, `Torso`, `LeftArm`, `RightArm`, `LeftLeg`, `RightLeg`, `Unknown` |
+| `UgCore.Enums.DamageCategory` | `Gunshot`, `Stab`, `Blunt`, `Explosion`, `Fire`, `Fall`, `Vehicle`, `Drowning`, `Animal`, `Unknown` |

@@ -5,9 +5,15 @@ description: "Persistent ACE grants."
 icon: "key"
 ---
 
-<Badge color="blue">Server</Badge> Required module. Proxied to ug-core. See [Permissions for owners](/owners/permissions).
+import { ModuleInfo } from "/snippets/module-info.jsx";
 
-Permissions are FiveM ACEs. Grants are stored in the database and applied again on every boot and join.
+<Badge color="blue">Server</Badge> Proxied to ug-core. See [Permissions for owners](/owners/permissions).
+
+<ModuleInfo name="permissions" required deps={["identity"]} server="Permissions" />
+
+Permissions are FiveM ACEs. Grants are stored in the database and applied as `add_ace identifier.<id> <permission> allow`, so every ACE check agrees, including `IsPlayerAceAllowed` and the `permission` option of callbacks, net events and commands.
+
+Permission names are letters, digits, dots, dashes and underscores, such as `my-garage.admin`.
 
 ## Has
 
@@ -44,11 +50,22 @@ UgCore.Permissions.GetAll(target) -> string[]
 
 Permissions granted with `Grant`, sorted. ACEs from `server.cfg` are not listed.
 
+## Errors
+
+| Function | Code | When |
+| --- | --- | --- |
+| `Grant`, `Revoke` | `not_found` | The source has no primary identifier, such as a player who already dropped. |
+| `Grant`, `Revoke` | `internal_error` | The database failed. |
+
+Malformed permission names and targets raise.
+
+<Warning>Grants need `add_ace resource.ug-core command allow` in `server.cfg`. ug-core reports it at boot when it is missing.</Warning>
+
 ## Example
 
 ```lua
 CreateThread(function()
-    UgCore.Permissions.Grant(source, 'my-garage.admin', 'console')
+    local ok, err = UgCore.Permissions.Grant(source, 'my-garage.admin', 'console')
 end)
 
 if UgCore.Permissions.Has(source, 'my-garage.admin') then

@@ -128,3 +128,17 @@ a.card:hover,
     transition: none;
   }
 }
+
+/* Module summary at the top of module API pages. */
+.ug-module-info {
+  border: 1px solid rgba(124, 92, 255, 0.25);
+  background: linear-gradient(180deg, rgba(124, 92, 255, 0.08), rgba(124, 92, 255, 0.02));
+}
+
+.ug-module-info > div + div {
+  border-top: 1px solid rgba(124, 92, 255, 0.12);
+}
+
+.ug-module-info code {
+  font-size: 0.8125rem;
+}

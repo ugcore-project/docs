@@ -1,0 +1,110 @@
+---
+title: "Using modules"
+description: "Build resources that work with the modules a server enables."
+icon: "puzzle-piece"
+---
+
+Server owners choose which modules run. Your resource sees a module's API, events, hooks, enums and statebags only when that module is enabled. This page shows how to depend on a module, or adapt when it is off.
+
+## What each module gives you
+
+| Module | Server | Client | Events | Hooks | Statebags |
+| --- | --- | --- | --- | --- | --- |
+| [`identity`](/api/identity) | `UgCore.Identity` | | | | |
+| [`players`](/api/players) | `UgCore.Players` | [`UgCore.LocalPlayer`](/api/localplayer) | `Players` | `Players` | `Loaded`, `Player`, `Metadata`, `DeathState`, `Injuries` |
+| [`permissions`](/api/permissions) | `UgCore.Permissions` | | | | |
+| [`characters`](/api/characters) | `UgCore.Characters` | | `Characters` | `Characters` | |
+| [`accounts`](/api/accounts) | `UgCore.Accounts` | `UgCore.Accounts` | `Accounts` | `Accounts` | |
+| [`jobs`](/api/jobs) | `UgCore.Jobs` | `UgCore.Jobs` | `Jobs` | `Jobs` | `Job` |
+| [`gangs`](/api/gangs) | `UgCore.Gangs` | `UgCore.Gangs` | `Gangs` | `Gangs` | `Gang` |
+| [`sessions`](/api/sessions) | `UgCore.Sessions` | | `Sessions` | `Sessions` | `Session` |
+| [`commands`](/api/commands) | `UgCore.Commands` | | `Commands` | | |
+| [`locale`](/api/locale) | `UgCore.Locale` | `UgCore.Locale` | | | |
+
+- **Events** and **Hooks** are groups of `UgCore.Enums.Events` and `UgCore.Enums.Hooks`, such as `UgCore.Enums.Events.Accounts.Changed`.
+- **Statebags** are player statebags named `ug-core:<Key>`, such as `ug-core:Job`.
+- `identity`, `players` and `permissions` are required. They are always there.
+
+## When a namespace exists
+
+Your resource learns which modules are enabled when ug-core replicates them, right before `Ready`. Until then, and for disabled modules, module namespaces raise a clear error:
+
+| Situation | Error |
+| --- | --- |
+| ug-core is not ready yet | `UgCore.Accounts is not available until ug-core is ready. Wait for UgCore.Lifecycle.Await('Ready').` |
+| The module is disabled | `UgCore.Accounts belongs to disabled module "accounts". Enable it in config/modules.lua.` |
+| A client namespace on the server | `UgCore.LocalPlayer exists on clients only.` |
+| A function that does not exist | `UgCore.Accounts.Deposit does not exist.` |
+
+Module enums, such as `UgCore.Enums.DeathState` or `UgCore.Enums.Events.Jobs`, follow the same rule: they exist once the module is enabled and replicated.
+
+<Tip>Run module code from `UgCore.Lifecycle.On('Ready', ...)`. It runs right away when ug-core is already ready, and again after you restart your resource.</Tip>
+
+## Require a module
+
+When your resource cannot work without a module, require it. Server owners get one clear error instead of a broken resource:
+
+```lua server.lua
+UgCore.Lifecycle.On('Ready', function()
+    UgCore.Modules.Require('accounts')
+    UgCore.Modules.Require('jobs')
+
+    UgCore.Events.On(UgCore.Enums.Events.Jobs.Changed, function(source, job, previous)
+        -- ...
+    end)
+end)
+```
+
+```text
+[ug-core] Modules.Require: module "jobs" is not enabled. Enable it in config/modules.lua.
+```
+
+List it in your README too, so owners know before they install your resource.
+
+## Adapt to an optional module
+
+When a module only adds something, check it and fall back:
+
+```lua server.lua
+local function canAfford(source, price)
+    if not UgCore.Modules.IsEnabled('accounts') then
+        return true -- free when the server has no economy
+    end
+
+    return (UgCore.Accounts.GetBalance(source, 'cash') or 0) >= price
+end
+```
+
+Register events and hooks of optional modules only when they are enabled:
+
+```lua server.lua
+UgCore.Lifecycle.On('Ready', function()
+    if UgCore.Modules.IsEnabled('jobs') then
+        UgCore.Hooks.Register(UgCore.Enums.Hooks.Jobs.BeforeSet, function(payload)
+            -- ...
+        end)
+    end
+end)
+```
+
+## On the client
+
+Clients follow the same rules. The client lifecycle reaches `Ready` after the client files of every enabled module have loaded:
+
+```lua client.lua
+UgCore.Lifecycle.On('Ready', function()
+    if UgCore.Modules.IsEnabled('jobs') then
+        local job = UgCore.Jobs.Get()
+    end
+end)
+```
+
+For data that changes, such as the job or the death state, watch the statebag instead of polling. See [Statebags](/developers/statebags).
+
+## Check list
+
+<Check>Declare `dependency 'ug-core'` and `ug_core_version` in your manifest.</Check>
+<Check>Use module namespaces, enums and events after `Ready`.</Check>
+<Check>Call `UgCore.Modules.Require` for modules you cannot work without.</Check>
+<Check>Check `UgCore.Modules.IsEnabled` for modules you can work without.</Check>
+<Check>Handle every error code a function can return. Each module page lists them.</Check>

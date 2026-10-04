@@ -5,7 +5,11 @@ description: "Typed, rate limited chat commands."
 icon: "terminal"
 ---
 
-<Badge color="blue">Server</Badge> Optional module. Proxied to ug-core.
+import { ModuleInfo } from "/snippets/module-info.jsx";
+
+<Badge color="blue">Server</Badge> Proxied to ug-core.
+
+<ModuleInfo name="commands" deps={["players"]} server="Commands" />
 
 ## Register
 
@@ -13,7 +17,7 @@ icon: "terminal"
 UgCore.Commands.Register(name, options, handler)
 ```
 
-<ResponseField name="name" type="string" required>Lowercase. Registers `/name`.</ResponseField>
+<ResponseField name="name" type="string" required>Starts with a lowercase letter, then letters, digits and underscores, up to 32 characters. Registers `/name`.</ResponseField>
 <ResponseField name="options" type="UgCommandOptions" required>
   <Expandable title="fields" defaultOpen>
     <ResponseField name="help" type="string" />
@@ -25,6 +29,8 @@ UgCore.Commands.Register(name, options, handler)
   </Expandable>
 </ResponseField>
 <ResponseField name="handler" type="fun(source, args)" required>`args` is keyed by argument name. `source` is `0` for the console.</ResponseField>
+
+Registering the same name twice raises.
 
 ### Argument types
 
@@ -39,9 +45,9 @@ UgCore.Commands.Register(name, options, handler)
 
 Each argument has `name`, `type`, and optional `optional`, `max` and `help`. Optional arguments MUST be trailing.
 
-### Failures
+### Checks
 
-ug-core shows nothing to players. A failure emits `ug-core:Commands:Failed` with `(source, name, errorCode, argIndex)`, so a chat or notification resource can display it.
+For players, in order: ug-core is ready, rate limit, `requirePlayer`, `permission`, arguments, handler. The console skips the first four checks. Console failures print the error code and the usage instead of emitting an event.
 
 ## GetAll
 
@@ -50,6 +56,31 @@ UgCore.Commands.GetAll() -> UgCommandInfo[]
 ```
 
 Commands sorted by name, with `name`, `help`, `permission` and `args`. Use it for chat suggestions, filtered by permission per player.
+
+## Errors
+
+ug-core shows nothing to players. A failed command emits `ug-core:Commands:Failed` so a chat or notification resource can display it:
+
+| Code | When |
+| --- | --- |
+| `not_loaded` | `requirePlayer` is set and the player is not loaded. |
+| `no_permission` | The player lacks the `permission` ACE. |
+| `invalid_args` | An argument is missing or invalid. `argIndex` says which one. |
+| `internal_error` | The handler raised. The error is logged on the server. |
+
+Rate limited commands are dropped silently.
+
+## Events
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Commands:Failed` | `(source, name, errorCode, argIndex)` |
+
+```lua
+UgCore.Events.On(UgCore.Enums.Events.Commands.Failed, function(source, name, errorCode, argIndex)
+    -- show a message with your own notification resource
+end)
+```
 
 ## Example
 
