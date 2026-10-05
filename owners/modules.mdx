@@ -12,14 +12,16 @@ ug-core ships ten modules. Three are required, the rest are yours to turn off.
 | --- | --- | --- | --- |
 | `identity` | Yes | | Player identifiers and bans. |
 | `players` | Yes | identity | Connected players, metadata, death state and injuries. |
-| `permissions` | Yes | identity | Permissions per identifier, applied as ACEs. |
+| `permissions` | Yes | identity | Staff groups with ranks, and permissions per identifier, applied as ACEs. |
 | `characters` | | players | Multiple characters per player. |
 | `accounts` | | characters | Cash, bank and custom accounts with a ledger. |
 | `jobs` | | characters | Jobs with grades and duty. |
 | `gangs` | | characters | Gangs with grades. |
 | `sessions` | | players | Instances on routing buckets. |
-| `commands` | | players | Chat commands with typed arguments. |
+| `commands` | | players, permissions | Chat commands with typed arguments, restricted by permission or group. |
 | `locale` | | | Translations of core messages. |
+| `items` | | | Item definitions and usable items. |
+| `inventory` | | items, characters | Slot and weight inventories with an audit log. |
 
 ## Enable and disable
 

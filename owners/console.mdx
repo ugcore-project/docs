@@ -71,6 +71,28 @@ add_ace group.admin ug.admin allow
     ```
   </Accordion>
 
+  <Accordion title="ug groups" icon="users">
+    Every group from `config/permissions.lua`, highest weight first, with its member count.
+
+    ```text
+    > ug groups
+      founder          Founder              weight 100     1   member(s) inherits admin
+      admin            Admin                weight 50      2   member(s) inherits moderator
+      moderator        Moderator            weight 10      4   member(s)
+    ```
+  </Accordion>
+
+  <Accordion title="ug inventory <id>" icon="boxes-stacked">
+    A loaded inventory by player id or inventory id: weight, slots and every item.
+
+    ```text
+    > ug inventory 3
+    player:12: 1250/30000 g, 40 slots
+        1  water                    x2
+        2  id_card                  x1      {"name":"Jane Doe"}
+    ```
+  </Accordion>
+
   <Accordion title="ug hooks" icon="anchor">
     Every registered hook, with the resource that registered it and its priority.
 

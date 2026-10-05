@@ -12,7 +12,7 @@ Server owners choose which modules run. Your resource sees a module's API, event
 | --- | --- | --- | --- | --- | --- |
 | [`identity`](/api/identity) | `UgCore.Identity` | | | | |
 | [`players`](/api/players) | `UgCore.Players` | [`UgCore.LocalPlayer`](/api/localplayer) | `Players` | `Players` | `Loaded`, `Player`, `Metadata`, `DeathState`, `Injuries` |
-| [`permissions`](/api/permissions) | `UgCore.Permissions` | | | | |
+| [`permissions`](/api/permissions) | `UgCore.Permissions` | | `Permissions` | `Permissions` | `Groups` |
 | [`characters`](/api/characters) | `UgCore.Characters` | | `Characters` | `Characters` | |
 | [`accounts`](/api/accounts) | `UgCore.Accounts` | `UgCore.Accounts` | `Accounts` | `Accounts` | |
 | [`jobs`](/api/jobs) | `UgCore.Jobs` | `UgCore.Jobs` | `Jobs` | `Jobs` | `Job` |
@@ -20,6 +20,8 @@ Server owners choose which modules run. Your resource sees a module's API, event
 | [`sessions`](/api/sessions) | `UgCore.Sessions` | | `Sessions` | `Sessions` | `Session` |
 | [`commands`](/api/commands) | `UgCore.Commands` | | `Commands` | | |
 | [`locale`](/api/locale) | `UgCore.Locale` | `UgCore.Locale` | | | |
+| [`items`](/api/items) | `UgCore.Items` | `UgCore.Items` | `Items` | `Items` | |
+| [`inventory`](/api/inventory) | `UgCore.Inventory` | `UgCore.Inventory` | `Inventory` | `Inventory` | |
 
 - **Events** and **Hooks** are groups of `UgCore.Enums.Events` and `UgCore.Enums.Hooks`, such as `UgCore.Enums.Events.Accounts.Changed`.
 - **Statebags** are player statebags named `ug-core:<Key>`, such as `ug-core:Job`.

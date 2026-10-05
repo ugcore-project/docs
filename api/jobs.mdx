@@ -65,7 +65,7 @@ UgCore.Jobs.SetGrade(source, grade) -> ok, errorCode
 
 **MUST run in a thread.** `grade` defaults to 1. The job is saved with the character.
 
-<Note>`Set` and `SetGrade` reset duty to the job's `defaultDuty`.</Note>
+<Note>A new grade in the same job keeps duty. A different job starts at its `defaultDuty`.</Note>
 
 ### SetDuty / IsOnDuty
 

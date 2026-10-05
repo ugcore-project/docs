@@ -1,7 +1,7 @@
 ---
 title: "UgCore.Commands"
 sidebarTitle: "Commands"
-description: "Typed, rate limited chat commands."
+description: "Typed, rate limited chat commands, restricted by permission or group."
 icon: "terminal"
 ---
 
@@ -9,7 +9,7 @@ import { ModuleInfo } from "/snippets/module-info.jsx";
 
 <Badge color="blue">Server</Badge> Proxied to ug-core.
 
-<ModuleInfo name="commands" deps={["players"]} server="Commands" />
+<ModuleInfo name="commands" deps={["players", "permissions"]} server="Commands" />
 
 ## Register
 
@@ -23,6 +23,7 @@ UgCore.Commands.Register(name, options, handler)
     <ResponseField name="help" type="string" />
     <ResponseField name="args" type="UgCommandArgument[]">Parsed and typed before the handler runs.</ResponseField>
     <ResponseField name="permission" type="string">ACE the player MUST have.</ResponseField>
+    <ResponseField name="groups" type="string[]">1 to 16 [groups](/owners/permissions#groups). The player MUST be in at least one of them.</ResponseField>
     <ResponseField name="rate" type="{ max, per }" default="{ max = 3, per = 2000 }">Per player.</ResponseField>
     <ResponseField name="requirePlayer" type="boolean">Requires a loaded player.</ResponseField>
     <ResponseField name="console" type="boolean" default="true">Allowed from the server console.</ResponseField>
@@ -31,6 +32,30 @@ UgCore.Commands.Register(name, options, handler)
 <ResponseField name="handler" type="fun(source, args)" required>`args` is keyed by argument name. `source` is `0` for the console.</ResponseField>
 
 Registering the same name twice raises.
+
+### Who can use it
+
+| Options | Allowed players |
+| --- | --- |
+| Neither | Everyone. |
+| `permission` | Players with the ACE, from a group, a grant or `server.cfg`. |
+| `groups` | Members of any listed group. Inheritance counts: with `groups = { 'admin' }`, a `founder` that inherits `admin` is allowed. |
+| Both | Players who pass both. |
+
+```lua
+UgCore.Commands.Register('announce', {
+    groups = { 'moderator', 'admin' },
+    args = { { name = 'message', type = 'text' } },
+}, function(source, args)
+    -- ...
+end)
+```
+
+<Tip>
+  Prefer `permission` in resources you share: owners decide which groups get it in `config/permissions.lua`. Use `groups` for commands tied to your own server's staff ranks.
+</Tip>
+
+A group missing from `config/permissions.lua` logs a warning at registration and matches nobody. It does not raise, so renaming a group never breaks a resource.
 
 ### Argument types
 
@@ -47,7 +72,15 @@ Each argument has `name`, `type`, and optional `optional`, `max` and `help`. Opt
 
 ### Checks
 
-For players, in order: ug-core is ready, rate limit, `requirePlayer`, `permission`, arguments, handler. The console skips the first four checks. Console failures print the error code and the usage instead of emitting an event.
+For players, in order: ug-core is ready, rate limit, `requirePlayer`, `permission` and `groups`, arguments, handler. The console skips the first four checks. Console failures print the error code and the usage instead of emitting an event.
+
+## CanUse
+
+```lua
+UgCore.Commands.CanUse(source, name) -> boolean
+```
+
+True when the player passes the command's `permission` and `groups`. Use it to show only usable commands in chat suggestions and menus. Rate limits, `requirePlayer` and arguments are not checked. Unknown commands return `false`. Source `0` is the console.
 
 ## GetAll
 
@@ -55,7 +88,21 @@ For players, in order: ug-core is ready, rate limit, `requirePlayer`, `permissio
 UgCore.Commands.GetAll() -> UgCommandInfo[]
 ```
 
-Commands sorted by name, with `name`, `help`, `permission` and `args`. Use it for chat suggestions, filtered by permission per player.
+Commands sorted by name, with `name`, `help`, `permission`, `groups` and `args`.
+
+```lua
+local function suggestionsFor(source)
+    local list = {}
+
+    for _, command in ipairs(UgCore.Commands.GetAll()) do
+        if UgCore.Commands.CanUse(source, command.name) then
+            list[#list + 1] = command
+        end
+    end
+
+    return list
+end
+```
 
 ## Errors
 
@@ -64,11 +111,11 @@ ug-core shows nothing to players. A failed command emits `ug-core:Commands:Faile
 | Code | When |
 | --- | --- |
 | `not_loaded` | `requirePlayer` is set and the player is not loaded. |
-| `no_permission` | The player lacks the `permission` ACE. |
+| `no_permission` | The player lacks the `permission` ACE, or is in none of the `groups`. |
 | `invalid_args` | An argument is missing or invalid. `argIndex` says which one. |
 | `internal_error` | The handler raised. The error is logged on the server. |
 
-Rate limited commands are dropped silently.
+Rate limited commands are dropped silently. Invalid options raise at registration.
 
 ## Events
 
@@ -87,12 +134,27 @@ end)
 ```lua
 UgCore.Commands.Register('givecash', {
     help = 'Give cash to a player',
-    permission = 'ug.admin',
+    groups = { 'admin' },
     args = {
         { name = 'target', type = 'player', help = 'Player id' },
         { name = 'amount', type = 'integer', help = 'Amount' },
     },
 }, function(source, args)
     UgCore.Accounts.Add(args.target, 'cash', args.amount, 'admin:givecash')
+end)
+```
+
+A moderation command that respects ranks:
+
+```lua
+UgCore.Commands.Register('kick', {
+    groups = { 'moderator' },
+    args = { { name = 'target', type = 'player' }, { name = 'reason', type = 'text', optional = true } },
+}, function(source, args)
+    if not UgCore.Permissions.CanTarget(source, args.target) then
+        return
+    end
+
+    UgCore.Players.Kick(args.target, args.reason)
 end)
 ```

@@ -49,7 +49,7 @@ Subscribe with [`UgCore.Events.On`](/api/events). Names live in `UgCore.Enums.Ev
 
 | Event | Arguments |
 | --- | --- |
-| `ug-core:Accounts:Changed` | `(source, account, balance, delta, reason)` |
+| `ug-core:Accounts:Changed` | Server: `(source, account, balance, delta, reason)`. Client: `(account, balance, delta)` for the local player. |
 
 ## Jobs and gangs
 
@@ -67,6 +67,22 @@ Subscribe with [`UgCore.Events.On`](/api/events). Names live in `UgCore.Enums.Ev
 | `ug-core:Sessions:Destroyed` | `(sessionId)` |
 | `ug-core:Sessions:Joined` | `(source, sessionId)` |
 | `ug-core:Sessions:Left` | `(source, sessionId)` |
+
+## Items and inventory
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Items:Used` | `(source, name, slot, metadata)` |
+| `ug-core:Inventory:ItemAdded` | `(inventoryId, name, count, metadata, reason)` |
+| `ug-core:Inventory:ItemRemoved` | `(inventoryId, name, count, metadata, reason)` |
+| `ug-core:Inventory:Changed` | Client only: `(changes)`, `nil` after a full sync |
+
+## Permissions
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Permissions:GroupAdded` | `(identifier, group, by)` |
+| `ug-core:Permissions:GroupRemoved` | `(identifier, group)` |
 
 ## Commands
 

@@ -1,52 +1,142 @@
 ---
-title: "Permissions"
-description: "Grant permissions per identifier. They are applied as ACEs, so every check agrees."
+title: "Permissions and groups"
+sidebarTitle: "Permissions"
+description: "Staff groups and permissions, applied as ACEs so every check agrees."
 icon: "key"
 ---
 
-UgCore permissions are FiveM ACEs. A grant runs `add_ace identifier.<id> <permission> allow`, so ACE checks everywhere, including `IsPlayerAceAllowed` in other resources, see it.
+UgCore permissions are FiveM ACEs, and UgCore groups are ACE principals. Every ACE check sees them, including `IsPlayerAceAllowed` in other resources and the `permission` option of callbacks, net events and commands.
 
 ## Setup
 
-ug-core needs permission to run `add_ace` and `remove_ace`:
+ug-core needs permission to run `add_ace`, `add_principal` and their `remove_` versions:
 
 ```bash server.cfg
 add_ace resource.ug-core command allow
 ```
 
-Without it, boot prints `ug-core cannot run add_ace. Add add_ace resource.ug-core command allow to server.cfg.` in red, and grants cannot be applied.
+Without it, boot prints `ug-core cannot run add_ace. Add add_ace resource.ug-core command allow to server.cfg.` in red, and nothing can be applied.
 
-## Two ways to give permissions
+## Groups
 
-<Tabs>
-  <Tab title="server.cfg">
-    Classic ACEs and principals keep working:
+Define your staff groups in `config/permissions.lua`. ug-core generates it with three groups:
 
-    ```bash server.cfg
-    add_principal identifier.license:abc123 group.admin
-    add_ace group.admin ug.admin allow
-    ```
-  </Tab>
-  <Tab title="UgCore API">
-    Resources such as admin menus grant and revoke at runtime. Grants are stored in `ug_permissions` and applied again on every boot:
+```lua config/permissions.lua
+return {
+    groups = {
+        moderator = {
+            label = 'Moderator',
+            weight = 10,
+            permissions = { 'my-reports.view', 'my-admin.kick' },
+        },
+        admin = {
+            label = 'Admin',
+            weight = 50,
+            inherits = 'moderator',
+            permissions = { 'ug.admin', 'my-admin.ban' },
+        },
+        founder = {
+            label = 'Founder',
+            weight = 100,
+            inherits = 'admin',
+            permissions = { 'my-admin.manage' },
+        },
+    },
+}
+```
 
-    ```lua
-    UgCore.Permissions.Grant('license:abc123', 'ug.admin', 'console')
-    UgCore.Permissions.Revoke(source, 'ug.admin')
-    ```
-  </Tab>
-</Tabs>
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `label` | Yes | Display name, up to 64 characters. |
+| `weight` | Yes | Rank, 0 to 1,000,000. Higher outranks lower. |
+| `inherits` | No | Another group. This group also gets all its permissions. |
+| `permissions` | Yes | ACEs the group allows. Can be empty. |
 
-`UgCore.Permissions.Has(source, permission)` is a plain ACE check, so both ways count.
+Group names are lowercase letters, digits and underscores. Each group becomes the principal `group.<name>`: on boot, ug-core runs `add_ace group.admin ug.admin allow` for each permission, and `add_principal group.admin group.moderator` for `inherits`.
+
+<Note>
+  The `groups` option replaces the default groups entirely, so it MUST list every group you want. Invalid groups and inheritance cycles, such as `a -> b -> a`, stop boot with a clear error.
+</Note>
+
+### Add players to groups
+
+Admin menus and commands add and remove members at runtime. Memberships are stored in `ug_group_members` and applied again on every boot:
+
+```lua
+UgCore.Permissions.AddGroup('license:abc123', 'admin', 'console')
+UgCore.Permissions.RemoveGroup(source, 'admin')
+```
+
+A member gets `add_principal identifier.license:abc123 group.admin`, so the player has every permission of `admin` and of the groups it inherits.
+
+### Weight
+
+ACE has no ranking, so groups have a `weight`. Admin menus use it to stop a moderator from kicking an admin:
+
+```lua
+if not UgCore.Permissions.CanTarget(source, target) then
+    return false, UgCore.Enums.Errors.NoPermission
+end
+```
+
+A player's weight is the highest weight of their groups. `CanTarget` needs a strictly higher weight. The server console outranks everyone.
+
+### Changing groups
+
+- New groups and permissions apply on `restart ug-core`.
+- Removed groups and permissions stay in the ACL until the server restarts, since FXServer keeps ACEs and principals across resource restarts.
+- Removing a group from the config never deletes its members. They are kept, not applied, and boot warns about them. Add the group back and they apply again.
+
+## server.cfg still works
+
+Groups and principals from `server.cfg` keep working next to UgCore groups. A config group with the same name, such as `admin`, adds its permissions to the one in `server.cfg`.
+
+```bash server.cfg
+add_principal identifier.license:abc123 group.admin
+```
+
+<Warning>
+  `IsInGroup`, `GetGroups`, `GetWeight` and `CanTarget` only know memberships managed by UgCore. A player added to `group.admin` in `server.cfg` has the permissions, but no UgCore weight. Use `AddGroup` for staff.
+</Warning>
+
+## Single permissions
+
+Give one permission to one player, without a group:
+
+```lua
+UgCore.Permissions.Grant('license:abc123', 'my-garage.admin', 'console')
+UgCore.Permissions.Revoke(source, 'my-garage.admin')
+```
+
+Grants are stored in `ug_permissions`. `UgCore.Permissions.Has(source, permission)` is a plain ACE check, so groups, grants and `server.cfg` all count.
+
+## Commands
+
+Chat commands accept a `permission`, a list of `groups`, or both. Any listed group is enough, and inheritance counts:
+
+```lua
+UgCore.Commands.Register('announce', { groups = { 'moderator', 'admin' } }, handler)
+```
+
+See [Commands](/api/commands#who-can-use-it).
+
+## Inspect
+
+```text
+> ug groups
+  founder          Founder              weight 100     1   member(s) inherits admin
+  admin            Admin                weight 50      2   member(s) inherits moderator
+  moderator        Moderator            weight 10      4   member(s)
+```
 
 ## Permissions used by ug-core
 
 | ACE | Allows |
 | --- | --- |
-| `ug.admin` | The `ug` console command in game. |
+| `ug.admin` | The `ug` console command in game. The default `admin` group has it. |
 
 Resources declare their own permissions on callbacks, net events and commands with the `permission` option.
 
 ## Safety
 
-Permission names and identifiers end up in a server command, so UgCore only accepts letters, digits, dots, dashes and underscores for permissions, and `type:value` identifiers. Anything else raises before reaching `ExecuteCommand`.
+Group names, permissions and identifiers end up in a server command, so UgCore only accepts letters, digits, dots, dashes and underscores, and `type:value` identifiers. Anything else raises, or stops boot when it comes from the config, before reaching `ExecuteCommand`.

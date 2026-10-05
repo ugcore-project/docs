@@ -154,6 +154,8 @@
               "api/permissions",
               "api/characters",
               "api/accounts",
+              "api/items",
+              "api/inventory",
               "api/jobs",
               "api/gangs",
               "api/sessions",

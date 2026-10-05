@@ -1,0 +1,259 @@
+---
+title: "UgCore.Inventory"
+sidebarTitle: "Inventory"
+description: "Server-authoritative slot and weight inventories with an audit log."
+icon: "boxes-stacked"
+---
+
+import { ModuleInfo } from "/snippets/module-info.jsx";
+
+<Badge color="blue">Server</Badge> <Badge color="green">Client</Badge> Proxied to ug-core.
+
+<ModuleInfo name="inventory" deps={["items", "characters"]} server="Inventory" client="Inventory" clientFunctions="reads, Move, Use, Give, Refresh" />
+
+ug-core owns every inventory: contents, rules, persistence and the callbacks clients use. It has no UI. An inventory resource such as `ug-inventory` shows the items and calls the client functions below. Owners can swap the UI without weakening security.
+
+<Info>This page covers player inventories. Stashes, vehicle inventories and ground drops come next.</Info>
+
+## Concepts
+
+- **Slots and weight.** Each inventory has a number of slots and a maximum weight in grams. Each slot holds one stack. Player inventories use `playerSlots` and `playerWeight` from `config/inventory.lua`.
+- **All or nothing.** Every change either applies fully or not at all. Adding 12 water that only fits 10 adds none and returns `cannot_carry`.
+- **Stacking.** Units stack up to the item's `maxStack`, only with the same name and equal metadata. Existing stacks fill first, then empty slots, lowest slot first.
+- **Targets.** `target` is a player source, for that player's inventory, or an inventory id. Player inventories are `player:<characterId>` and exist while the character is loaded.
+- **Audit log.** Every change writes a row to `ug_item_logs`, in the same database transaction as the inventory. See [GetLog](#getlog).
+
+## Adding and removing
+
+### AddItem
+
+```lua
+UgCore.Inventory.AddItem(target, name, count, metadata?, reason?) -> ok, errorCode
+```
+
+<ResponseField name="count" type="integer" required>1 to 1,000,000.</ResponseField>
+<ResponseField name="metadata" type="table">Checked by the [item's rule](/api/items#metadata-rules).</ResponseField>
+<ResponseField name="reason" type="string">Up to 128 characters, stored in the audit log.</ResponseField>
+
+```lua
+local ok, err = UgCore.Inventory.AddItem(source, 'water', 2, nil, 'shop:24-7')
+
+if err == 'cannot_carry' then
+    -- inventory full or too heavy
+end
+```
+
+### RemoveItem
+
+```lua
+UgCore.Inventory.RemoveItem(target, name, count, metadata?, reason?) -> ok, errorCode
+```
+
+Removes from the lowest slots first. With `metadata`, only stacks whose metadata has those keys and values count.
+
+### RemoveFromSlot
+
+```lua
+UgCore.Inventory.RemoveFromSlot(target, slot, count?, reason?) -> ok, errorCode
+```
+
+`count` defaults to the whole stack.
+
+### SetMetadata
+
+```lua
+UgCore.Inventory.SetMetadata(target, slot, metadata, reason?) -> ok, errorCode
+```
+
+Replaces the metadata of a whole slot. The audit log records it with an amount of `0`.
+
+### Clear
+
+```lua
+UgCore.Inventory.Clear(target, reason?) -> ok, errorCode
+```
+
+## Moving
+
+```lua
+UgCore.Inventory.Move(from, fromSlot, to, toSlot?, count?, reason?) -> ok, errorCode
+```
+
+Moves units between slots of one or two inventories:
+
+| Destination slot | Result |
+| --- | --- |
+| Empty | The units move. Fewer than the stack splits it. |
+| Same item, equal metadata | The units merge, if they all fit under `maxStack`. |
+| Different item | The two whole stacks swap. Moving part of a stack onto a different item is `invalid_args`. |
+| `nil` | The units go where `AddItem` would put them. |
+
+Between two inventories, the target's weight is checked, and both sides get an audit row pointing to the other.
+
+## Reading
+
+```lua
+UgCore.Inventory.GetItems(target) -> UgInventorySlot[]
+UgCore.Inventory.GetSlot(target, slot) -> UgInventorySlot?
+UgCore.Inventory.Count(target, name, metadata?) -> integer
+UgCore.Inventory.HasItem(target, name, count?, metadata?) -> boolean
+UgCore.Inventory.CanCarry(target, name, count, metadata?) -> boolean
+UgCore.Inventory.Get(target) -> { id, slots, maxWeight, weight }?
+UgCore.Inventory.GetSource(inventoryId) -> integer?
+```
+
+<ResponseField name="UgInventorySlot" type="table">
+  A copy.
+  <Expandable title="fields" defaultOpen>
+    <ResponseField name="slot" type="integer" />
+    <ResponseField name="name" type="string" />
+    <ResponseField name="count" type="integer" />
+    <ResponseField name="metadata" type="table?" />
+  </Expandable>
+</ResponseField>
+
+Unknown or unloaded inventories read as empty. `GetSource` returns the player who owns an inventory id, or `nil`.
+
+## Use
+
+```lua
+UgCore.Inventory.Use(source, slot) -> ok, errorCode
+```
+
+Uses the item in a slot of the player's inventory, in this order:
+
+1. The slot has an item with a [use handler](/api/items#registeruse). Otherwise `not_found` or `invalid_args`.
+2. The player is alive, unless the handler allows otherwise. Otherwise `no_permission`.
+3. The item's cooldown passed. Otherwise `rate_limited`.
+4. `Items:BeforeUse` allows it. Otherwise `no_permission`.
+5. The handler runs. Returning `false` refuses the use with `no_permission`. An error returns `internal_error`.
+6. `consume` units leave the slot, and `ug-core:Items:Used` fires.
+
+## GetLog
+
+```lua
+UgCore.Inventory.GetLog(target, limit?) -> ok, entries, errorCode
+```
+
+**MUST run in a thread.** Saves the inventory first, then returns the latest audit rows, newest first.
+
+<ResponseField name="limit" type="integer" default="25">1 to 100.</ResponseField>
+<ResponseField name="entries" type="UgItemLogEntry[]">
+  <Expandable title="fields">
+    <ResponseField name="item" type="string" />
+    <ResponseField name="amount" type="integer">Positive when added, negative when removed, `0` for a metadata change.</ResponseField>
+    <ResponseField name="metadata" type="table?" />
+    <ResponseField name="reason" type="string?" />
+    <ResponseField name="related" type="string?">The other inventory of a move or give.</ResponseField>
+    <ResponseField name="createdAt" type="integer">Unix seconds.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+Inventories are saved by a write-behind cache: every 30 seconds, on character unload, on player drop and on resource stop. Audit rows are written in the same transaction, so the log never shows a change the inventory lost. A failed write keeps both and retries.
+
+## Client
+
+The player's own inventory, sent by the server to that player only. Reads are local:
+
+```lua
+UgCore.Inventory.IsLoaded() -> boolean
+UgCore.Inventory.GetItems() -> UgInventorySlot[]
+UgCore.Inventory.GetSlot(slot) -> UgInventorySlot?
+UgCore.Inventory.Count(name) -> integer
+UgCore.Inventory.HasItem(name, count?) -> boolean
+UgCore.Inventory.GetWeight() -> integer
+UgCore.Inventory.GetMaxWeight() -> integer
+UgCore.Inventory.GetSlots() -> integer
+```
+
+Actions ask the server, which checks everything again. They **MUST run in a thread** and return `ok, errorCode`:
+
+```lua
+UgCore.Inventory.Move(fromSlot, toSlot, count?) -> ok, errorCode
+UgCore.Inventory.Use(slot) -> ok, errorCode
+UgCore.Inventory.Give(target, slot, count?) -> ok, errorCode
+UgCore.Inventory.Refresh() -> ok, errorCode
+```
+
+`Give` needs the other player within `giveDistance` meters, measured on the server.
+
+### Build an inventory UI
+
+```lua client.lua
+UgCore.Events.On(UgCore.Enums.Events.Inventory.Changed, function(changes)
+    if changes == nil then
+        -- full sync: redraw everything from UgCore.Inventory.GetItems()
+        return
+    end
+
+    for _, change in ipairs(changes) do
+        -- change.slot is now change.item, or empty when change.item is nil
+    end
+end)
+
+RegisterNUICallback('move', function(data, reply)
+    CreateThread(function()
+        local ok, err = UgCore.Inventory.Move(data.from, data.to, data.count)
+        reply({ ok = ok, error = err })
+    end)
+end)
+```
+
+`ug-core:Inventory:Changed` is a client event: `nil` after a full sync, or the list of changed slots.
+
+## Security
+
+Clients send slots and counts, never items, metadata or inventory ids. Their own inventory is the reference `player`.
+
+| Callback | Rate | Checks |
+| --- | --- | --- |
+| `ug-core:InventoryMove` | 10 per second | Loaded, alive, both inventories within reach. Anything else is flagged in Guard. |
+| `ug-core:InventoryUse` | 4 per second | Loaded, alive, then the [Use](#use) checks. |
+| `ug-core:InventoryGive` | 2 per second | Loaded, alive, target loaded and near, measured on the server. |
+| `ug-core:InventoryRefresh` | 2 per 5 seconds | Loaded. |
+
+Each replies `true` or an error code. The client functions above call them for you.
+
+## Errors
+
+| Code | When |
+| --- | --- |
+| `not_loaded` | The player has no loaded character. |
+| `not_found` | Unknown inventory id, or an empty slot. |
+| `invalid_args` | Unknown item, rejected metadata, a slot out of range, or a partial stack onto a different item. |
+| `cannot_carry` | Not enough slots, `maxStack` or weight. Nothing changed. |
+| `insufficient_items` | Fewer units than asked. Nothing changed. |
+| `no_permission` | A hook cancelled, or the player is out of reach. |
+| `rate_limited` | The item's use cooldown. |
+| `internal_error` | A use handler failed, or the database failed. |
+
+Wrong argument types, counts out of range and long reasons raise.
+
+## Events
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Inventory:ItemAdded` | `(inventoryId, name, count, metadata, reason)` |
+| `ug-core:Inventory:ItemRemoved` | `(inventoryId, name, count, metadata, reason)` |
+| `ug-core:Inventory:Changed` | Client only: `(changes)` |
+
+Use `GetSource(inventoryId)` to find the player of a player inventory.
+
+## Hooks
+
+| Hook | Payload |
+| --- | --- |
+| `Inventory:BeforeAdd` | `{ inventory, name, count, metadata, reason }` |
+| `Inventory:BeforeRemove` | `{ inventory, name, count, metadata, reason }` |
+| `Inventory:BeforeMove` | `{ from, fromSlot, to, toSlot, count, reason }` |
+| `Inventory:BeforeClearOnRespawn` | `{ source }` |
+
+They allow or cancel. Changes to the payload are ignored.
+
+## Death
+
+Items stay when a player dies. With `clearOnRespawn = true` in `config/inventory.lua`, respawning empties the inventory, except items with `keepOnRespawn`. `Inventory:BeforeClearOnRespawn` can cancel it, for example in an arena.
+
+## Player object
+
+[Player objects](/api/player#inventory) have shortcuts: `player:AddItem`, `RemoveItem`, `GetItemCount`, `HasItem`, `CanCarry`, `GetItems`, `UseItem`.

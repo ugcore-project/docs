@@ -1,0 +1,150 @@
+---
+title: "UgCore.Items"
+sidebarTitle: "Items"
+description: "Item definitions, metadata rules and usable items."
+icon: "box"
+---
+
+import { ModuleInfo } from "/snippets/module-info.jsx";
+
+<Badge color="blue">Server</Badge> <Badge color="green">Client</Badge> Proxied to ug-core.
+
+<ModuleInfo name="items" server="Items" client="Items" clientFunctions="Get, GetAll, Exists" />
+
+Items are defined by owners in `config/items.lua` and by resources at runtime. Inventories that hold them come from the [inventory](/api/inventory) module.
+
+## Config
+
+```lua config/items.lua
+return {
+    water = { label = 'Water', weight = 500, maxStack = 10 },
+    bread = { label = 'Bread', weight = 250, maxStack = 10 },
+    phone = { label = 'Phone', weight = 200, stack = false, keepOnRespawn = true, description = 'Calls and messages.' },
+}
+```
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `label` | Yes | Display name, up to 64 characters. |
+| `weight` | Yes | Grams per unit, 0 to 1,000,000. |
+| `stack` | No | `false` puts every unit in its own slot. Defaults to `true`. |
+| `maxStack` | No | Units per slot, 1 to 1,000,000. |
+| `description` | No | Up to 256 characters. |
+| `keepOnRespawn` | No | Survives `clearOnRespawn` in `config/inventory.lua`. |
+
+Item names are lowercase letters, digits and underscores. The file replaces the default items entirely.
+
+## Register
+
+```lua
+UgCore.Items.Register(name, definition)
+```
+
+Adds an item from a resource. Same fields as the config, plus `metadata`:
+
+<ResponseField name="metadata" type="UgSchemaRule | function">
+  Checked on every write of the item's metadata. A [schema](/api/schema) rule, or a function `fun(metadata): ok, message?`.
+</ResponseField>
+
+```lua
+local S = UgCore.Schema
+
+UgCore.Items.Register('id_card', {
+    label = 'ID card',
+    weight = 10,
+    stack = false,
+    metadata = S.Object({
+        name = S.String({ max = 64 }),
+        dob = S.String({ max = 10, pattern = '^%d%d%d%d%-%d%d%-%d%d$' }),
+    }),
+})
+```
+
+- Invalid definitions raise, with the same messages as config errors.
+- When `config/items.lua` defines the same name, the config wins: its fields stay, and only your `metadata` rule is added. A warning is logged.
+- A name registered by another resource raises.
+- Items registered by a resource are removed when it stops.
+
+## Metadata rules
+
+Every item's metadata MUST be bounded data, rule or not: booleans, finite numbers, strings up to 512 characters, at most 128 entries, 6 levels deep. Vectors are not allowed, since metadata is saved as JSON.
+
+- `nil` metadata is always allowed. An empty table counts as `nil`.
+- Stacks only merge when their metadata is equal.
+- A rejected write returns `invalid_args`. The reason goes to the server log in debug mode.
+
+## RegisterUse
+
+```lua
+UgCore.Items.RegisterUse(name, handler, options?)
+```
+
+Makes an existing item usable. Players use items through [`Inventory.Use`](/api/inventory#use), which runs every check before your handler.
+
+<ResponseField name="handler" type="fun(source, item): boolean?" required>
+  Gets the player and a copy of the slot: `{ slot, name, count, metadata }`. Return `false` to refuse: nothing is consumed.
+</ResponseField>
+<ResponseField name="options.consume" type="integer" default="0">Units removed from the slot after a successful use. 0 to 1,000.</ResponseField>
+<ResponseField name="options.cooldown" type="integer" default="0">Milliseconds between uses of this item, per player.</ResponseField>
+<ResponseField name="options.requireAlive" type="boolean" default="true">Refuses downed and dead players.</ResponseField>
+
+```lua
+UgCore.Items.RegisterUse('bread', function(source, item)
+    local player = UgCore.Players.Get(source)
+
+    if not player then
+        return false
+    end
+
+    player:SetMetadata('hunger', math.min(100, (player:GetMetadata('hunger') or 0) + 25))
+    return true
+end, { consume = 1, cooldown = 2000 })
+```
+
+One resource per item. Handlers are removed when their resource stops.
+
+## Get / GetAll / Exists / IsUsable
+
+```lua
+UgCore.Items.Get(name) -> UgItemDefinition?
+UgCore.Items.GetAll() -> table<string, UgItemDefinition>
+UgCore.Items.Exists(name) -> boolean
+UgCore.Items.IsUsable(name) -> boolean
+```
+
+<ResponseField name="UgItemDefinition" type="table">
+  <Expandable title="fields" defaultOpen>
+    <ResponseField name="name" type="string" />
+    <ResponseField name="label" type="string" />
+    <ResponseField name="weight" type="integer">Grams per unit.</ResponseField>
+    <ResponseField name="stack" type="boolean" />
+    <ResponseField name="maxStack" type="integer">1 when the item does not stack.</ResponseField>
+    <ResponseField name="description" type="string?" />
+    <ResponseField name="keepOnRespawn" type="boolean" />
+    <ResponseField name="usable" type="boolean" />
+  </Expandable>
+</ResponseField>
+
+## Client
+
+```lua
+UgCore.Items.Get(name) -> UgItemDefinition?
+UgCore.Items.GetAll() -> table<string, UgItemDefinition>
+UgCore.Items.Exists(name) -> boolean
+```
+
+Definitions replicate through `GlobalState['ug-core:Items']`, without metadata rules. Use them for labels and weights in a UI.
+
+## Events
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Items:Used` | `(source, name, slot, metadata)` |
+
+## Hooks
+
+| Hook | Payload |
+| --- | --- |
+| `Items:BeforeUse` | `{ source, name, slot, metadata }` |
+
+It allows or cancels. A cancelled use returns `no_permission` and consumes nothing.

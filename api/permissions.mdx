@@ -1,29 +1,109 @@
 ---
 title: "UgCore.Permissions"
 sidebarTitle: "Permissions"
-description: "Persistent ACE grants."
+description: "Staff groups, ranks and persistent ACE grants."
 icon: "key"
 ---
 
 import { ModuleInfo } from "/snippets/module-info.jsx";
 
-<Badge color="blue">Server</Badge> Proxied to ug-core. See [Permissions for owners](/owners/permissions).
+<Badge color="blue">Server</Badge> Proxied to ug-core. See [Permissions and groups](/owners/permissions) for the owner side.
 
 <ModuleInfo name="permissions" required deps={["identity"]} server="Permissions" />
 
-Permissions are FiveM ACEs. Grants are stored in the database and applied as `add_ace identifier.<id> <permission> allow`, so every ACE check agrees, including `IsPlayerAceAllowed` and the `permission` option of callbacks, net events and commands.
+Permissions are FiveM ACEs, groups are ACE principals `group.<name>`. Both are stored in the database and applied again on every boot, so every ACE check agrees, including `IsPlayerAceAllowed` and the `permission` option of callbacks, net events and commands.
 
-Permission names are letters, digits, dots, dashes and underscores, such as `my-garage.admin`.
+`target` is a player source or an identifier such as `license:abc`. Identifiers work for offline players. Permission names are letters, digits, dots, dashes and underscores, such as `my-garage.admin`.
 
-## Has
+## Groups
+
+Groups come from `config/permissions.lua`. Read them with `GetGroupDefinition`.
+
+### AddGroup
+
+```lua
+UgCore.Permissions.AddGroup(target, group, by?) -> ok, errorCode
+```
+
+**MUST run in a thread.** Adds the target to the group and applies it right away. Adding a member again does nothing and returns `true`.
+
+<ResponseField name="group" type="string" required>A group from `config/permissions.lua`.</ResponseField>
+<ResponseField name="by" type="string">Who added it. Up to 64 characters.</ResponseField>
+
+### RemoveGroup
+
+```lua
+UgCore.Permissions.RemoveGroup(target, group) -> ok, removed, errorCode
+```
+
+**MUST run in a thread.** `removed` is `false` when the target was not a member. Also deletes stored memberships of groups no longer in the config.
+
+### GetGroups
+
+```lua
+UgCore.Permissions.GetGroups(target) -> string[]
+```
+
+The target's groups, highest weight first. Inherited groups are not listed.
+
+### IsInGroup
+
+```lua
+UgCore.Permissions.IsInGroup(target, group) -> boolean
+```
+
+True for direct members and through inheritance: a `founder` that inherits `admin` is also in `admin`.
+
+### GetWeight
+
+```lua
+UgCore.Permissions.GetWeight(target) -> integer
+```
+
+The highest weight of the target's groups. `0` without groups.
+
+### CanTarget
+
+```lua
+UgCore.Permissions.CanTarget(actor, target) -> boolean
+```
+
+True when `actor` has a strictly higher weight than `target`. Source `0`, the server console, outranks everyone and is outranked by no one.
+
+```lua
+UgCore.Commands.Register('kick', {
+    permission = 'my-admin.kick',
+    args = { { name = 'target', type = 'player' } },
+}, function(source, args)
+    if not UgCore.Permissions.CanTarget(source, args.target) then
+        return
+    end
+
+    UgCore.Players.Kick(args.target)
+end)
+```
+
+### GetGroupDefinition
+
+```lua
+UgCore.Permissions.GetGroupDefinition(group) -> { label, weight, inherits?, permissions }?
+```
+
+A copy of the group from the config. `nil` for unknown groups.
+
+<Warning>`IsInGroup`, `GetGroups`, `GetWeight` and `CanTarget` only know memberships managed by UgCore, not `add_principal` lines in `server.cfg`.</Warning>
+
+## Single permissions
+
+### Has
 
 ```lua
 UgCore.Permissions.Has(source, permission) -> boolean
 ```
 
-Checks the ACE, including ACEs from `server.cfg`.
+A plain ACE check: groups, grants and `server.cfg` all count.
 
-## Grant
+### Grant
 
 ```lua
 UgCore.Permissions.Grant(target, permission, by?) -> ok, errorCode
@@ -31,44 +111,70 @@ UgCore.Permissions.Grant(target, permission, by?) -> ok, errorCode
 
 **MUST run in a thread.** Applies the ACE right away.
 
-<ResponseField name="target" type="integer | string" required>A source or an identifier.</ResponseField>
-<ResponseField name="by" type="string">Who granted it. Up to 64 characters.</ResponseField>
-
-## Revoke
+### Revoke
 
 ```lua
 UgCore.Permissions.Revoke(target, permission) -> ok, removed, errorCode
 ```
 
-**MUST run in a thread.** `removed` is `false` when it was not granted. ACEs from `server.cfg` stay.
+**MUST run in a thread.** `removed` is `false` when it was not granted. ACEs from `server.cfg` and groups stay.
 
-## GetAll
+### GetAll
 
 ```lua
 UgCore.Permissions.GetAll(target) -> string[]
 ```
 
-Permissions granted with `Grant`, sorted. ACEs from `server.cfg` are not listed.
+Permissions granted with `Grant`, sorted. Group permissions and ACEs from `server.cfg` are not listed.
 
 ## Errors
 
 | Function | Code | When |
 | --- | --- | --- |
-| `Grant`, `Revoke` | `not_found` | The source has no primary identifier, such as a player who already dropped. |
-| `Grant`, `Revoke` | `internal_error` | The database failed. |
+| `AddGroup`, `RemoveGroup`, `Grant`, `Revoke` | `not_found` | The source has no primary identifier, such as a player who already dropped. |
+| `AddGroup` | `invalid_args` | The group is not in `config/permissions.lua`. |
+| `AddGroup` | `no_permission` | `Permissions:BeforeGroupAdd` cancelled. |
+| `RemoveGroup` | `no_permission` | `Permissions:BeforeGroupRemove` cancelled. |
+| `AddGroup`, `RemoveGroup`, `Grant`, `Revoke` | `internal_error` | The database failed. |
 
-Malformed permission names and targets raise.
+Malformed targets, group names and permission names raise.
 
-<Warning>Grants need `add_ace resource.ug-core command allow` in `server.cfg`. ug-core reports it at boot when it is missing.</Warning>
+## Events
 
-## Example
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Permissions:GroupAdded` | `(identifier, group, by)` |
+| `ug-core:Permissions:GroupRemoved` | `(identifier, group)` |
 
-```lua
-CreateThread(function()
-    local ok, err = UgCore.Permissions.Grant(source, 'my-garage.admin', 'console')
-end)
+They carry the identifier, since the target MAY be offline.
 
-if UgCore.Permissions.Has(source, 'my-garage.admin') then
-    -- ...
-end
+## Hooks
+
+| Hook | Payload |
+| --- | --- |
+| `Permissions:BeforeGroupAdd` | `{ identifier, group, by }` |
+| `Permissions:BeforeGroupRemove` | `{ identifier, group }` |
+
+They allow or cancel. Changes to the payload are ignored.
+
+## Statebags
+
+| Key | Value |
+| --- | --- |
+| `ug-core:Groups` | The player's groups, highest weight first, such as `{ 'admin' }`. Set on join and on every change. |
+
+Clients read it to show a staff badge:
+
+```lua client.lua
+local groups = LocalPlayer.state['ug-core:Groups'] or {}
 ```
+
+<Warning>Never trust a client's view of its own groups. Check permissions on the server.</Warning>
+
+## Player object
+
+Every function above has a [player object](/api/player#permissions) shortcut: `player:AddGroup('admin')`, `player:IsInGroup('moderator')`, `player:CanTarget(other)`.
+
+## Requirements
+
+`add_ace resource.ug-core command allow` in `server.cfg`. ug-core reports it at boot when it is missing.

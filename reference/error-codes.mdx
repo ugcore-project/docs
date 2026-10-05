@@ -14,6 +14,8 @@ Mutating functions return `ok, errorCode` or `ok, value, errorCode`. Codes are p
 | `RateLimited` | `rate_limited` | Too many requests, or too many callbacks in flight. |
 | `NoPermission` | `no_permission` | Missing ACE, a hook cancelled, a limit was reached, or the player is downed or dead. |
 | `InsufficientFunds` | `insufficient_funds` | The account balance is too low. |
+| `InsufficientItems` | `insufficient_items` | The inventory holds fewer units than asked. |
+| `CannotCarry` | `cannot_carry` | The inventory has no room: slots, stack size or weight. |
 | `Timeout` | `timeout` | A callback got no answer in time. |
 | `InternalError` | `internal_error` | A handler crashed or the database failed. Details are in the server console. |
 

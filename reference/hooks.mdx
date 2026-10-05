@@ -21,6 +21,13 @@ Register with [`UgCore.Hooks.Register`](/api/hooks). Names live in `UgCore.Enums
 | `Jobs:BeforeSet` | `{ source, name, grade }` | No |
 | `Gangs:BeforeSet` | `{ source, name, grade }` | No |
 | `Sessions:BeforeJoin` | `{ source, sessionId }` | No |
+| `Permissions:BeforeGroupAdd` | `{ identifier, group, by }` | No |
+| `Permissions:BeforeGroupRemove` | `{ identifier, group }` | No |
+| `Items:BeforeUse` | `{ source, name, slot, metadata }` | No |
+| `Inventory:BeforeAdd` | `{ inventory, name, count, metadata, reason }` | No |
+| `Inventory:BeforeRemove` | `{ inventory, name, count, metadata, reason }` | No |
+| `Inventory:BeforeMove` | `{ from, fromSlot, to, toSlot, count, reason }` | No |
+| `Inventory:BeforeClearOnRespawn` | `{ source }` | No |
 
 "Reads changes" lists the fields ug-core reads back from a returned table. Other hooks only allow or cancel.
 

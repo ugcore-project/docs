@@ -87,6 +87,12 @@ Always available. See [`UgCore.Permissions`](/api/permissions).
 | `player:GrantPermission(permission, by?) -> ok, errorCode` | `Permissions.Grant`. Thread. |
 | `player:RevokePermission(permission) -> ok, removed, errorCode` | `Permissions.Revoke`. Thread. |
 | `player:GetPermissions() -> string[]` | `Permissions.GetAll` |
+| `player:AddGroup(group, by?) -> ok, errorCode` | `Permissions.AddGroup`. Thread. |
+| `player:RemoveGroup(group) -> ok, removed, errorCode` | `Permissions.RemoveGroup`. Thread. |
+| `player:GetGroups() -> string[]` | `Permissions.GetGroups` |
+| `player:IsInGroup(group) -> boolean` | `Permissions.IsInGroup` |
+| `player:GetWeight() -> integer` | `Permissions.GetWeight` |
+| `player:CanTarget(target) -> boolean` | `Permissions.CanTarget`. `target` is a player object, a source or an identifier. |
 
 ### Characters
 
@@ -124,6 +130,20 @@ Needs the `jobs` module. See [`UgCore.Jobs`](/api/jobs).
 | `player:SetJobGrade(grade) -> ok, errorCode` | `Jobs.SetGrade`. Thread. |
 | `player:SetDuty(onDuty) -> ok, errorCode` | `Jobs.SetDuty` |
 | `player:IsOnDuty() -> boolean` | `Jobs.IsOnDuty` |
+
+### Inventory
+
+Needs the `inventory` module. See [`UgCore.Inventory`](/api/inventory).
+
+| Method | Calls |
+| --- | --- |
+| `player:AddItem(name, count, metadata?, reason?) -> ok, errorCode` | `Inventory.AddItem` |
+| `player:RemoveItem(name, count, metadata?, reason?) -> ok, errorCode` | `Inventory.RemoveItem` |
+| `player:GetItemCount(name, metadata?) -> integer` | `Inventory.Count` |
+| `player:HasItem(name, count?, metadata?) -> boolean` | `Inventory.HasItem` |
+| `player:CanCarry(name, count, metadata?) -> boolean` | `Inventory.CanCarry` |
+| `player:GetItems() -> UgInventorySlot[]` | `Inventory.GetItems` |
+| `player:UseItem(slot) -> ok, errorCode` | `Inventory.Use` |
 
 ### Gang
 

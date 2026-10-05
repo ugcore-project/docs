@@ -103,11 +103,20 @@ Unknown accounts, out-of-range amounts and long reasons raise.
 
 ## Events
 
-| Event | Arguments |
-| --- | --- |
-| `ug-core:Accounts:Changed` | `(source, account, balance, delta, reason)` |
+| Side | Event | Arguments |
+| --- | --- | --- |
+| Server | `ug-core:Accounts:Changed` | `(source, account, balance, delta, reason)` |
+| Client | `ug-core:Accounts:Changed` | `(account, balance, delta)` |
 
-Server only. It fires for every change of an online character, including both sides of a transfer.
+On the server, it fires for every change of an online character, including both sides of a transfer.
+
+On the client, it fires for the local player's own balances only: on load, on every change, and with `balance = nil` when the character unloads. Use it to update a HUD:
+
+```lua client.lua
+UgCore.Events.On(UgCore.Enums.Events.Accounts.Changed, function(account, balance, delta)
+    -- show the new balance, or hide it when balance is nil
+end)
+```
 
 ## Hooks
 

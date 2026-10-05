@@ -28,13 +28,21 @@ The **Side** column says who can read the value: `server` only, or `shared` with
 
 ## modules
 
-One boolean per optional module, all `true` by default: `characters`, `accounts`, `jobs`, `gangs`, `sessions`, `commands`, `locale`. Required modules are not listed.
+One boolean per optional module, all `true` by default: `characters`, `accounts`, `jobs`, `gangs`, `sessions`, `commands`, `locale`, `items`, `inventory`. Required modules are not listed.
 
 ## identity
 
 | Option | Type | Default | Notes |
 | --- | --- | --- | --- |
 | `primaryIdentifier` | string | `'license'` | `license`, `license2`, `steam`, `discord` or `fivem`. Players without it cannot connect. |
+
+## permissions
+
+| Option | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `groups` | table | `moderator` 10, `admin` 50, `founder` 100 | Up to 64 groups. Each is `{ label, weight, inherits?, permissions }`. |
+
+`admin` inherits `moderator` and has `ug.admin`. `founder` inherits `admin`. See [Permissions and groups](/owners/permissions#groups).
 
 ## players
 
@@ -69,6 +77,23 @@ return {
 | Option | Type | Default | Notes |
 | --- | --- | --- | --- |
 | `maxCharacters` | integer | `4` | 1 to 32. Deleted characters do not count. |
+
+## items
+
+Data config. Your file replaces the defaults (`water`, `bread`, `bandage`). See [Items](/api/items#config).
+
+```lua
+name = { label, weight, stack?, maxStack?, description?, keepOnRespawn? }
+```
+
+## inventory
+
+| Option | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `playerSlots` | integer | `40` | 1 to 200. |
+| `playerWeight` | integer | `30000` | Grams, 1 to 10,000,000. |
+| `giveDistance` | number | `3.0` | Meters, 0.5 to 20. |
+| `clearOnRespawn` | boolean | `false` | Empties player inventories on respawn, except `keepOnRespawn` items. |
 
 ## accounts
 
