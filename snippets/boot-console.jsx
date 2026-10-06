@@ -23,7 +23,7 @@ export const BootConsole = () => {
     { tag: "[INFO]", text: " Database: connected to MariaDB 10.11.6.", tone: "info", delay: 420 },
     { tag: "[INFO]", text: " Lifecycle: Starting (38 ms)", tone: "info", delay: 220 },
     { tag: "[INFO]", text: " Lifecycle: Ready (2 ms)", tone: "info", delay: 220 },
-    { tag: "[INFO]", text: " ug-core v1.0.0 ready in 61 ms. 10 modules enabled.", tone: "ok", delay: 900 },
+    { tag: "[INFO]", text: " ug-core v1.0.0 ready in 61 ms. 14 modules enabled.", tone: "ok", delay: 900 },
     { text: "> ug modules", tone: "command", delay: 500 },
     { text: "  identity       enabled   required", tone: "muted", delay: 70 },
     { text: "  players        enabled   required", tone: "muted", delay: 70 },

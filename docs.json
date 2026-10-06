@@ -156,6 +156,8 @@
               "api/accounts",
               "api/items",
               "api/inventory",
+              "api/weapons",
+              "api/shops",
               "api/jobs",
               "api/gangs",
               "api/sessions",

@@ -18,6 +18,7 @@ Guard is UgCore's built-in watchdog. Every rejected request, every invalid paylo
 | `NoPermission` | 3 | A request needs an ACE the player lacks. |
 | `OutOfRange` | 5 | A resource found the player too far from an action. |
 | `InvalidDeathState` | 5 | A downed or dead player moved away. |
+| `WeaponMismatch` | 5 | A weapon in hand that was not equipped from the inventory, or more ammo than the server gave. |
 
 Resources report their own checks with `UgCore.Guard.Flag`.
 

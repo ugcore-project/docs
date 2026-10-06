@@ -28,7 +28,7 @@ The **Side** column says who can read the value: `server` only, or `shared` with
 
 ## modules
 
-One boolean per optional module, all `true` by default: `characters`, `accounts`, `jobs`, `gangs`, `sessions`, `commands`, `locale`, `items`, `inventory`. Required modules are not listed.
+One boolean per optional module, all `true` by default: `characters`, `accounts`, `jobs`, `gangs`, `sessions`, `commands`, `locale`, `items`, `inventory`, `weapons`, `shops`. Required modules are not listed.
 
 ## identity
 
@@ -80,7 +80,7 @@ return {
 
 ## items
 
-Data config. Your file replaces the defaults (`water`, `bread`, `bandage`). See [Items](/api/items#config).
+Data config. Your file replaces the defaults: `water`, `bread`, `bandage`, and the weapon items of the default `config/weapons.lua`. See [Items](/api/items#config).
 
 ```lua
 name = { label, weight, stack?, maxStack?, description?, keepOnRespawn? }
@@ -94,6 +94,29 @@ name = { label, weight, stack?, maxStack?, description?, keepOnRespawn? }
 | `playerWeight` | integer | `30000` | Grams, 1 to 10,000,000. |
 | `giveDistance` | number | `3.0` | Meters, 0.5 to 20. |
 | `clearOnRespawn` | boolean | `false` | Empties player inventories on respawn, except `keepOnRespawn` items. |
+| `stashes` | table | `police_locker` | Up to 256 stashes. See [Stashes](/api/inventory#stashes). |
+| `trunk` | table | `{ slots = 20, weight = 50000 }` | Size of every trunk. |
+| `glovebox` | table | `{ slots = 5, weight = 5000 }` | Size of every glovebox. |
+| `drops` | table | `{ slots = 20, weight = 100000, lifetime = 15 }` | Size of ground drops, and minutes before they expire. |
+
+## weapons
+
+| Option | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `weapons` | table | `weapon_pistol` | Up to 256 weapons by item name: `{ hash, ammo?, capacity?, wear?, components? }`. |
+| `tints` | table | `{ weapon_tint_gold = 2 }` | Tint items to a tint index from 0 to 31. |
+| `enforce` | boolean | `true` | Takes away and flags weapons not equipped from the inventory. |
+| `allowed` | table | `{}` | Weapon names players MAY hold without an item. |
+
+See [Weapons](/api/weapons#config).
+
+## shops
+
+| Option | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `shops` | table | `general_store`, `ammunation` | Up to 256 shops: `{ label, coords, distance?, account, items, jobs?, gangs?, groups? }`. |
+
+Each item is `{ name, price, stock?, restock?, metadata? }`. See [Shops](/api/shops#config).
 
 ## accounts
 

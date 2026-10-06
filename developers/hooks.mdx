@@ -67,5 +67,15 @@ Lower priority runs first, default `0`. Ties run in registration order.
 | `Jobs:BeforeSet` | `source, name, grade` | Job unchanged. |
 | `Gangs:BeforeSet` | `source, name, grade` | Gang unchanged. |
 | `Sessions:BeforeJoin` | `source, sessionId` | The player stays where they are. |
+| `Permissions:BeforeGroupAdd` | `identifier, group, by` | Not added to the group. |
+| `Permissions:BeforeGroupRemove` | `identifier, group` | Stays in the group. |
+| `Items:BeforeUse` | `source, name, slot, metadata` | Item not used, nothing consumed. |
+| `Inventory:BeforeAdd` | `inventory, name, count, metadata, reason` | No items added. |
+| `Inventory:BeforeRemove` | `inventory, name, count, metadata, reason` | No items removed. |
+| `Inventory:BeforeMove` | `from, fromSlot, to, toSlot, count, reason` | Nothing moves. |
+| `Inventory:BeforeOpen` | `source, inventory` | The inventory does not open. |
+| `Inventory:BeforeClearOnRespawn` | `source` | Items stay on respawn. |
+| `Weapons:BeforeEquip` | `source, name, serial` | The weapon stays in the inventory. |
+| `Shops:BeforePurchase` | `source, shop, item, count, price, total, account` | No purchase. Lower `total` for a discount instead. |
 
 Cancelled actions return `false, 'no_permission'` to the caller.

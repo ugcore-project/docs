@@ -67,7 +67,7 @@ stateDiagram-v2
     Every module's `Start` runs.
   </Step>
   <Step title="Ready">
-    Connections are accepted. The summary line prints: `ug-core v1.0.0 ready in 61 ms. 10 modules enabled.`
+    Connections are accepted. The summary line prints: `ug-core v1.0.0 ready in 61 ms. 14 modules enabled.`
   </Step>
 </Steps>
 
@@ -116,10 +116,16 @@ flowchart TD
     players --> characters
     players --> sessions
     players --> commands
+    permissions --> commands
     characters --> accounts
     characters --> jobs
     characters --> gangs
     identity --> permissions
+    characters --> inventory
+    items --> inventory
+    inventory --> weapons
+    inventory --> shops
+    accounts --> shops
     locale
 ```
 

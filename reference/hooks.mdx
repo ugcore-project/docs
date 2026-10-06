@@ -27,7 +27,10 @@ Register with [`UgCore.Hooks.Register`](/api/hooks). Names live in `UgCore.Enums
 | `Inventory:BeforeAdd` | `{ inventory, name, count, metadata, reason }` | No |
 | `Inventory:BeforeRemove` | `{ inventory, name, count, metadata, reason }` | No |
 | `Inventory:BeforeMove` | `{ from, fromSlot, to, toSlot, count, reason }` | No |
+| `Inventory:BeforeOpen` | `{ source, inventory }` | No |
 | `Inventory:BeforeClearOnRespawn` | `{ source }` | No |
+| `Weapons:BeforeEquip` | `{ source, name, serial }` | No |
+| `Shops:BeforePurchase` | `{ source, shop, item, count, price, total, account }` | `total`, lower only |
 
 "Reads changes" lists the fields ug-core reads back from a returned table. Other hooks only allow or cancel.
 

@@ -1,0 +1,218 @@
+---
+title: "UgCore.Weapons"
+sidebarTitle: "Weapons"
+description: "Weapons as items: serials, ammo, attachments, tints and durability."
+icon: "gun"
+---
+
+import { ModuleInfo } from "/snippets/module-info.jsx";
+
+<Badge color="blue">Server</Badge> <Badge color="green">Client</Badge> Proxied to ug-core.
+
+<ModuleInfo name="weapons" deps={["inventory"]} server="Weapons" client="Weapons" clientFunctions="GetEquipped, Equip, Unequip, Reload, Unload, Attach, Detach" />
+
+Weapons are [inventory](/api/inventory) items. The inventory is the only source of weapons: the server gives the equipped one to the ped, and takes away any other.
+
+## How it works
+
+- **Items.** A weapon is a non-stackable item in `config/items.lua`, mapped to a game weapon in `config/weapons.lua`. Its state lives in the item's metadata, so it moves with the item: give it, stash it, drop it.
+- **Serials.** Every new weapon item gets a unique serial, recorded with the character it was created for. See [GetBySerial](#getbyserial).
+- **Equipping.** Using a weapon item equips it. Using it again puts it away. The server calls the weapon natives, so a client cannot equip what it does not own.
+- **Ammo.** Ammo is an item. [Reload](#reload) moves ammo items into the weapon, up to its `capacity`. Using an ammo item reloads the equipped weapon.
+- **Shots and wear.** The client reports its ammo count as it shoots. The server only accepts the count going down. Each shot wears the weapon by `wear` out of 100 durability. At 0 it breaks: it is put away and cannot be equipped until [repaired](#repair).
+- **Attachments and tints.** Attachment and tint items are used up into the weapon's metadata. Components come back off, tints do not. Using an attachment fits it on the equipped weapon.
+- **Out of hands.** A weapon is put away when its item leaves the player's inventory, and when the player goes down, dies or unloads the character.
+
+<Note>
+  Two natives have no server version: reading ammo and setting tints. The core client does both and reports to the server, which checks every report. See [Security](#security).
+</Note>
+
+## Config
+
+```lua config/weapons.lua
+return {
+    weapons = {
+        weapon_pistol = {
+            hash = 'WEAPON_PISTOL',
+            ammo = 'ammo_9mm',
+            capacity = 60,
+            wear = 0.05,
+            components = { pistol_suppressor = 'COMPONENT_AT_PI_SUPP_02' },
+        },
+        weapon_bat = { hash = 'WEAPON_BAT' },
+    },
+    tints = { weapon_tint_gold = 2 },
+    enforce = true,
+    allowed = { 'WEAPON_PETROLCAN' },
+}
+```
+
+| Option | Meaning |
+| --- | --- |
+| `weapons` | By item name. `hash` is the game weapon. `ammo` and `capacity` go together. `wear` is durability lost per shot, out of 100, 0 by default. `components` maps attachment items to component names. |
+| `tints` | Tint items to a tint index from 0 to 31. |
+| `enforce` | Takes away and flags any weapon a player holds without having equipped it from the inventory. |
+| `allowed` | Weapons players MAY hold without an item. Unarmed is always allowed. |
+
+Every item named here MUST exist in `config/items.lua`, and weapon items MUST have `stack = false`. Otherwise boot stops with the item name.
+
+The default config comes with `weapon_pistol`, `ammo_9mm`, `pistol_suppressor` and `weapon_tint_gold`, which `config/items.lua` also defines by default.
+
+## Metadata
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `serial` | `string` | 10 characters, unique. |
+| `ammo` | `integer` | Rounds loaded. |
+| `durability` | `number` | 0 to 100. |
+| `components` | `string[]?` | Attachment items fitted. |
+| `tint` | `integer?` | Tint index. |
+
+New weapons get `ammo = 0`, `durability = 100` and a serial. Pass metadata to [`AddItem`](/api/inventory#additem) to start from other values, such as a loaded weapon for a shop. Ammo and durability updates do not write audit rows. Attaching, detaching and repairing do.
+
+## Server
+
+### Equip / Unequip
+
+```lua
+UgCore.Weapons.Equip(source, slot) -> ok, errorCode
+UgCore.Weapons.Unequip(source, reason?) -> ok
+```
+
+Equipping the equipped weapon puts it away. Broken weapons and other items return `invalid_args`. Downed and dead players get `no_permission`. `Weapons:BeforeEquip` MAY cancel.
+
+### GetEquipped
+
+```lua
+UgCore.Weapons.GetEquipped(source) -> { name, serial, hash, ammo, durability }?
+```
+
+### Reload
+
+```lua
+UgCore.Weapons.Reload(source) -> ok, errorCode
+```
+
+Moves ammo items from the player's inventory into the equipped weapon, up to its capacity. Returns `insufficient_items` without ammo, `not_found` without an equipped weapon.
+
+### Unload
+
+```lua
+UgCore.Weapons.Unload(source) -> ok, errorCode
+```
+
+Takes the loaded rounds out, back into the inventory. Returns `cannot_carry` when they do not fit.
+
+### Attach / Detach
+
+```lua
+UgCore.Weapons.Attach(source, weaponSlot, itemSlot) -> ok, errorCode
+UgCore.Weapons.Detach(source, weaponSlot, item) -> ok, errorCode
+```
+
+`Attach` uses one attachment or tint item from `itemSlot` on the weapon in `weaponSlot`. Items that do not fit that weapon, or are already fitted, return `invalid_args`. `Detach` gives a component back, by item name.
+
+### Repair
+
+```lua
+UgCore.Weapons.Repair(target, slot, durability?) -> ok, errorCode
+```
+
+Sets durability, 100 by default. `target` is a player source or an inventory id, so a gunsmith can repair weapons in a stash.
+
+### GetBySerial
+
+```lua
+UgCore.Weapons.GetBySerial(serial) -> ok, record, errorCode
+```
+
+**MUST run in a thread.** `record` is `{ serial, item, characterId?, createdAt }`, or `nil` for unknown serials. `characterId` is the character the weapon was created for, such as the buyer.
+
+```lua
+-- A police computer
+CreateThread(function()
+    local ok, record = UgCore.Weapons.GetBySerial(serial)
+
+    if record and record.characterId then
+        -- look up the registered owner
+    end
+end)
+```
+
+### IsWeapon / GetDefinition
+
+```lua
+UgCore.Weapons.IsWeapon(name) -> boolean
+UgCore.Weapons.GetDefinition(name) -> { weapon, ammo?, capacity, wear, components }?
+```
+
+## Client
+
+```lua
+UgCore.Weapons.GetEquipped() -> { hash, ammo, tint? }?
+```
+
+Actions ask the server. They **MUST run in a thread** and return `ok, errorCode`:
+
+```lua
+UgCore.Weapons.Equip(slot)
+UgCore.Weapons.Unequip()
+UgCore.Weapons.Reload()
+UgCore.Weapons.Unload()
+UgCore.Weapons.Attach(weaponSlot, itemSlot)
+UgCore.Weapons.Detach(weaponSlot, item)
+```
+
+Client events `ug-core:Weapons:Equipped` with `(hash, ammo)` and `ug-core:Weapons:Unequipped` let a HUD show the weapon.
+
+```lua client.lua
+RegisterCommand('reload', function()
+    CreateThread(function()
+        UgCore.Weapons.Reload()
+    end)
+end, false)
+
+RegisterKeyMapping('reload', 'Reload', 'keyboard', 'R')
+```
+
+## Security
+
+| Attack | What happens |
+| --- | --- |
+| Spawning a weapon with a mod menu | Every 2 seconds, the server reads the weapon in each player's hands. Anything not equipped from the inventory, and not in `allowed`, is removed and flagged `WeaponMismatch`. |
+| Infinite ammo | The server keeps the loaded count. A client reporting more rounds than it has is flagged `WeaponMismatch` and reset to the server's count. |
+| Not reporting shots | The weapon stays usable, but its ammo never refills: reloading takes ammo items, counted by the server. |
+| Equipping someone else's weapon | Equipping reads the slot of the player's own inventory on the server. |
+
+| Callback | Rate |
+| --- | --- |
+| `ug-core:WeaponEquip`, `WeaponUnequip`, `WeaponReload`, `WeaponUnload`, `WeaponAttach`, `WeaponDetach` | 3 per second each. Loaded and alive. |
+| Net event `ug-core:WeaponAmmo` | 20 per second. Loaded. |
+
+<Warning>
+  The server reads the weapon in hand and gives weapons through OneSync natives. Test them on your artifact before going live, and keep `enforce` on.
+</Warning>
+
+## Events
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Weapons:Equipped` | Server: `(source, name, serial)`. Client: `(hash, ammo)`. |
+| `ug-core:Weapons:Unequipped` | Server: `(source, name, serial, reason)`. Client: `()`. |
+| `ug-core:Weapons:Broken` | `(source, name, serial)` |
+
+`reason` is `toggle`, `switch`, `moved`, `removed`, `down`, `unload`, `broken` or `request`.
+
+## Hooks
+
+| Hook | Payload |
+| --- | --- |
+| `Weapons:BeforeEquip` | `{ source, name, serial }` |
+
+It allows or cancels. A safe zone can refuse every equip:
+
+```lua
+UgCore.Hooks.Register(UgCore.Enums.Hooks.Weapons.BeforeEquip, function(payload)
+    return not SafeZones.Contains(payload.source)
+end)
+```

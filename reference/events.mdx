@@ -75,7 +75,13 @@ Subscribe with [`UgCore.Events.On`](/api/events). Names live in `UgCore.Enums.Ev
 | `ug-core:Items:Used` | `(source, name, slot, metadata)` |
 | `ug-core:Inventory:ItemAdded` | `(inventoryId, name, count, metadata, reason)` |
 | `ug-core:Inventory:ItemRemoved` | `(inventoryId, name, count, metadata, reason)` |
-| `ug-core:Inventory:Changed` | Client only: `(changes)`, `nil` after a full sync |
+| `ug-core:Inventory:Opened` | Server: `(source, inventoryId)`. Client: `(inventory)` |
+| `ug-core:Inventory:Closed` | Server: `(source, inventoryId)`. Client: `()` |
+| `ug-core:Inventory:Changed` | Client only: `(changes, ref)`, `nil` changes after a full sync |
+| `ug-core:Weapons:Equipped` | Server: `(source, name, serial)`. Client: `(hash, ammo)` |
+| `ug-core:Weapons:Unequipped` | Server: `(source, name, serial, reason)`. Client: `()` |
+| `ug-core:Weapons:Broken` | `(source, name, serial)` |
+| `ug-core:Shops:Purchased` | `(source, shop, item, count, total, account)` |
 
 ## Permissions
 

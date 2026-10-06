@@ -93,6 +93,36 @@ add_ace group.admin ug.admin allow
     ```
   </Accordion>
 
+  <Accordion title="ug items [name]" icon="box">
+    Every item definition, or the details of one.
+
+    ```text
+    > ug items water
+    water: Water, 500 g, stacks to 10, not usable
+    ```
+  </Accordion>
+
+  <Accordion title="ug shops [name]" icon="store">
+    Every shop, or the prices and stock of one.
+
+    ```text
+    > ug shops general_store
+    general_store (24/7), pays with cash:
+        1  water                             5  unlimited
+        2  bread                             8  unlimited
+        3  bandage                          50  18/20 in stock
+    ```
+  </Accordion>
+
+  <Accordion title="ug weapon <id>" icon="gun">
+    The weapon a player has equipped, with its serial, ammo and durability.
+
+    ```text
+    > ug weapon 3
+    Player 3: weapon_pistol, serial K7QH2M9XPA, 42 rounds, 97.5% durability
+    ```
+  </Accordion>
+
   <Accordion title="ug hooks" icon="anchor">
     Every registered hook, with the resource that registered it and its priority.
 

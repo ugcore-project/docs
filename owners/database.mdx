@@ -38,13 +38,22 @@ Each module creates and updates its own tables with versioned migrations. They r
 | `ug_migrations` | core | Applied migration versions per module. |
 | `ug_bans`, `ug_ban_identifiers` | identity | Bans and the identifiers they cover. |
 | `ug_permissions` | permissions | Permissions granted per identifier. |
+| `ug_group_members` | permissions | Staff group memberships per identifier. |
 | `ug_characters` | characters | Characters, their data and saved death state. Deleted characters stay, marked deleted. |
 | `ug_accounts`, `ug_ledger` | accounts | Balances and every change to them. |
 | `ug_character_jobs` | jobs | Job and grade per character. |
 | `ug_character_gangs` | gangs | Gang and grade per character. |
+| `ug_inventories` | inventory | Saved inventories: players, stashes, and trunks and gloveboxes of persistent vehicles. |
+| `ug_item_logs` | inventory | Every item change: amount, reason, and the other inventory of moves and gives. |
+| `ug_weapon_serials` | weapons | Every weapon serial and the character it was created for. |
+| `ug_shop_stock` | shops | Current stock of limited shop items. |
 
 Disabling a module never drops its tables.
 
 ## Money is always traceable
 
 Every balance change writes a ledger row in the same transaction: amount, balance after, reason and the other character for transfers. If the write fails, the change is undone.
+
+## Items are always traceable
+
+Every item change writes a row to `ug_item_logs`, saved in the same transaction as the inventory, so the log never shows a change the inventory lost. Read it with [`Inventory.GetLog`](/api/inventory#getlog).

@@ -144,6 +144,28 @@ Needs the `inventory` module. See [`UgCore.Inventory`](/api/inventory).
 | `player:CanCarry(name, count, metadata?) -> boolean` | `Inventory.CanCarry` |
 | `player:GetItems() -> UgInventorySlot[]` | `Inventory.GetItems` |
 | `player:UseItem(slot) -> ok, errorCode` | `Inventory.Use` |
+| `player:OpenInventory(inventoryId) -> ok, errorCode` | `Inventory.Open`. Thread. |
+| `player:CloseInventory()` | `Inventory.Close` |
+| `player:GetOpenInventory() -> id?` | `Inventory.GetOpen` |
+
+### Weapons
+
+Needs the `weapons` module. See [`UgCore.Weapons`](/api/weapons).
+
+| Method | Calls |
+| --- | --- |
+| `player:GetEquippedWeapon() -> UgEquippedWeapon?` | `Weapons.GetEquipped` |
+| `player:EquipWeapon(slot) -> ok, errorCode` | `Weapons.Equip` |
+| `player:UnequipWeapon(reason?) -> ok` | `Weapons.Unequip` |
+| `player:ReloadWeapon() -> ok, errorCode` | `Weapons.Reload`. Thread. |
+
+### Shops
+
+Needs the `shops` module. See [`UgCore.Shops`](/api/shops).
+
+| Method | Calls |
+| --- | --- |
+| `player:Buy(shop, index, count) -> ok, errorCode` | `Shops.Buy`. Thread. |
 
 ### Gang
 

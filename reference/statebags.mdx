@@ -30,5 +30,8 @@ On `GlobalState`.
 | --- | --- |
 | `ug-core:Config` | `{ [name] = { kind, values } }` with client and shared values only. Written once every config loaded. |
 | `ug-core:Modules` | Enabled modules in load order, with their files and namespaces. |
+| `ug-core:Items` | Item definitions, without metadata rules. Needs `items`. |
+| `ug-core:Drops` | Ground drop positions by id, as `{ x, y, z }`. Contents are never replicated. Needs `inventory`. |
+| `ug-core:Shops` | Shop labels and positions by name. Prices and stock are never replicated. Needs `shops`. |
 
 <Warning>Player statebags replicate to every client. They never hold secrets.</Warning>

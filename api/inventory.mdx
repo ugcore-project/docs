@@ -13,14 +13,20 @@ import { ModuleInfo } from "/snippets/module-info.jsx";
 
 ug-core owns every inventory: contents, rules, persistence and the callbacks clients use. It has no UI. An inventory resource such as `ug-inventory` shows the items and calls the client functions below. Owners can swap the UI without weakening security.
 
-<Info>This page covers player inventories. Stashes, vehicle inventories and ground drops come next.</Info>
+| Kind | Id | Saved |
+| --- | --- | --- |
+| Player | `player:<characterId>` | Yes |
+| [Stash](#stashes) | `stash:<name>`, or `stash:<name>:<characterId>` when personal | Yes |
+| [Trunk, glovebox](#vehicles) | `trunk:<plate>`, `glovebox:<plate>` | Only after [`SetPersistent`](#setpersistent) |
+| [Ground drop](#drops) | `drop:<n>` | Never |
 
 ## Concepts
 
 - **Slots and weight.** Each inventory has a number of slots and a maximum weight in grams. Each slot holds one stack. Player inventories use `playerSlots` and `playerWeight` from `config/inventory.lua`.
 - **All or nothing.** Every change either applies fully or not at all. Adding 12 water that only fits 10 adds none and returns `cannot_carry`.
 - **Stacking.** Units stack up to the item's `maxStack`, only with the same name and equal metadata. Existing stacks fill first, then empty slots, lowest slot first.
-- **Targets.** `target` is a player source, for that player's inventory, or an inventory id. Player inventories are `player:<characterId>` and exist while the character is loaded.
+- **Targets.** `target` is a player source, for that player's inventory, or an inventory id. Functions act on loaded inventories: player inventories while their character is loaded, others once opened or [loaded](#load). Unknown ids return `not_found`.
+- **Idle unloading.** Saved inventories nobody owns or has open unload after 5 minutes idle, and are saved first.
 - **Audit log.** Every change writes a row to `ug_item_logs`, in the same database transaction as the inventory. See [GetLog](#getlog).
 
 ## Adding and removing
@@ -151,6 +157,158 @@ UgCore.Inventory.GetLog(target, limit?) -> ok, entries, errorCode
 
 Inventories are saved by a write-behind cache: every 30 seconds, on character unload, on player drop and on resource stop. Audit rows are written in the same transaction, so the log never shows a change the inventory lost. A failed write keeps both and retries.
 
+## Stashes
+
+Owners define stashes in `config/inventory.lua`. Resources add their own at runtime.
+
+```lua config/inventory.lua
+return {
+    stashes = {
+        police_locker = {
+            label = 'Police locker',
+            slots = 50,
+            weight = 100000,
+            coords = vector3(461.7, -996.0, 30.7),
+            personal = true,
+            jobs = { police = 1 },
+        },
+        gang_safe = { label = 'Safe', slots = 20, weight = 50000, coords = vector3(0, 0, 0), gangs = { ballas = 2 } },
+        evidence = { label = 'Evidence', slots = 100, weight = 500000 },
+    },
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `label`, `slots`, `weight` | Required. Weight in grams. |
+| `coords` | Where players open it themselves. Without it, only [`Inventory.Open`](#open) opens it. |
+| `distance` | Meters from `coords`, 0.5 to 20. Defaults to 2. |
+| `personal` | One inventory per character, such as a locker. |
+| `jobs`, `gangs` | Name to minimum grade. Need the `jobs` or `gangs` module. |
+| `groups` | [Permission groups](/owners/permissions#groups). |
+
+Any listed job, gang or group gives access. A stash without any is open to everyone in range.
+
+### RegisterStash
+
+```lua
+UgCore.Inventory.RegisterStash(name, options)
+```
+
+Same fields as the config, plus `check`, a function `fun(source): boolean` that MUST also pass. Registered stashes are removed when your resource stops. Their items stay saved.
+
+```lua
+UgCore.Inventory.RegisterStash('house_42', {
+    label = 'House 42',
+    slots = 30,
+    weight = 80000,
+    coords = vector3(-174.3, 497.6, 137.6),
+    check = function(source)
+        return Houses.IsOwner(42, source)
+    end,
+})
+```
+
+Config names cannot be registered. A name registered by another resource raises.
+
+### GetStash / GetStashId
+
+```lua
+UgCore.Inventory.GetStash(name) -> definition?
+UgCore.Inventory.GetStashId(name, source?) -> id?
+```
+
+`GetStashId` needs the player for personal stashes, to know the character.
+
+## Vehicles
+
+Every vehicle has a trunk and a glovebox, keyed by its plate. Sizes come from `trunk` and `glovebox` in `config/inventory.lua`.
+
+- **Trunk:** the player stands within 4 meters and the doors are unlocked.
+- **Glovebox:** the player sits in the vehicle.
+- Both are checked on the server, from the vehicle entity and its plate.
+
+Vehicle inventories are temporary: they leave with the vehicle. A garage resource marks owned vehicles persistent, and their items are saved.
+
+### SetPersistent
+
+```lua
+UgCore.Inventory.SetPersistent(plate, persistent) -> ok, errorCode
+```
+
+**MUST run in a thread.** Starts or stops saving the trunk and glovebox of a plate. Stopping deletes the saved items. Plates are trimmed and upper case, with spaces as `_`: `' ab 123 '` is `trunk:AB_123`.
+
+## Drops
+
+Ground drops hold items at a position. They are never saved: a drop disappears when it is empty, or after `lifetime` minutes from `drops` in `config/inventory.lua`, with its items.
+
+- Players drop items with the client function [`Drop`](#client). A drop within 1.5 meters with room is reused.
+- Positions replicate to clients for drawing. Contents are only sent when a player opens a drop within 2.5 meters.
+
+### CreateDrop
+
+```lua
+UgCore.Inventory.CreateDrop(coords, items?, reason?) -> ok, id, errorCode
+```
+
+Every item MUST fit, or no drop is created.
+
+```lua
+local ok, id = UgCore.Inventory.CreateDrop(vector3(215.0, -810.0, 30.7), {
+    { name = 'bread', count = 3 },
+})
+```
+
+### GetDrops
+
+```lua
+UgCore.Inventory.GetDrops() -> table<string, vector3>
+```
+
+## Opening
+
+A player has their own inventory, `player`, and at most one more open, `other`. Opening another closes the previous one.
+
+Reach is checked when it opens, and again on **every** action: walking away, losing a job or a locked trunk closes it. The client gets `ug-core:InventoryClosed`.
+
+### Open
+
+```lua
+UgCore.Inventory.Open(source, inventoryId) -> ok, errorCode
+```
+
+**MUST run in a thread.** Opens any inventory for a player from server code, such as a house stash, a search or an evidence room. Loads it when needed. Reach is not checked: your code decided. `Inventory:BeforeOpen` MAY cancel.
+
+```lua
+-- A police search
+UgCore.Inventory.Open(officer, UgCore.Inventory.Get(suspect).id)
+```
+
+### Close / GetOpen
+
+```lua
+UgCore.Inventory.Close(source)
+UgCore.Inventory.GetOpen(source) -> id?
+```
+
+### Load
+
+```lua
+UgCore.Inventory.Load(id) -> ok, errorCode
+```
+
+**MUST run in a thread.** Loads a saved inventory by id for server code, such as an offline player's `player:12`. It unloads again when idle.
+
+```lua
+CreateThread(function()
+    local id = 'player:' .. characterId
+
+    if UgCore.Inventory.Load(id) then
+        UgCore.Inventory.AddItem(id, 'letter', 1, { from = 'City Hall' }, 'mail')
+    end
+end)
+```
+
 ## Client
 
 The player's own inventory, sent by the server to that player only. Reads are local:
@@ -173,14 +331,34 @@ UgCore.Inventory.Move(fromSlot, toSlot, count?) -> ok, errorCode
 UgCore.Inventory.Use(slot) -> ok, errorCode
 UgCore.Inventory.Give(target, slot, count?) -> ok, errorCode
 UgCore.Inventory.Refresh() -> ok, errorCode
+UgCore.Inventory.Drop(slot, count?) -> ok, errorCode
 ```
 
 `Give` needs the other player within `giveDistance` meters, measured on the server.
 
+The other inventory:
+
+```lua
+UgCore.Inventory.Open(kind, key) -> ok, errorCode
+UgCore.Inventory.Close() -> ok, errorCode
+UgCore.Inventory.MoveBetween(from, fromSlot, to, toSlot, count?) -> ok, errorCode
+UgCore.Inventory.GetOther() -> { label, slots, maxWeight, items }?
+UgCore.Inventory.GetDrops() -> table<string, vector3>
+```
+
+| `kind` | `key` |
+| --- | --- |
+| `stash` | Stash name |
+| `trunk`, `glovebox` | Vehicle entity. Sent as its network id. |
+| `drop` | Drop id, from `GetDrops` |
+
+`from` and `to` are `'player'` or `'other'`.
+
 ### Build an inventory UI
 
 ```lua client.lua
-UgCore.Events.On(UgCore.Enums.Events.Inventory.Changed, function(changes)
+UgCore.Events.On(UgCore.Enums.Events.Inventory.Changed, function(changes, ref)
+    -- ref is 'player' or 'other'
     if changes == nil then
         -- full sync: redraw everything from UgCore.Inventory.GetItems()
         return
@@ -191,6 +369,14 @@ UgCore.Events.On(UgCore.Enums.Events.Inventory.Changed, function(changes)
     end
 end)
 
+UgCore.Events.On(UgCore.Enums.Events.Inventory.Opened, function(inventory)
+    -- show inventory.label, inventory.slots, inventory.items next to the player's
+end)
+
+UgCore.Events.On(UgCore.Enums.Events.Inventory.Closed, function()
+    -- hide the second panel
+end)
+
 RegisterNUICallback('move', function(data, reply)
     CreateThread(function()
         local ok, err = UgCore.Inventory.Move(data.from, data.to, data.count)
@@ -199,15 +385,18 @@ RegisterNUICallback('move', function(data, reply)
 end)
 ```
 
-`ug-core:Inventory:Changed` is a client event: `nil` after a full sync, or the list of changed slots.
+On clients, `Changed` gets `(changes, ref)`: `nil` after a full sync, or the list of changed slots. `Opened` gets the opened inventory and `Closed` nothing.
 
 ## Security
 
-Clients send slots and counts, never items, metadata or inventory ids. Their own inventory is the reference `player`.
+Clients send slots and counts, never items, metadata or inventory ids. Their own inventory is `player`, the open one `other`.
 
 | Callback | Rate | Checks |
 | --- | --- | --- |
-| `ug-core:InventoryMove` | 10 per second | Loaded, alive, both inventories within reach. Anything else is flagged in Guard. |
+| `ug-core:InventoryOpen` | 3 per second | Loaded, alive, then access and reach for the kind. Replies the opened inventory. |
+| `ug-core:InventoryClose` | 5 per second | Loaded. |
+| `ug-core:InventoryMove` | 10 per second | Loaded, alive, `other` still within reach. `other` without an open inventory is flagged in Guard. |
+| `ug-core:InventoryDrop` | 3 per second | Loaded, alive. The drop is at the ped position read on the server. |
 | `ug-core:InventoryUse` | 4 per second | Loaded, alive, then the [Use](#use) checks. |
 | `ug-core:InventoryGive` | 2 per second | Loaded, alive, target loaded and near, measured on the server. |
 | `ug-core:InventoryRefresh` | 2 per 5 seconds | Loaded. |
@@ -235,7 +424,9 @@ Wrong argument types, counts out of range and long reasons raise.
 | --- | --- |
 | `ug-core:Inventory:ItemAdded` | `(inventoryId, name, count, metadata, reason)` |
 | `ug-core:Inventory:ItemRemoved` | `(inventoryId, name, count, metadata, reason)` |
-| `ug-core:Inventory:Changed` | Client only: `(changes)` |
+| `ug-core:Inventory:Opened` | Server: `(source, inventoryId)`. Client: `(inventory)`. |
+| `ug-core:Inventory:Closed` | Server: `(source, inventoryId)`. Client: `()`. |
+| `ug-core:Inventory:Changed` | Client only: `(changes, ref)` |
 
 Use `GetSource(inventoryId)` to find the player of a player inventory.
 
@@ -246,6 +437,7 @@ Use `GetSource(inventoryId)` to find the player of a player inventory.
 | `Inventory:BeforeAdd` | `{ inventory, name, count, metadata, reason }` |
 | `Inventory:BeforeRemove` | `{ inventory, name, count, metadata, reason }` |
 | `Inventory:BeforeMove` | `{ from, fromSlot, to, toSlot, count, reason }` |
+| `Inventory:BeforeOpen` | `{ source, inventory }` |
 | `Inventory:BeforeClearOnRespawn` | `{ source }` |
 
 They allow or cancel. Changes to the payload are ignored.
