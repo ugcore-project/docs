@@ -17,6 +17,7 @@
 - `api/`: one page per `UgCore.<Namespace>`. Signatures, parameters with `ResponseField`, one example.
 - `reference/`: exhaustive tables. Error codes, events, hooks, statebags, convars, config files.
 - `contributing/`: contribution workflow, conventions, testing.
+- `ug-lib/`: the ug-lib tab, flat: guides and one page per `UgLib.<Namespace>`. The link checker does not resolve deeper folders. The `ug-lib` repository is its source of truth.
 
 ## Terminology
 
@@ -40,5 +41,6 @@
 ## Content boundaries
 
 - Document the public `UgCore.*` API only. Never document `UgCore.Internal`, wire event names (`__ugcb:*`) or internal net events.
-- Never document UI. ug-core is headless. UI belongs to other resources such as ug-lib.
+- Never document UI in ug-core pages. ug-core is headless. UI is documented in the `ug-lib/` pages only.
+- In `ug-lib/` pages, document the public `UgLib.*` API only. Never document `UgLib.Internal`, the UI exports (`UiOpen`, `RadialAddItem`, ...), the NUI protocol or the `__uglib:*` events.
 - Never reveal which Guard check triggers a kick or ban beyond the public weights table.

@@ -1,0 +1,45 @@
+---
+title: "UgLib.Draw"
+sidebarTitle: "Draw"
+description: "3D text, 2D text and markers, every frame."
+icon: "pen-nib"
+---
+
+<Badge color="green">Client</Badge> Runs in your resource.
+
+```lua
+UgLib.Draw.Text3D(coords, text, options?)
+UgLib.Draw.Text2D(x, y, text, options?)
+UgLib.Draw.Marker(markerType, coords, options?)
+```
+
+Call them every frame while the drawing is wanted.
+
+| Option | Applies to | Default |
+| --- | --- | --- |
+| `scale` | text | `0.35` |
+| `font` | text | `4` |
+| `color` | all | white for text, primary for markers. `{ r, g, b, a? }` from 0 to 255. |
+| `outline` | text | `true` |
+| `center` | text | `true` |
+| `maxDistance` | `Text3D`, `Marker` | unlimited. Skips drawing farther from the player. |
+| `size`, `direction`, `rotation` | `Marker` | `vector3`s |
+| `bob`, `faceCamera`, `rotate` | `Marker` | `false` |
+
+<Tip>
+  An options table is checked once, then trusted on later frames. Build it once and pass the same table every frame.
+</Tip>
+
+## Example
+
+```lua client.lua
+local LABEL = { maxDistance = 10.0, color = { 255, 255, 255 } }
+local SHOP = vector3(25.7, -1347.3, 29.5)
+
+CreateThread(function()
+    while true do
+        UgLib.Draw.Text3D(SHOP, 'Shop', LABEL)
+        Wait(0)
+    end
+end)
+```

@@ -1,0 +1,49 @@
+---
+title: "UgLib.Progress"
+sidebarTitle: "Progress"
+description: "Timed actions with a bar, an animation and props."
+icon: "bars-progress"
+---
+
+<Badge color="green">Client</Badge> Through ug-lib.
+
+```lua
+UgLib.Progress.Start(options) -> completed, reason
+UgLib.Progress.Cancel() -> boolean
+UgLib.Progress.IsActive() -> boolean
+```
+
+`Start` MUST run in a thread.
+
+<ResponseField name="options.duration" type="integer" required>100 to 600000 ms.</ResponseField>
+<ResponseField name="options.label" type="string">Up to 128 characters.</ResponseField>
+<ResponseField name="options.style" type="UgProgressStyle" default="Bar" />
+<ResponseField name="options.position" type="UgPosition">Defaults to `settings.progressPosition`.</ResponseField>
+<ResponseField name="options.canCancel" type="boolean" default="true">The cancel key (`settings.cancelKey`) cancels it.</ResponseField>
+<ResponseField name="options.cancelOnMove" type="boolean" default="false">Movement stays enabled, and pressing a direction cancels.</ResponseField>
+<ResponseField name="options.disable" type="table">`{ move, sprint, car, combat, mouse }`. All but `mouse` default to true.</ResponseField>
+<ResponseField name="options.animation" type="table">`{ dict, name, flag? }` (flag 49 by default) or `{ scenario }`.</ResponseField>
+<ResponseField name="options.props" type="table[]">Up to 4 [`AttachProp`](/ug-lib/animation) options.</ResponseField>
+<ResponseField name="options.allowDead" type="boolean" default="false">A dead player cancels unless set.</ResponseField>
+
+- `completed` is true when the time ran out. Otherwise `reason` is `Cancelled`, `Busy`, `Replaced` or `Closed`.
+- One progress at a time across resources: a second start returns `false, Busy`.
+- The animation stops and props are deleted however it ends.
+- `Cancel` and `IsActive` act on your resource's progress.
+
+## Example
+
+```lua client.lua
+CreateThread(function()
+    local completed = UgLib.Progress.Start({
+        duration = 5000,
+        label = 'Repairing the engine',
+        animation = { dict = 'mini@repair', name = 'fixing_a_ped' },
+        props = { { model = 'prop_tool_wrench' } },
+    })
+
+    if completed then
+        UgCore.Network.TriggerServer('my-mechanic:Repaired')
+    end
+end)
+```

@@ -1,0 +1,33 @@
+---
+title: "UgLib.Entity"
+sidebarTitle: "Entity"
+description: "Find the closest or nearby peds, vehicles, objects and players."
+icon: "people-group"
+---
+
+<Badge color="green">Client</Badge> Runs in your resource.
+
+```lua
+UgLib.Entity.GetClosestPed(coords?, maxDistance?, options?) -> entity, distance
+UgLib.Entity.GetClosestVehicle(coords?, maxDistance?, options?) -> entity, distance
+UgLib.Entity.GetClosestObject(coords?, maxDistance?, options?) -> entity, distance
+UgLib.Entity.GetClosestPlayer(coords?, maxDistance?, options?) -> player
+UgLib.Entity.GetNearbyPeds(coords?, radius, options?) -> { entity, distance }[]
+UgLib.Entity.GetNearbyVehicles(coords?, radius, options?) -> { entity, distance }[]
+UgLib.Entity.GetNearbyObjects(coords?, radius, options?) -> { entity, distance }[]
+UgLib.Entity.GetNearbyPlayers(coords?, radius, options?) -> player[]
+```
+
+- `coords` defaults to the local player. `maxDistance` defaults to unlimited. Lists are sorted closest first. Nothing found returns `nil`.
+- Peds skip the local player always, and player peds unless `includePlayers = true`. `exclude` skips one handle.
+- Players skip the local player unless `includeSelf = true`. A player is `{ playerId, serverId, ped, distance }`.
+
+## Example
+
+```lua client.lua
+local player = UgLib.Entity.GetClosestPlayer(nil, 3.0)
+
+if player then
+    UgCore.Network.TriggerServer('my-police:Cuff', player.serverId)
+end
+```

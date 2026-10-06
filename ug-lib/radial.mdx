@@ -1,0 +1,46 @@
+---
+title: "UgLib.Radial"
+sidebarTitle: "Radial"
+description: "One-off radials, and the global radial every resource adds to."
+icon: "circle-nodes"
+---
+
+<Badge color="green">Client</Badge> Through ug-lib.
+
+```lua
+UgLib.Radial.Open(options) -> id, reason
+UgLib.Radial.AddItem(item)
+UgLib.Radial.RemoveItem(id) -> boolean
+UgLib.Radial.ClearItems()
+UgLib.Radial.SetEnabled(enabled)
+```
+
+Items: `id` (1 to 64 letters, digits or `_ - . :`, unique in your tree), `label` (up to 64 characters), `icon`, `disabled`, and `items` for a submenu. Up to 50 items per ring and 3 levels. A ring shows 8 items at a time and pages the rest behind a "more" button.
+
+## One-off
+
+`Open({ items, title?, timeout? })` waits and returns the chosen item's `id`, or `nil, reason`. Its items MUST NOT have `onSelect`. MUST run in a thread.
+
+## Global radial
+
+The global radial opens with `settings.radialKey` (default `F1`) and shows the items of every resource.
+
+- `AddItem(item)` adds an item, or replaces yours with the same id. Leaves MUST have `onSelect(id)`, which runs in your resource. An item with a submenu MUST NOT have one.
+- `RemoveItem` and `ClearItems` act on your items only.
+- `SetEnabled(false)` blocks the key, such as while the player is dead. It stays blocked while any resource blocks it.
+- Your items and your block go away when your resource stops.
+- While the radial is open, Escape or a click outside closes it.
+
+## Example
+
+```lua client.lua
+UgLib.Radial.AddItem({
+    id = 'emotes',
+    label = 'Emotes',
+    icon = UgLib.Enums.Icon.User,
+    items = {
+        { id = 'wave', label = 'Wave', onSelect = function() ExecuteCommand('e wave') end },
+        { id = 'sit', label = 'Sit', onSelect = function() ExecuteCommand('e sit') end },
+    },
+})
+```

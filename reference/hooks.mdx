@@ -42,13 +42,13 @@ UgCore.Hooks.Register(UgCore.Enums.Hooks.Accounts.BeforeRemove, function(payload
 ## Notes
 
 - `Players:BeforeBleedout` cancelled means the bleedout retries later. Use it to keep a player downed during CPR.
-- `Guard:BeforeAction` `action` is `'warn'`, `'kick'` or `'ban'`. A hook MAY lower it, such as `ban` to `kick`, never raise it. `flags` are the recent flags, oldest first.
+- `Guard:BeforeAction` `action` is a `UgCore.Enums.GuardActions` value: `Warn`, `Kick` or `Ban`. A hook MAY lower it, such as `Ban` to `Kick`, never raise it. `flags` are the recent flags, oldest first.
 - `Characters:BeforeCreate` MAY fill `data`, for example a starting phone number.
 
 ```lua
 UgCore.Hooks.Register(UgCore.Enums.Hooks.Guard.BeforeAction, function(payload)
-    if payload.action == 'ban' then
-        payload.action = 'kick'
+    if payload.action == UgCore.Enums.GuardActions.Ban then
+        payload.action = UgCore.Enums.GuardActions.Kick
         return payload
     end
 end)

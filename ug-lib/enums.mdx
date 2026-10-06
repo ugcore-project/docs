@@ -1,0 +1,46 @@
+---
+title: "UgLib.Enums"
+sidebarTitle: "Enums"
+description: "Every value ug-lib compares or accepts."
+icon: "list"
+---
+
+<Badge color="purple">Shared</Badge> Runs in your resource.
+
+Pass and compare these values, never the strings. Your editor completes them and flags typos.
+
+| Enum | Values |
+| --- | --- |
+| `Position` | `TopLeft`, `Top`, `TopRight`, `CenterLeft`, `Center`, `CenterRight`, `BottomLeft`, `Bottom`, `BottomRight` |
+| `NotifyType` | `Info`, `Success`, `Warning`, `Error` |
+| `NotifyStyle` | `Toast`, `Compact`, `Banner` |
+| `ProgressStyle` | `Bar`, `Circle`, `Ring`, `Minimal` |
+| `TextUIStyle` | `Pill`, `Minimal`, `Keybind`, `Card` |
+| `FieldType` | `Text`, `Textarea`, `Number`, `Password`, `Select`, `MultiSelect`, `Checkbox`, `Toggle`, `Slider`, `Color`, `Date` |
+| `CloseReason` | `Cancelled`, `Timeout`, `Busy`, `Replaced`, `Closed` |
+| `Difficulty` | `Easy`, `Medium`, `Hard` |
+| `Icon` | `Info`, `Settings`, `User`, `Lock`, `Unlock`, `Trash`, `Star`, `Edit`, `Plus`, `Minus`, `Check`, `Warning`, `Error`, `Question` |
+| `Color` | `Primary`, `Success`, `Warning`, `Destructive`, `Muted` |
+| `DialogSize` | `Small`, `Medium`, `Large` |
+| `UiType` | `Notify`, `TextUI`, `Progress`, `SkillCheck`, `Dialog`, `Context`, `Menu`, `Radial` |
+| `CacheKey` | `Ped`, `PlayerId`, `ServerId`, `Coords`, `Heading`, `Vehicle`, `Seat`, `Weapon` |
+| `Asset` | `Model`, `AnimDict`, `AnimSet`, `PtfxAsset`, `TextureDict`, `ScaleformMovie` |
+| `ZoneShape` | `Sphere`, `Box`, `Poly`, `Point` |
+| `KeyMapper` | `Keyboard`, `MouseButton`, `MouseWheel`, `Gamepad` |
+| `CurrencyPosition` | `Before`, `After` |
+| `DurationStyle` | `Short`, `Clock`, `Long` |
+| `ThemeMode` | `Dark`, `Light` |
+| `Events.Cache` | `Changed` |
+| `Events.Ui` | `Opened`, `Closed` |
+
+## Events
+
+Local events from ug-lib reach every resource on the client. Check `GetInvokingResource()` is `ug-lib` before trusting them.
+
+| Event | Arguments |
+| --- | --- |
+| `Events.Cache.Changed` | `(key, value, oldValue)` |
+| `Events.Ui.Opened` | `(type, ownerResource)`, when a modal opens |
+| `Events.Ui.Closed` | `(type, ownerResource)`, when it closes |
+
+Prefer [`UgLib.Cache.On`](/ug-lib/cache) to the raw cache event.

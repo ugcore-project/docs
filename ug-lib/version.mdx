@@ -1,0 +1,24 @@
+---
+title: "UgLib.Version"
+sidebarTitle: "Version"
+description: "Require a minimum ug-lib version."
+icon: "code-compare"
+---
+
+<Badge color="purple">Shared</Badge> Runs in your resource.
+
+```lua
+UgLib.Version.Get() -> string
+UgLib.Version.IsAtLeast(minimum) -> boolean
+UgLib.Version.Require(minimum)
+```
+
+- `Get` returns ug-lib's manifest version, such as `'1.0.0'`.
+- `IsAtLeast` compares major, minor and patch as numbers. Pre-release suffixes are ignored.
+- `Require` raises when ug-lib is older, and logs one warning when ug-lib has a newer major version.
+
+The manifest key does the same before `UgLib` exists:
+
+```lua fxmanifest.lua
+ug_lib_version '1.0.0'
+```

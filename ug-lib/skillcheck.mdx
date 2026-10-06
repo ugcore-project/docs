@@ -1,0 +1,42 @@
+---
+title: "UgLib.SkillCheck"
+sidebarTitle: "SkillCheck"
+description: "Press the key while the needle is in the area."
+icon: "bullseye"
+---
+
+<Badge color="green">Client</Badge> Through ug-lib.
+
+```lua
+UgLib.SkillCheck.Start(difficulties, keys?) -> success, reason
+UgLib.SkillCheck.Cancel() -> boolean
+UgLib.SkillCheck.IsActive() -> boolean
+```
+
+`Start` MUST run in a thread.
+
+<ResponseField name="difficulties" type="table" required>
+  1 to 10 rounds. Each is a `UgLib.Enums.Difficulty` or `{ areaSize, speed }`: area 10 to 120 degrees, speed 0.1 to 1.0 degrees per ms.
+</ResponseField>
+<ResponseField name="keys" type="string[]" default="{ 'e' }">1 to 8 lower-case letters or digits. Each round asks for one of them.</ResponseField>
+
+| Difficulty | Area | Speed |
+| --- | --- | --- |
+| `Easy` | 60° | 0.25 |
+| `Medium` | 45° | 0.35 |
+| `Hard` | 30° | 0.45 |
+
+- Every round MUST be hit. A miss, a wrong key or a full turn without a press fails.
+- Lua picks every area, key and speed, and counts a hit only when the needle could be in the area at the time of the press. A forged hit counts as a miss.
+- `reason` is set when it ended without an answer: `Busy`, `Timeout`, `Cancelled` (Escape), `Replaced` or `Closed` (`Cancel`).
+
+## Example
+
+```lua client.lua
+CreateThread(function()
+    local Difficulty = UgLib.Enums.Difficulty
+    local success = UgLib.SkillCheck.Start({ Difficulty.Easy, Difficulty.Medium, Difficulty.Hard }, { 'w', 'a', 's', 'd' })
+
+    UgCore.Network.TriggerServer('my-heist:Lockpick', success)
+end)
+```

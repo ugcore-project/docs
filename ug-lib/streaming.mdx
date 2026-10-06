@@ -1,0 +1,33 @@
+---
+title: "UgLib.Streaming"
+sidebarTitle: "Streaming"
+description: "Load models, animations, effects and textures, and wait for them."
+icon: "cloud-arrow-down"
+---
+
+<Badge color="green">Client</Badge> Runs in your resource.
+
+```lua
+UgLib.Streaming.Model(model, timeout?) -> ok
+UgLib.Streaming.AnimDict(dict, timeout?) -> ok
+UgLib.Streaming.AnimSet(set, timeout?) -> ok
+UgLib.Streaming.PtfxAsset(asset, timeout?) -> ok
+UgLib.Streaming.TextureDict(dict, timeout?) -> ok
+UgLib.Streaming.ScaleformMovie(movie, timeout?) -> ok, handle
+UgLib.Streaming.Release(kind, name) -> boolean
+```
+
+- Every loader MUST run in a thread. `timeout` defaults to 10000 ms.
+- `Model` takes a name or a hash. Models and dictionaries that do not exist fail at once.
+- Assets loaded by your resource are released when it stops. `Release` frees one early, with `kind` from `UgLib.Enums.Asset`.
+
+## Example
+
+```lua client.lua
+CreateThread(function()
+    if UgLib.Streaming.Model('prop_cs_burger_01') then
+        local coords = UgLib.Cache.Coords
+        local prop = CreateObject(`prop_cs_burger_01`, coords.x, coords.y, coords.z, false, false, false)
+    end
+end)
+```

@@ -1,0 +1,94 @@
+---
+title: "Configuration"
+description: "Positions, durations, keys, language and theme of ug-lib."
+icon: "sliders"
+---
+
+`ug-lib` generates `config/settings.lua` and `config/theme.lua` on first start, with a description, type, limits and convar name above every option. It never edits them afterwards. Delete a file to restore its defaults.
+
+Precedence, lowest to highest: default, file, convar. An invalid value logs an error and uses its default, so `ug-lib` always starts.
+
+<Warning>
+  Every value is sent to players. Never put secrets in these files.
+</Warning>
+
+## `config/settings.lua`
+
+| Key | Type | Default | Purpose |
+| --- | --- | --- | --- |
+| `locale` | string | `en` | Language of ug-lib labels, and the default of `UgLib.Locale`. |
+| `debug` | boolean | `false` | Debug logs on both sides, and the `uglib` client command. |
+| `currency` | table | `{ symbol = '$', position = 'before' }` | Default of `Format.Money`. `position` is `before` or `after`. |
+| `notifyPosition` | string | `top-right` | Default anchor of notifications. |
+| `notifyDuration` | integer | `5000` | Default notification time in ms. `0` keeps it until dismissed. |
+| `notifyMax` | integer | `5` | Notifications per anchor. Older ones leave first. |
+| `textUIPosition` | string | `bottom` | Default anchor of the text prompt. |
+| `progressPosition` | string | `bottom` | Default anchor of progress bars. |
+| `menuPosition` | string | `top-left` | Default anchor of keyboard menus. |
+| `cancelKey` | string | `X` | Cancels a progress action. |
+| `radialKey` | string | `F1` | Opens the global radial. An empty string disables it. |
+| `menuKeys` | table | arrows, `RETURN`, `BACK` | Keys of keyboard menus: `up`, `down`, `left`, `right`, `select`, `back`. |
+| `cacheInterval` | integer | `100` | How often the client cache reads the player, in ms. 50 to 1000. |
+| `zoneInterval` | integer | `250` | How often zones check the player, in ms. 50 to 2000. |
+| `sounds` | boolean | `true` | Frontend sounds in keyboard menus. |
+
+Anchors are `top-left`, `top`, `top-right`, `center-left`, `center`, `center-right`, `bottom-left`, `bottom` and `bottom-right`.
+
+<Note>
+  Keys are defaults for FiveM key mappings. Players MAY rebind them in their FiveM key settings, under ug-lib.
+</Note>
+
+## `config/theme.lua`
+
+| Key | Type | Default | Purpose |
+| --- | --- | --- | --- |
+| `mode` | string | `dark` | `dark` or `light`. |
+| `colors` | table | `{}` | Color overrides as HSL triplets, such as `primary = '217 91% 60%'`. |
+| `radius` | string | `0.5rem` | Corner radius, in `rem` or `px`. |
+| `font` | string | `Inter` | Typeface. Only bundled fonts: the page loads nothing from the network. |
+| `scale` | number | `1.0` | UI scale, 0.75 to 1.5. |
+
+Color tokens: `background`, `foreground`, `card`, `cardForeground`, `popover`, `popoverForeground`, `primary`, `primaryForeground`, `secondary`, `secondaryForeground`, `muted`, `mutedForeground`, `accent`, `accentForeground`, `destructive`, `destructiveForeground`, `success`, `successForeground`, `warning`, `warningForeground`, `border`, `input`, `ring`. An unknown token or a bad triplet is an error, and the whole table uses its default.
+
+```lua config/theme.lua
+return {
+    mode = 'dark',
+    colors = {
+        primary = '160 84% 39%',
+        primaryForeground = '0 0% 100%',
+    },
+    radius = '0.75rem',
+    scale = 1.1,
+}
+```
+
+## Convars
+
+Settings use `ug-lib:<Key>`, theme options `ug-lib:Theme:<Key>`. Tables cannot be set by convar.
+
+```bash server.cfg
+set ug-lib:Locale "pt"
+set ug-lib:Debug "true"
+set ug-lib:Theme:Mode "light"
+```
+
+## Console
+
+`uglib` on the server console:
+
+| Command | Shows |
+| --- | --- |
+| `uglib status` | Version, locale, theme, debug, and each file: generated, loaded or failed, with values from file and convars. |
+| `uglib config <name>` | Every value of `settings` or `theme` with its source. |
+
+`uglib` in F8, with `debug = true`:
+
+| Command | Does |
+| --- | --- |
+| `uglib state` | Page state, focus, open layers and cache values. |
+| `uglib close` | Closes every layer. |
+| `uglib demo <name> [args]` | Shows a demo: `notify`, `textui`, `progress`, `skillcheck`, `dialog`, `context`, `menu`, `radial`. |
+
+## Languages
+
+Labels such as Confirm and Cancel come from `locales/<locale>.json` of ug-lib. Add a file with the same keys as `locales/en.json` to translate them.

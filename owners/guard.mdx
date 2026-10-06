@@ -64,9 +64,9 @@ Every action goes through the `Guard:BeforeAction` hook first. An external antic
 
 ```lua
 UgCore.Hooks.Register(UgCore.Enums.Hooks.Guard.BeforeAction, function(payload)
-    -- payload: { source, action = 'warn'|'kick'|'ban', score, flags }
-    if payload.action == 'ban' then
-        payload.action = 'kick' -- softer while you review
+    -- payload: { source, action: UgCore.Enums.GuardActions, score, flags }
+    if payload.action == UgCore.Enums.GuardActions.Ban then
+        payload.action = UgCore.Enums.GuardActions.Kick -- softer while you review
 
         -- Another resource gets a copy through exports, so return the changed payload.
         return payload

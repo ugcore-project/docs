@@ -1,0 +1,33 @@
+---
+title: "UgLib.Math"
+sidebarTitle: "Math"
+description: "Numbers, distances and directions."
+icon: "calculator"
+---
+
+<Badge color="purple">Shared</Badge> Runs in your resource.
+
+```lua
+UgLib.Math.Clamp(value, min, max) -> number
+UgLib.Math.Round(value, decimals?) -> number
+UgLib.Math.Lerp(a, b, t) -> number
+UgLib.Math.InverseLerp(a, b, value) -> number
+UgLib.Math.Remap(value, inMin, inMax, outMin, outMax) -> number
+UgLib.Math.Distance2D(a, b) -> number
+UgLib.Math.PointInPolygon(point, polygon) -> boolean
+UgLib.Math.RotationToDirection(rotation) -> vector3
+```
+
+- `Clamp` raises when `min` is greater than `max`.
+- `Round` rounds half away from zero. `decimals` is 0 to 10, default 0, and 0 returns an integer.
+- `Lerp` does not clamp `t`, so values outside 0 to 1 extrapolate. `InverseLerp` returns 0 when `a` equals `b`. `Remap` does not clamp.
+- `Distance2D` ignores height. It takes vectors or tables with `x` and `y`.
+- `PointInPolygon` tests on the ground plane, with at least 3 points in order.
+- `RotationToDirection` turns a rotation in degrees, such as `GetGameplayCamRot(2)`, into a unit direction.
+
+## Example
+
+```lua
+local fuel = UgLib.Math.Round(UgLib.Math.Clamp(fuel, 0, 100), 1)
+local speedRatio = UgLib.Math.InverseLerp(0, 200, speed)
+```

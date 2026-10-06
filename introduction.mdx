@@ -52,7 +52,7 @@ UgCore is split into resources with strict boundaries:
 | Resource | Role |
 | --- | --- |
 | `ug-core` | The framework: state, validation, networking, modules. Headless. |
-| `ug-lib` | UI components and pure utilities. No network, no state. |
+| [`ug-lib`](/ug-lib/introduction) | UI components and pure utilities. No network, no state. |
 | Feature resources | `ug-multicharacter`, `ug-spawn`, `ug-hud` and others. They use both. |
 
 `ug-core` and `ug-lib` never depend on each other. `ug-core` depends only on OneSync and `oxmysql`.

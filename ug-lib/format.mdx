@@ -1,0 +1,52 @@
+---
+title: "UgLib.Format"
+sidebarTitle: "Format"
+description: "Numbers, money, durations, distances and times as text."
+icon: "text-width"
+---
+
+<Badge color="purple">Shared</Badge> Runs in your resource.
+
+## Number and Money
+
+```lua
+UgLib.Format.Number(value, options?) -> string
+UgLib.Format.Money(amount, options?) -> string
+```
+
+<ResponseField name="options.decimals" type="integer" default="0">0 to 10.</ResponseField>
+<ResponseField name="options.separator" type="string" default=",">Thousands separator.</ResponseField>
+<ResponseField name="options.decimalSeparator" type="string" default=".">Decimal separator.</ResponseField>
+<ResponseField name="options.symbol" type="string">Money only. Defaults to `settings.currency`.</ResponseField>
+<ResponseField name="options.position" type="UgCurrencyPosition">Money only. `Before` gives `$1,500`, `After` gives `1,500 €`.</ResponseField>
+
+## Duration
+
+```lua
+UgLib.Format.Duration(ms, options?) -> string
+```
+
+| `style` | Examples |
+| --- | --- |
+| `Short` (default) | `45s`, `3m 05s`, `1h 02m`, `2d 03h` |
+| `Clock` | `03:05`, `1:02:30` |
+| `Long` | `3 minutes 5 seconds`, `1 day`, in the configured language |
+
+`Long` shows the largest unit and the one below it, when not zero. Negative durations count as 0.
+
+## Distance, Clock and Plural
+
+```lua
+UgLib.Format.Distance(meters, options?) -> string       -- '120m', '1.5km', or '394ft', '1.2mi' with imperial = true
+UgLib.Format.Clock(hour, minute, options?) -> string    -- '14:05', or '2:05 PM' with twelveHour = true
+UgLib.Format.Plural(count, singular, plural?) -> string -- '1 item', '3 items', '1,200 people'
+```
+
+`Distance` takes `decimals` (default 1, for kilometers and miles) and `imperial`.
+
+## Example
+
+```lua
+local price = UgLib.Format.Money(1500)
+local left = UgLib.Format.Duration(cooldownMs, { style = UgLib.Enums.DurationStyle.Clock })
+```

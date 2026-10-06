@@ -1,0 +1,81 @@
+---
+title: "Importing ug-lib"
+description: "One shared script gives your resource UgLib."
+icon: "file-import"
+---
+
+## Add the import
+
+```lua fxmanifest.lua
+fx_version 'cerulean'
+game 'gta5'
+lua54 'yes'
+
+ug_lib_version '1.0.0'
+dependency 'ug-lib'
+
+shared_script '@ug-lib/import.lua'
+```
+
+The import defines one global in your resource: `UgLib`. It is read-only, and `UgLib.Internal` is private.
+
+`ug_lib_version` is optional. With it, your resource does not start against an older ug-lib:
+
+```text
+[ug-lib] my-shop requires ug-lib 1.2.0 or newer, found 1.0.0. Update ug-lib.
+```
+
+## What runs where
+
+<Columns cols={2}>
+  <Card title="In your resource" icon="bolt">
+    `Enums`, `Math`, `Table`, `String`, `Format`, `Async`, `Locale` and `Version` on both sides. `Cache`, `Streaming`, `Entity`, `Raycast`, `Screen`, `Draw`, `Animation`, `Zone`, `Point` and `Keybind` on clients.
+
+    No export call. Zones and key bindings belong to your resource.
+  </Card>
+  <Card title="Through ug-lib" icon="window-maximize">
+    `Notify`, `TextUI`, `Progress`, `SkillCheck`, `Dialog`, `Context`, `Menu`, `Radial`, `Clipboard` and `Ui`, on clients.
+
+    Waiting happens in your resource. Callbacks and `args` stay in your resource.
+  </Card>
+</Columns>
+
+Client-only namespaces raise on the server: `UgLib.Dialog exists on clients only.`
+
+## Waiting calls MUST run in a thread
+
+`Dialog.*`, `Progress.Start`, `SkillCheck.Start`, `Radial.Open`, inline `Context.Open`, `Streaming.*`, `Raycast.*`, `Animation.Play`, `Animation.AttachProp` and `Async.WaitFor` wait. Call them from a thread, an event handler or a command:
+
+```lua client.lua
+RegisterCommand('sell', function()
+    local confirmed = UgLib.Dialog.Confirm({ title = 'Sell the car?', destructive = true })
+
+    if confirmed then
+        TriggerServerEvent('my-shop:sell')
+    end
+end, false)
+```
+
+Outside a thread they raise: `UgLib.Dialog.Confirm MUST run in a thread.`
+
+## Close reasons
+
+A call that ends without an answer returns its empty value and a reason from `UgLib.Enums.CloseReason`:
+
+| Reason | When |
+| --- | --- |
+| `Cancelled` | The player closed it, or the answer failed the checks. |
+| `Timeout` | No answer before `timeout`. |
+| `Busy` | Another modal (or progress) is open. |
+| `Replaced` | A newer one with `replace = true`, or a newer one of a single-instance type, took its place. |
+| `Closed` | Closed by code, `Ui.CloseAll`, or ug-lib stopping. |
+
+## Use enums
+
+Compare and pass values through `UgLib.Enums`, never as strings:
+
+```lua
+UgLib.Notify.Show({ message = 'Saved', type = UgLib.Enums.NotifyType.Success })
+```
+
+See [Enums](/ug-lib/enums).

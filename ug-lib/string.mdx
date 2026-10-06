@@ -1,0 +1,33 @@
+---
+title: "UgLib.String"
+sidebarTitle: "String"
+description: "Trim, split, truncate and compare text."
+icon: "font"
+---
+
+<Badge color="purple">Shared</Badge> Runs in your resource.
+
+```lua
+UgLib.String.Trim(text) -> string
+UgLib.String.Split(text, separator) -> string[]
+UgLib.String.StartsWith(text, prefix) -> boolean
+UgLib.String.EndsWith(text, suffix) -> boolean
+UgLib.String.Capitalize(text) -> string
+UgLib.String.Truncate(text, max, suffix?) -> string
+UgLib.String.Random(pattern) -> string
+UgLib.String.Distance(a, b) -> integer
+UgLib.String.Suggest(input, candidates, maxDistance?) -> string?
+```
+
+- `Split` splits on a plain separator and keeps empty parts: `Split('a,,b', ',')` is `{ 'a', '', 'b' }`.
+- `Truncate` cuts to `max` characters, `suffix` (default `...`) included. It counts UTF-8 characters.
+- `Random` builds a string from a pattern: `1` is a digit, `A` an upper-case letter, `a` a lower-case letter, `.` a letter or digit. Other characters stay.
+- `Distance` is the Levenshtein distance in bytes.
+- `Suggest` returns the closest candidate within `maxDistance` (default 3), ignoring case.
+
+## Example
+
+```lua
+local plate = UgLib.String.Random('AA 1111') -- such as 'QZ 0421'
+local name = UgLib.String.Truncate(playerName, 16, '…')
+```

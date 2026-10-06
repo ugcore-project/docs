@@ -1,0 +1,39 @@
+---
+title: "UgLib.Clipboard and Ui"
+sidebarTitle: "Clipboard and Ui"
+description: "Copy text, and inspect or close every open UI."
+icon: "clipboard"
+---
+
+<Badge color="green">Client</Badge> Through ug-lib.
+
+## Clipboard
+
+```lua
+UgLib.Clipboard.Copy(text)
+```
+
+Copies 1 to 4096 characters to the player's clipboard.
+
+## Ui
+
+```lua
+UgLib.Ui.CloseAll()
+UgLib.Ui.IsOpen(kind?) -> boolean
+```
+
+- `CloseAll` closes every UI of every resource. Waiting calls end with `Closed`.
+- `IsOpen(kind)` is true when a UI of that `UgLib.Enums.UiType` is open. Without `kind`, it is true when a modal is open: a dialog, a context menu, a radial or a skill check.
+
+## Example
+
+```lua client.lua
+RegisterCommand('plate', function()
+    local vehicle = UgLib.Cache.Vehicle
+
+    if vehicle and not UgLib.Ui.IsOpen() then
+        UgLib.Clipboard.Copy(GetVehicleNumberPlateText(vehicle))
+        UgLib.Notify.Show({ message = 'Plate copied.' })
+    end
+end, false)
+```

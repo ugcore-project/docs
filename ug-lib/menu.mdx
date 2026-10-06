@@ -1,0 +1,58 @@
+---
+title: "UgLib.Menu"
+sidebarTitle: "Menu"
+description: "Keyboard menus while the game stays playable."
+icon: "bars"
+---
+
+<Badge color="green">Client</Badge> Through ug-lib.
+
+```lua
+UgLib.Menu.Register(definition)
+UgLib.Menu.Open(id, startIndex?)
+UgLib.Menu.Close() -> boolean
+UgLib.Menu.GetOpen() -> string?
+UgLib.Menu.SetItem(id, index, fields)
+```
+
+## Register
+
+<ResponseField name="id" type="string" required>Registering it again replaces it.</ResponseField>
+<ResponseField name="title" type="string" required />
+<ResponseField name="items" type="table[]" required>1 to 100 items.</ResponseField>
+<ResponseField name="position" type="UgPosition">Defaults to `settings.menuPosition`.</ResponseField>
+<ResponseField name="onSelect" type="function">`(index, scrollIndex, args)` on the select key.</ResponseField>
+<ResponseField name="onSelected" type="function">`(index, scrollIndex, args)` when the selection moves.</ResponseField>
+<ResponseField name="onSideScroll" type="function">`(index, scrollIndex, args)`.</ResponseField>
+<ResponseField name="onCheck" type="function">`(index, checked, args)`.</ResponseField>
+<ResponseField name="onClose" type="function">Closed without a closing selection.</ResponseField>
+<ResponseField name="canClose" type="boolean" default="true">The back key closes.</ResponseField>
+<ResponseField name="disableInput" type="boolean" default="false">Blocks movement and combat while open.</ResponseField>
+
+Items: `label`, `description` (shown while selected), `icon`, `values` (side-scroll labels), `defaultIndex`, `checked` (makes a checkbox, not with `values`), `progress`, `close` (default true) and `args`. `scrollIndex` is nil for items without values.
+
+## Keys
+
+ug-lib owns the keys: up, down, left, right, select and back, with `settings.menuKeys` as defaults. Players MAY rebind them. They do nothing while a modal is open.
+
+- Select on a checkbox toggles it. Select on an item with `close = false` calls `onSelect` and stays open. Otherwise the menu closes after `onSelect`.
+- One menu at a time: a new menu from any resource replaces the open one, and the old one's `onClose` runs.
+- `SetItem` changes `label`, `description`, `icon`, `values`, `checked` or `progress` of an item. An open menu updates in place and keeps its selection.
+
+## Example
+
+```lua client.lua
+UgLib.Menu.Register({
+    id = 'vehicle',
+    title = 'Vehicle',
+    items = {
+        { label = 'Engine', checked = true },
+        { label = 'Seat', values = { 'Driver', 'Passenger' } },
+        { label = 'Lock and leave', args = 'lock' },
+    },
+    onCheck = function(_, checked) SetVehicleEngineOn(UgLib.Cache.Vehicle, checked, false, true) end,
+    onSelect = function(index, scrollIndex, args) print(index, scrollIndex, args) end,
+})
+
+UgLib.Menu.Open('vehicle')
+```

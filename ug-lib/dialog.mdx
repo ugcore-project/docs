@@ -1,0 +1,80 @@
+---
+title: "UgLib.Dialog"
+sidebarTitle: "Dialog"
+description: "Alerts, confirmations and forms."
+icon: "window-restore"
+---
+
+<Badge color="green">Client</Badge> Through ug-lib.
+
+```lua
+UgLib.Dialog.Alert(options) -> acknowledged, reason
+UgLib.Dialog.Confirm(options) -> confirmed, reason
+UgLib.Dialog.Input(options) -> values, reason
+```
+
+All MUST run in a thread.
+
+| Function | Answer | Closed (Escape, backdrop, failed checks) |
+| --- | --- | --- |
+| `Alert` | `true` | `false, Cancelled` |
+| `Confirm` | `true`, or `false, nil` for the cancel button | `false, Cancelled` |
+| `Input` | values by field name | `nil, Cancelled` |
+
+## Options
+
+<ResponseField name="title" type="string" required>1 to 128 characters.</ResponseField>
+<ResponseField name="message" type="string">Up to 1024 characters.</ResponseField>
+<ResponseField name="icon" type="UgIcon">Defaults to `Info` for Alert and `Question` for Confirm.</ResponseField>
+<ResponseField name="confirmLabel" type="string">Defaults to the configured labels.</ResponseField>
+<ResponseField name="cancelLabel" type="string">Confirm and Input.</ResponseField>
+<ResponseField name="destructive" type="boolean">Confirm only. A red confirm button.</ResponseField>
+<ResponseField name="size" type="UgDialogSize" default="Medium" />
+<ResponseField name="timeout" type="integer" default="60000">ms. `0` waits forever.</ResponseField>
+<ResponseField name="replace" type="boolean">Replaces an open modal instead of returning `Busy`.</ResponseField>
+<ResponseField name="fields" type="table[]">Input only. 1 to 32 fields.</ResponseField>
+
+Title, message, field labels and descriptions take the [markup](/ug-lib/notify#markup).
+
+## Fields
+
+Every field has `name` (unique, 1 to 32 letters, digits or underscores), `type` (a `UgLib.Enums.FieldType`), and optional `label`, `description`, `placeholder`, `default`, `required`, `disabled` and `icon`.
+
+| Type | Extra options | Value |
+| --- | --- | --- |
+| `Text`, `Password` | `maxLength` (up to 1024, default 256) | string, without control characters |
+| `Textarea` | `maxLength` (up to 4096), `rows` (1 to 20) | string, keeps tabs and line breaks |
+| `Number` | `min`, `max`, `step` | number within the bounds and steps |
+| `Slider` | `min` and `max` (required), `step` | number |
+| `Select` | `options` | one option value |
+| `MultiSelect` | `options`, `min`, `max` (counts) | array of unique option values |
+| `Checkbox`, `Toggle` | | boolean |
+| `Color` | | `#rrggbb` in lower case |
+| `Date` | `min`, `max` as `YYYY-MM-DD` | `YYYY-MM-DD` |
+
+`options` is 1 to 100 `{ value, label }` with unique string or integer values.
+
+- Empty optional fields are absent from `values`. A required checkbox MUST be ticked.
+- A disabled field keeps its `default`, whatever the page sends.
+- Lua checks every value against its field. An answer that fails returns `nil, Cancelled`.
+- Wrong definitions raise at your line, and a `default` MUST pass its own rules.
+
+## Example
+
+```lua client.lua
+CreateThread(function()
+    local FieldType = UgLib.Enums.FieldType
+    local values = UgLib.Dialog.Input({
+        title = 'Register a vehicle',
+        fields = {
+            { name = 'plate', type = FieldType.Text, label = 'Plate', required = true, maxLength = 8 },
+            { name = 'class', type = FieldType.Select, label = 'Class', options = { { value = 'sport', label = 'Sport' }, { value = 'suv', label = 'SUV' } } },
+            { name = 'insured', type = FieldType.Checkbox, label = 'Insured' },
+        },
+    })
+
+    if values then
+        UgCore.Network.TriggerServer('my-dmv:Register', values.plate, values.class, values.insured == true)
+    end
+end)
+```

@@ -1,0 +1,38 @@
+---
+title: "UgLib.Keybind"
+sidebarTitle: "Keybind"
+description: "Keys players can change in their FiveM settings."
+icon: "keyboard"
+---
+
+<Badge color="green">Client</Badge> Runs in your resource.
+
+```lua
+UgLib.Keybind.Register(options) -> command
+UgLib.Keybind.Remove(name) -> boolean
+UgLib.Keybind.SetEnabled(name, enabled)
+UgLib.Keybind.IsPressed(name) -> boolean
+```
+
+<ResponseField name="options.name" type="string" required>1 to 32 letters, digits or underscores.</ResponseField>
+<ResponseField name="options.label" type="string" required>Shown in the FiveM key settings.</ResponseField>
+<ResponseField name="options.defaultKey" type="string">Such as `E` or `F6`. Players MAY change it.</ResponseField>
+<ResponseField name="options.defaultMapper" type="UgKeyMapper" default="Keyboard" />
+<ResponseField name="options.onPressed" type="function" />
+<ResponseField name="options.onReleased" type="function" />
+<ResponseField name="options.disableWhileUi" type="boolean" default="true">Ignores presses while a ug-lib dialog, context menu, radial or skill check is open.</ResponseField>
+
+- The mapping is registered in your resource, as `+<resource>-<name>`, so players find it under your resource.
+- FiveM cannot unregister a key mapping: `Remove` disables it for good. Registering the same name again reuses it.
+
+## Example
+
+```lua client.lua
+UgLib.Keybind.Register({
+    name = 'radio',
+    label = 'Talk on the radio',
+    defaultKey = 'CAPITAL',
+    onPressed = function() print('on air') end,
+    onReleased = function() print('off air') end,
+})
+```

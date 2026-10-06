@@ -1,0 +1,52 @@
+---
+title: "UgLib.Context"
+sidebarTitle: "Context"
+description: "Clickable menus with submenus."
+icon: "list-ul"
+---
+
+<Badge color="green">Client</Badge> Through ug-lib.
+
+```lua
+UgLib.Context.Register(definition)
+UgLib.Context.Open(id)
+UgLib.Context.Open(options) -> index, args, reason
+UgLib.Context.Close() -> boolean
+UgLib.Context.GetOpen() -> string?
+```
+
+## Register
+
+<ResponseField name="id" type="string" required>1 to 64 letters, digits or `_ - . :`. Registering it again replaces it.</ResponseField>
+<ResponseField name="title" type="string" required />
+<ResponseField name="items" type="table[]" required>1 to 50 items.</ResponseField>
+<ResponseField name="menu" type="string">Id of the parent context. Shows a back button.</ResponseField>
+<ResponseField name="onBack" type="function" />
+<ResponseField name="onClose" type="function">Closed without a choice.</ResponseField>
+<ResponseField name="canClose" type="boolean" default="true" />
+
+Items: `title`, `description`, `icon`, `iconColor` (a `Color`), `image` (`nui://` or `https://`), `disabled`, `readOnly`, `progress` (0 to 100), `colorScheme` (a `Color` for the bar), `arrow`, `metadata` (up to 10 `{ label, value }`, shown on hover), `menu` (id of a context to open), `onSelect(args)` and `args`.
+
+- `Open(id)` returns at once. Callbacks run in your resource. `args` never reach the page.
+- Opening a context replaces your own open one. It is not shown while another resource has a modal open.
+
+## Inline
+
+`Open({ title, items, canClose?, timeout? })` waits and returns the chosen item's index and `args`. Inline items MUST NOT have `onSelect` or `menu`. MUST run in a thread.
+
+## Example
+
+```lua client.lua
+UgLib.Context.Register({
+    id = 'garage',
+    title = 'Garage',
+    items = {
+        { title = 'Sultan RS', description = 'Plate **UG 001**', progress = 80, colorScheme = UgLib.Enums.Color.Success,
+          metadata = { { label = 'Fuel', value = '80%' } }, args = 'UG 001',
+          onSelect = function(plate) UgCore.Network.TriggerServer('my-garage:TakeOut', plate) end },
+        { title = 'Impounded', description = 'Pay to release', disabled = true },
+    },
+})
+
+UgLib.Context.Open('garage')
+```

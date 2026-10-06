@@ -1,0 +1,84 @@
+---
+title: "Using ug-lib with UgCore"
+description: "Translate error codes into UI, and notify players from the server."
+icon: "link"
+---
+
+`ug-core` is headless: it returns error codes and emits events. Your resource decides what the player sees. `ug-lib` has no network, so the server never calls it directly.
+
+## Notify from the server
+
+Send your own event to your own client script through `UgCore.Network`, then show the notification there.
+
+```lua server.lua
+UgCore.Network.Register('Buy', {
+    schema = UgCore.Schema.Define({ UgCore.Schema.String({ min = 1, max = 32 }) }),
+    rate = { max = 5, per = 1000 },
+    requirePlayer = true,
+}, function(source, item)
+    local ok, _, err = UgCore.Accounts.Remove(source, 'cash', 50, 'my-shop:' .. item)
+
+    UgCore.Network.TriggerClient(source, 'my-shop:Bought', ok, err)
+end)
+```
+
+```lua client.lua
+local t = UgLib.Locale.Create()
+
+UgCore.Network.Register('Bought', function(ok, err)
+    if ok then
+        UgLib.Notify.Show({ message = t('bought'), type = UgLib.Enums.NotifyType.Success })
+    elseif err == UgCore.Enums.Errors.InsufficientFunds then
+        UgLib.Notify.Show({ message = t('no_money'), type = UgLib.Enums.NotifyType.Error })
+    end
+end)
+```
+
+```json locales/en.json
+{
+  "bought": "Bought for **$50**.",
+  "no_money": "You do not have enough cash."
+}
+```
+
+<Note>
+  List `locales/*.json` in your resource's `files {}` so clients can read them.
+</Note>
+
+## React to events
+
+Client events of ug-core reach every resource, so a HUD shows changes without asking:
+
+```lua client.lua
+UgCore.Events.On(UgCore.Enums.Events.Accounts.Changed, function(account, balance, delta)
+    if balance and delta and delta ~= 0 then
+        UgLib.Notify.Show({
+            id = 'money-' .. account,
+            message = UgLib.Format.Money(balance),
+            style = UgLib.Enums.NotifyStyle.Compact,
+        })
+    end
+end)
+```
+
+Showing the same `id` again updates the notification in place, so fast changes never stack.
+
+## Ask before an action
+
+Ask on the client, then send the intent. The server checks everything again.
+
+```lua client.lua
+RegisterCommand('transfer', function()
+    local values = UgLib.Dialog.Input({
+        title = 'Transfer',
+        fields = {
+            { name = 'target', type = UgLib.Enums.FieldType.Number, label = 'Character id', required = true, min = 1 },
+            { name = 'amount', type = UgLib.Enums.FieldType.Number, label = 'Amount', required = true, min = 1, max = 1000000 },
+        },
+    })
+
+    if values then
+        UgCore.Network.TriggerServer('my-bank:Transfer', values.target, values.amount)
+    end
+end, false)
+```

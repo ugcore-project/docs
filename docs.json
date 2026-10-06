@@ -179,6 +179,63 @@
         ]
       },
       {
+        "tab": "ug-lib",
+        "icon": "wand-magic-sparkles",
+        "groups": [
+          {
+            "group": "Getting started",
+            "pages": [
+              "ug-lib/introduction",
+              "ug-lib/installation",
+              "ug-lib/configuration",
+              "ug-lib/importing",
+              "ug-lib/with-ugcore",
+              "ug-lib/security"
+            ]
+          },
+          {
+            "group": "UI",
+            "pages": [
+              "ug-lib/notify",
+              "ug-lib/textui",
+              "ug-lib/progress",
+              "ug-lib/skillcheck",
+              "ug-lib/dialog",
+              "ug-lib/context",
+              "ug-lib/menu",
+              "ug-lib/radial",
+              "ug-lib/clipboard"
+            ]
+          },
+          {
+            "group": "Client utilities",
+            "pages": [
+              "ug-lib/cache",
+              "ug-lib/streaming",
+              "ug-lib/entity",
+              "ug-lib/raycast",
+              "ug-lib/draw",
+              "ug-lib/animation",
+              "ug-lib/zone",
+              "ug-lib/keybind"
+            ]
+          },
+          {
+            "group": "Shared utilities",
+            "pages": [
+              "ug-lib/enums",
+              "ug-lib/math",
+              "ug-lib/table",
+              "ug-lib/string",
+              "ug-lib/format",
+              "ug-lib/async",
+              "ug-lib/locale",
+              "ug-lib/version"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "Contributing",
         "icon": "code-pull-request",
         "groups": [
@@ -220,6 +277,10 @@
           {
             "label": "API reference",
             "href": "/api/overview"
+          },
+          {
+            "label": "ug-lib",
+            "href": "/ug-lib/introduction"
           }
         ]
       },
@@ -229,6 +290,10 @@
           {
             "label": "ug-core on GitHub",
             "href": "https://github.com/ugcore-project/ug-core"
+          },
+          {
+            "label": "ug-lib on GitHub",
+            "href": "https://github.com/ugcore-project/ug-lib"
           },
           {
             "label": "Contributing",

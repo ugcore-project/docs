@@ -1,0 +1,44 @@
+---
+title: "ug-lib"
+description: "UI components and utilities for your resources, standalone or with ug-core."
+icon: "wand-magic-sparkles"
+---
+
+`ug-lib` is the UI and utility library of the UgCore ecosystem. It gives your resources notifications, prompts, progress bars, dialogs, menus and radials, plus Lua helpers for math, text, zones, entities and more.
+
+It works with or without `ug-core`. The two never depend on each other: `ug-core` returns error codes and emits events, and your resource decides what the player sees through `ug-lib`.
+
+## What you get
+
+<Columns cols={2}>
+  <Card title="UI services" icon="window-maximize" href="/ug-lib/notify">
+    Notify, TextUI, Progress, SkillCheck, Dialog, Context, Menu and Radial. One page, themed by the server owner.
+  </Card>
+  <Card title="Client utilities" icon="location-crosshairs" href="/ug-lib/cache">
+    Cache, Streaming, Entity, Raycast, Draw, Animation, Zone, Point and Keybind. They run in your resource.
+  </Card>
+  <Card title="Shared utilities" icon="toolbox" href="/ug-lib/format">
+    Math, Table, String, Format, Async and Locale, on the server and on clients.
+  </Card>
+  <Card title="Owner config" icon="sliders" href="/ug-lib/configuration">
+    Positions, durations, keys, colors and language in two generated files.
+  </Card>
+</Columns>
+
+## Principles
+
+- **The page is untrusted.** Anything the NUI page sends can be forged. Lua checks every answer against what it sent: a dialog value against its field, a menu choice against its items. See [Security](/ug-lib/security).
+- **Calls stay in your resource.** Utilities run in your runtime. UI calls wait in your runtime and reach `ug-lib` through non-blocking exports. Callbacks and `args` never leave your resource.
+- **Mistakes raise at your line.** Wrong options raise with a suggestion: `Dialog.Input: field "plate" has an unknown option "maxLenght". Did you mean "maxLength"?`
+- **No network.** `ug-lib` registers no net events and has no callbacks. Notifications from the server go through your own client script. See [Using ug-lib with UgCore](/ug-lib/with-ugcore).
+
+## Next steps
+
+<Columns cols={2}>
+  <Card title="Installation" icon="download" href="/ug-lib/installation">
+    Download, start order and the first start.
+  </Card>
+  <Card title="Importing ug-lib" icon="file-import" href="/ug-lib/importing">
+    One shared script gives your resource `UgLib`.
+  </Card>
+</Columns>

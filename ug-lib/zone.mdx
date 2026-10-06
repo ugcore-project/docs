@@ -1,0 +1,50 @@
+---
+title: "UgLib.Zone and Point"
+sidebarTitle: "Zone and Point"
+description: "Areas that call back when the player enters or leaves."
+icon: "draw-polygon"
+---
+
+<Badge color="green">Client</Badge> Runs in your resource.
+
+## Zone
+
+```lua
+UgLib.Zone.Sphere({ coords, radius, ... }) -> zone
+UgLib.Zone.Box({ coords, size, heading?, minZ?, maxZ?, ... }) -> zone
+UgLib.Zone.Poly({ points, minZ?, maxZ?, ... }) -> zone
+UgLib.Zone.Remove(zoneOrId) -> boolean
+UgLib.Zone.GetAll() -> zone[]
+```
+
+Common options: `onEnter(zone)`, `onExit(zone)`, `inside(zone)` (every frame while inside), `debug` (draws the outline), `data`.
+
+- A box is centered on `coords`: `size.x` is the width, `size.y` the length, `size.z` the height, `heading` in degrees. `minZ` and `maxZ` replace the height.
+- A poly takes 3 to 256 points and has no height limit unless `minZ` or `maxZ` is set.
+- A zone has `id`, `shape`, `data`, `isInside`, `enabled`, and `zone:Remove()`, `zone:Contains(coords)`, `zone:SetEnabled(enabled)`. Removing or disabling a zone the player is in calls `onExit`.
+
+Zones are checked every `settings.zoneInterval` ms (default 250), and every frame only while an `inside` or `debug` zone needs it.
+
+## Point
+
+```lua
+UgLib.Point.Create({ coords, distance, onEnter?, onExit?, nearby?, debug?, data? }) -> point
+UgLib.Point.Remove(pointOrId) -> boolean
+```
+
+A point is a sphere that knows how far the player is: `point.currentDistance`. `nearby(point)` runs every frame while inside, closest point first.
+
+## Example
+
+```lua client.lua
+UgLib.Point.Create({
+    coords = vector3(25.7, -1347.3, 29.5),
+    distance = 2.0,
+    nearby = function()
+        UgLib.TextUI.Show({ text = 'Open the shop', key = 'E', style = UgLib.Enums.TextUIStyle.Keybind })
+    end,
+    onExit = function()
+        UgLib.TextUI.Hide()
+    end,
+})
+```
