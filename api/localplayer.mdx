@@ -38,7 +38,7 @@ Watch the statebag instead of polling:
 ```lua client.lua
 local bag = ('player:%d'):format(GetPlayerServerId(PlayerId()))
 
-AddStateBagChangeHandler('ug-core:DeathState', bag, function(_, _, state)
+AddStateBagChangeHandler(UgCore.Enums.StateBags.DeathState, bag, function(_, _, state)
     if state == UgCore.Enums.DeathState.Downed then
         -- show your own downed UI
     end

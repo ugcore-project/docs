@@ -120,12 +120,14 @@ Runs for `Set` and `SetGrade`. It allows or cancels. Changes to the payload are 
 
 ## Statebags
 
-| Key | Value |
-| --- | --- |
-| `ug-core:Job` | `UgAssignment` with `onDuty` |
+Index them with `UgCore.Enums.StateBags`. See [Statebags](/reference/statebags).
+
+| Enum key | Key | Value |
+| --- | --- | --- |
+| `Job` | `ug-core:Job` | `UgAssignment` with `onDuty` |
 
 ```lua client.lua
-AddStateBagChangeHandler('ug-core:Job', ('player:%d'):format(GetPlayerServerId(PlayerId())), function(_, _, job)
+AddStateBagChangeHandler(UgCore.Enums.StateBags.Job, ('player:%d'):format(GetPlayerServerId(PlayerId())), function(_, _, job)
     -- update your HUD
 end)
 ```

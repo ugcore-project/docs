@@ -60,6 +60,6 @@ When boot fails, ug-core prints every error it found, then `Boot aborted: N erro
   </Accordion>
 
   <Accordion title="UgCore.<Ns> is not available until ug-core is ready">
-    The resource used a module before ug-core finished booting. Developers wait with `UgCore.Lifecycle.Await('Ready')`.
+    The resource used a module before ug-core finished booting. Developers wait with `UgCore.Lifecycle.Await(UgCore.Enums.Lifecycle.Ready)`.
   </Accordion>
 </AccordionGroup>

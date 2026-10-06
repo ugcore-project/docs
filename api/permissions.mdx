@@ -159,14 +159,16 @@ They allow or cancel. Changes to the payload are ignored.
 
 ## Statebags
 
-| Key | Value |
-| --- | --- |
-| `ug-core:Groups` | The player's groups, highest weight first, such as `{ 'admin' }`. Set on join and on every change. |
+Index them with `UgCore.Enums.StateBags`. See [Statebags](/reference/statebags).
+
+| Enum key | Key | Value |
+| --- | --- | --- |
+| `Groups` | `ug-core:Groups` | The player's groups, highest weight first, such as `{ 'admin' }`. Set on join and on every change. |
 
 Clients read it to show a staff badge:
 
 ```lua client.lua
-local groups = LocalPlayer.state['ug-core:Groups'] or {}
+local groups = LocalPlayer.state[UgCore.Enums.StateBags.Groups] or {}
 ```
 
 <Warning>Never trust a client's view of its own groups. Check permissions on the server.</Warning>

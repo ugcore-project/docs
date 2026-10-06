@@ -34,7 +34,7 @@ Functions that change state return `ok` first, then a value, then an error code:
 local ok, balance, errorCode = UgCore.Accounts.Remove(source, 'bank', 500)
 
 if not ok then
-    -- errorCode: 'insufficient_funds', 'not_loaded', 'no_permission', ...
+    -- errorCode is a value of UgCore.Enums.Errors, such as InsufficientFunds
 end
 ```
 

@@ -6,7 +6,7 @@ icon: "list-ol"
 
 <Badge color="purple">Shared</Badge>
 
-Compare against enums, never against raw strings. Your editor autocompletes them and flags typos.
+Compare against enums, never against raw strings. Your editor autocompletes them and flags typos, and a renamed value updates every user. ug-core follows the same rule: its repository check rejects error codes, event names, hook names and statebag keys spelled out outside the enum files.
 
 ```lua
 if UgCore.Players.GetDeathState(source) == UgCore.Enums.DeathState.Downed then
@@ -29,6 +29,8 @@ end
     | `RateLimited` | `rate_limited` |
     | `NoPermission` | `no_permission` |
     | `InsufficientFunds` | `insufficient_funds` |
+    | `InsufficientItems` | `insufficient_items` |
+    | `CannotCarry` | `cannot_carry` |
     | `Timeout` | `timeout` |
     | `InternalError` | `internal_error` |
   </Accordion>
@@ -40,7 +42,24 @@ end
     ```
   </Accordion>
   <Accordion title="Enums.Events.<Group>" icon="bell">
-    Event names by group: `Lifecycle`, `Players`, `Guard`, and one group per module that emits events. Values are `ug-core:<Group>:<Key>`.
+    Event names by group. Values are `ug-core:<Group>:<Key>`.
+
+    | Group | Keys | From |
+    | --- | --- | --- |
+    | `Lifecycle` | `Changed`, `Ready`, `Stopping` | core |
+    | `Guard` | `Flagged` | core |
+    | `Players` | `Loaded`, `Injured`, `Downed`, `Died`, `Revived`, `Respawned`, `DeathStateChanged` | players |
+    | `Permissions` | `GroupAdded`, `GroupRemoved` | permissions |
+    | `Characters` | `Created`, `Deleted`, `Loaded`, `Unloaded` | characters |
+    | `Accounts` | `Changed` | accounts |
+    | `Jobs` | `Changed`, `DutyChanged` | jobs |
+    | `Gangs` | `Changed` | gangs |
+    | `Sessions` | `Created`, `Destroyed`, `Joined`, `Left` | sessions |
+    | `Commands` | `Failed` | commands |
+    | `Items` | `Used` | items |
+    | `Inventory` | `ItemAdded`, `ItemRemoved`, `Opened`, `Closed`, `Changed` | inventory |
+    | `Weapons` | `Equipped`, `Unequipped`, `Broken` | weapons |
+    | `Shops` | `Purchased` | shops |
 
     ```lua
     UgCore.Enums.Events.Players.Downed -- 'ug-core:Players:Downed'
@@ -51,17 +70,44 @@ end
   <Accordion title="Enums.Hooks.<Group>" icon="anchor">
     Hook names by group. Values are `<Group>:<Key>`.
 
+    | Group | Keys | From |
+    | --- | --- | --- |
+    | `Guard` | `BeforeAction` | core |
+    | `Players` | `BeforeDown`, `BeforeBleedout`, `BeforeRevive`, `BeforeRespawn` | players |
+    | `Permissions` | `BeforeGroupAdd`, `BeforeGroupRemove` | permissions |
+    | `Characters` | `BeforeCreate`, `BeforeDelete` | characters |
+    | `Accounts` | `BeforeAdd`, `BeforeRemove`, `BeforeTransfer` | accounts |
+    | `Jobs` | `BeforeSet` | jobs |
+    | `Gangs` | `BeforeSet` | gangs |
+    | `Sessions` | `BeforeJoin` | sessions |
+    | `Items` | `BeforeUse` | items |
+    | `Inventory` | `BeforeAdd`, `BeforeRemove`, `BeforeMove`, `BeforeOpen`, `BeforeClearOnRespawn` | inventory |
+    | `Weapons` | `BeforeEquip` | weapons |
+    | `Shops` | `BeforePurchase` | shops |
+
     ```lua
     UgCore.Enums.Hooks.Accounts.BeforeRemove -- 'Accounts:BeforeRemove'
     ```
 
     See [Hooks reference](/reference/hooks).
   </Accordion>
+  <Accordion title="Enums.StateBags and Enums.GlobalState" icon="layer-group">
+    Statebag keys. `StateBags` index `Player(source).state` and `LocalPlayer.state`, `GlobalState` indexes `GlobalState`. Values are `ug-core:<Key>`. See [Statebags](/reference/statebags).
+
+    | Enum | Keys |
+    | --- | --- |
+    | `StateBags` | `Loaded`, `Player`, `Metadata`, `DeathState`, `Injuries`, `Job`, `Gang`, `Session`, `Groups` |
+    | `GlobalState` | `Config`, `Modules`, `Exports`, `Items`, `Drops`, `Shops`, `BannerShown` |
+
+    ```lua
+    local job = LocalPlayer.state[UgCore.Enums.StateBags.Job]
+    ```
+  </Accordion>
 </AccordionGroup>
 
 ## Module enums
 
-Modules add their own enums and event and hook groups. In your resource, they appear once ug-core has replicated its enabled modules, so read them after `UgCore.Lifecycle.On('Ready', ...)`. Enums of disabled modules never exist.
+Modules add their own enums and event and hook groups. In your resource, they appear once ug-core has replicated its enabled modules, so read them after `UgCore.Lifecycle.On(UgCore.Enums.Lifecycle.Ready, ...)`. Enums of disabled modules never exist.
 
 The `players` module, always enabled, adds:
 

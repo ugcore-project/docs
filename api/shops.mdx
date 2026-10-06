@@ -132,7 +132,7 @@ UgCore.Shops.Open(name) -> ok, errorCode, listing
 UgCore.Shops.Buy(name, index, count) -> ok, errorCode
 ```
 
-`GetAll` reads positions from `GlobalState['ug-core:Shops']`, for blips and markers. `Open` and `Buy` **MUST run in a thread**.
+`GetAll` reads positions from `GlobalState[UgCore.Enums.GlobalState.Shops]`, for blips and markers. `Open` and `Buy` **MUST run in a thread**.
 
 <ResponseField name="listing" type="table">
   <Expandable title="fields">

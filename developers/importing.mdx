@@ -63,7 +63,7 @@ If your resource starts while ug-core is still booting, module namespaces raise 
 
 ```lua server.lua
 CreateThread(function()
-    if not UgCore.Lifecycle.Await('Ready', 30000) then
+    if not UgCore.Lifecycle.Await(UgCore.Enums.Lifecycle.Ready, 30000) then
         UgCore.Logger.Error('ug-core did not become ready.')
         return
     end
@@ -72,7 +72,7 @@ CreateThread(function()
 end)
 ```
 
-`UgCore.Lifecycle.On('Ready', handler)` does the same without blocking, and runs right away if ug-core is already ready.
+`UgCore.Lifecycle.On(UgCore.Enums.Lifecycle.Ready, handler)` does the same without blocking, and runs right away if ug-core is already ready.
 
 ## Optional modules
 

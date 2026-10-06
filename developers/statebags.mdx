@@ -12,7 +12,7 @@ Data that is read often replicates through statebags. Reading a statebag costs n
 
 ## Player statebags
 
-Set by the server only, on `Player(source).state`:
+Set by the server only, on `Player(source).state`. Index them with `UgCore.Enums.StateBags`, never with the string:
 
 | Key | Value | Module |
 | --- | --- | --- |
@@ -24,6 +24,7 @@ Set by the server only, on `Player(source).state`:
 | `ug-core:Job` | `{ name, label, grade, gradeName, gradeLabel, salary, boss, onDuty }` | jobs |
 | `ug-core:Gang` | `{ name, label, grade, gradeName, gradeLabel, salary, boss }` | gangs |
 | `ug-core:Session` | Session id, or nil in the shared world | sessions |
+| `ug-core:Groups` | Groups managed by UgCore, highest weight first | permissions |
 
 <Warning>
   Player statebags reach **every** client. Never put secrets in replicated metadata.
@@ -34,7 +35,7 @@ Set by the server only, on `Player(source).state`:
 <CodeGroup>
 
 ```lua Server
-local job = Player(source).state['ug-core:Job']
+local job = Player(source).state[UgCore.Enums.StateBags.Job]
 
 if job and job.name == 'police' and job.onDuty then
     -- ...
@@ -42,7 +43,7 @@ end
 ```
 
 ```lua Client
-local state = LocalPlayer.state['ug-core:DeathState']
+local state = LocalPlayer.state[UgCore.Enums.StateBags.DeathState]
 
 -- Or through UgCore, which returns copies:
 local downed = UgCore.LocalPlayer.IsDowned()
@@ -54,14 +55,16 @@ local job = UgCore.Jobs.Get()
 ## React to changes
 
 ```lua client.lua
-AddStateBagChangeHandler('ug-core:Job', ('player:%d'):format(GetPlayerServerId(PlayerId())), function(_, _, job)
+AddStateBagChangeHandler(UgCore.Enums.StateBags.Job, ('player:%d'):format(GetPlayerServerId(PlayerId())), function(_, _, job)
     print('New job: ' .. (job and job.label or 'none'))
 end)
 ```
 
 ## Global state
 
+Indexed with `UgCore.Enums.GlobalState`.
+
 | Key | Value |
 | --- | --- |
-| `GlobalState['ug-core:Config']` | Client and shared config values. |
-| `GlobalState['ug-core:Modules']` | Enabled modules, their files and namespaces. |
+| `GlobalState[UgCore.Enums.GlobalState.Config]` | Client and shared config values. |
+| `GlobalState[UgCore.Enums.GlobalState.Modules]` | Enabled modules, their files and namespaces. |

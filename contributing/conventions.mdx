@@ -11,7 +11,7 @@ icon: "ruler"
 | Public API function | PascalCase | `UgCore.Players.Get` |
 | Namespace | PascalCase | `UgCore.Accounts` |
 | Local function | camelCase | `local function createRoot()` |
-| Local constant | UPPER_SNAKE | `local STATE_KEY = 'ug-core:Config'` |
+| Local constant | UPPER_SNAKE | `local DEFAULT_SLOTS = 40` |
 | Data field, option key | camelCase | `requirePlayer`, `startingBalance` |
 | Module and config name | camelCase | `accounts`, `core` |
 | File and folder | lowercase | `core/server/config/loader.lua` |
@@ -53,6 +53,7 @@ UgCore.Schema = Schema
 ## Errors
 
 - Mutating functions return `ok, value` or `ok, errorCode` with codes from `UgCore.Enums.Errors`.
+- Error codes, event names, hook names and statebag keys are only spelled out in enum files (`core/shared/enums/*.lua`, `modules/*/shared/enums.lua`). Everywhere else, use `UgCore.Enums`. The repository check fails on literals outside comments.
 - Programmer errors raise with `UgCore.Internal.Utils.Raise(level, message, ...)`, never `error`. Messages never include the `[ug-core]` prefix.
 - Stack traces never reach clients.
 

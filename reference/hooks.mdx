@@ -4,7 +4,12 @@ description: "Every hook and its payload."
 icon: "anchor"
 ---
 
-Register with [`UgCore.Hooks.Register`](/api/hooks). Names live in `UgCore.Enums.Hooks.<Group>.<Key>`. Return `false` to cancel. The cancelled function returns `no_permission`.
+Register with [`UgCore.Hooks.Register`](/api/hooks). Every name below is `UgCore.Enums.Hooks.<Group>.<Key>`: use the enum, never the string. Return `false` to cancel. The cancelled function returns `UgCore.Enums.Errors.NoPermission`.
+
+```lua
+-- Accounts:BeforeRemove
+UgCore.Hooks.Register(UgCore.Enums.Hooks.Accounts.BeforeRemove, function(payload) end)
+```
 
 | Hook | Payload | Reads changes |
 | --- | --- | --- |

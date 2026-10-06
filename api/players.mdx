@@ -168,13 +168,15 @@ Invalid keys, values, regions, options and coordinates raise.
 
 ## Statebags
 
-| Key | Value |
-| --- | --- |
-| `ug-core:Loaded` | `true` once the player is loaded |
-| `ug-core:Player` | `{ name, characterId? }` |
-| `ug-core:Metadata` | Metadata set with `replicate = true` |
-| `ug-core:DeathState` | `'Alive'`, `'Downed'` or `'Dead'` |
-| `ug-core:Injuries` | `UgInjury[]` |
+Index them with `UgCore.Enums.StateBags`. See [Statebags](/reference/statebags).
+
+| Enum key | Key | Value |
+| --- | --- | --- |
+| `Loaded` | `ug-core:Loaded` | `true` once the player is loaded |
+| `Player` | `ug-core:Player` | `{ name, characterId? }` |
+| `Metadata` | `ug-core:Metadata` | Metadata set with `replicate = true` |
+| `DeathState` | `ug-core:DeathState` | `'Alive'`, `'Downed'` or `'Dead'` |
+| `Injuries` | `ug-core:Injuries` | `UgInjury[]` |
 
 ## Enums
 

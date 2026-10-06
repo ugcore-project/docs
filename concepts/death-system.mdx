@@ -75,14 +75,14 @@ The fatal injury is also stored as the cause of death: `{ region, category, weap
 
 ```lua server.lua
 -- Hold bleedout while CPR is running.
-UgCore.Hooks.Register('Players:BeforeBleedout', function(payload)
+UgCore.Hooks.Register(UgCore.Enums.Hooks.Players.BeforeBleedout, function(payload)
     if cprInProgress[payload.source] then
         return false
     end
 end)
 
 -- Respawn only after hospital check-in.
-UgCore.Hooks.Register('Players:BeforeRespawn', function(payload)
+UgCore.Hooks.Register(UgCore.Enums.Hooks.Players.BeforeRespawn, function(payload)
     return checkedIn[payload.source] == true
 end)
 

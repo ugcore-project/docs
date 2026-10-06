@@ -26,7 +26,7 @@ Server owners choose which modules run. Your resource sees a module's API, event
 | [`shops`](/api/shops) | `UgCore.Shops` | `UgCore.Shops` | `Shops` | `Shops` | |
 
 - **Events** and **Hooks** are groups of `UgCore.Enums.Events` and `UgCore.Enums.Hooks`, such as `UgCore.Enums.Events.Accounts.Changed`.
-- **Statebags** are player statebags named `ug-core:<Key>`, such as `ug-core:Job`.
+- **Statebags** are player statebags indexed with `UgCore.Enums.StateBags`, such as `LocalPlayer.state[UgCore.Enums.StateBags.Job]`.
 - `identity`, `players` and `permissions` are required. They are always there.
 
 ## When a namespace exists
@@ -35,21 +35,21 @@ Your resource learns which modules are enabled when ug-core replicates them, rig
 
 | Situation | Error |
 | --- | --- |
-| ug-core is not ready yet | `UgCore.Accounts is not available until ug-core is ready. Wait for UgCore.Lifecycle.Await('Ready').` |
+| ug-core is not ready yet | `UgCore.Accounts is not available until ug-core is ready. Wait for UgCore.Lifecycle.Await(UgCore.Enums.Lifecycle.Ready).` |
 | The module is disabled | `UgCore.Accounts belongs to disabled module "accounts". Enable it in config/modules.lua.` |
 | A client namespace on the server | `UgCore.LocalPlayer exists on clients only.` |
 | A function that does not exist | `UgCore.Accounts.Deposit does not exist.` |
 
 Module enums, such as `UgCore.Enums.DeathState` or `UgCore.Enums.Events.Jobs`, follow the same rule: they exist once the module is enabled and replicated.
 
-<Tip>Run module code from `UgCore.Lifecycle.On('Ready', ...)`. It runs right away when ug-core is already ready, and again after you restart your resource.</Tip>
+<Tip>Run module code from `UgCore.Lifecycle.On(UgCore.Enums.Lifecycle.Ready, ...)`. It runs right away when ug-core is already ready, and again after you restart your resource.</Tip>
 
 ## Require a module
 
 When your resource cannot work without a module, require it. Server owners get one clear error instead of a broken resource:
 
 ```lua server.lua
-UgCore.Lifecycle.On('Ready', function()
+UgCore.Lifecycle.On(UgCore.Enums.Lifecycle.Ready, function()
     UgCore.Modules.Require('accounts')
     UgCore.Modules.Require('jobs')
 
@@ -82,7 +82,7 @@ end
 Register events and hooks of optional modules only when they are enabled:
 
 ```lua server.lua
-UgCore.Lifecycle.On('Ready', function()
+UgCore.Lifecycle.On(UgCore.Enums.Lifecycle.Ready, function()
     if UgCore.Modules.IsEnabled('jobs') then
         UgCore.Hooks.Register(UgCore.Enums.Hooks.Jobs.BeforeSet, function(payload)
             -- ...
@@ -96,7 +96,7 @@ end)
 Clients follow the same rules. The client lifecycle reaches `Ready` after the client files of every enabled module have loaded:
 
 ```lua client.lua
-UgCore.Lifecycle.On('Ready', function()
+UgCore.Lifecycle.On(UgCore.Enums.Lifecycle.Ready, function()
     if UgCore.Modules.IsEnabled('jobs') then
         local job = UgCore.Jobs.Get()
     end

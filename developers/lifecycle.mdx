@@ -19,14 +19,14 @@ A state can be skipped: a failed boot goes from `Booting` straight to `Stopping`
 <CodeGroup>
 
 ```lua Non-blocking
-UgCore.Lifecycle.On('Ready', function()
+UgCore.Lifecycle.On(UgCore.Enums.Lifecycle.Ready, function()
     -- Runs when ug-core is ready, or right away if it already is.
 end)
 ```
 
 ```lua Blocking
 CreateThread(function()
-    if UgCore.Lifecycle.Await('Ready', 30000) then
+    if UgCore.Lifecycle.Await(UgCore.Enums.Lifecycle.Ready, 30000) then
         -- ready
     end
 end)

@@ -107,7 +107,7 @@ You will build `my-greeter`, a resource that:
     UgCore emits events when things happen. Events from `ug-core` are only accepted when ug-core itself sent them:
 
     ```lua server.lua
-    UgCore.Events.On('ug-core:Players:DeathStateChanged', function(source, newState, oldState)
+    UgCore.Events.On(UgCore.Enums.Events.Players.DeathStateChanged, function(source, newState, oldState)
         print(('Player %d went from %s to %s'):format(source, oldState, newState))
     end)
     ```

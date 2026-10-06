@@ -44,7 +44,7 @@ UgCore.Inventory.AddItem(target, name, count, metadata?, reason?) -> ok, errorCo
 ```lua
 local ok, err = UgCore.Inventory.AddItem(source, 'water', 2, nil, 'shop:24-7')
 
-if err == 'cannot_carry' then
+if err == UgCore.Enums.Errors.CannotCarry then
     -- inventory full or too heavy
 end
 ```

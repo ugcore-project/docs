@@ -63,7 +63,7 @@ Each player gets one budget shared by every UgCore net event and callback, from 
 Every action goes through the `Guard:BeforeAction` hook first. An external anticheat can cancel it or pick a milder action, never a harsher one:
 
 ```lua
-UgCore.Hooks.Register('Guard:BeforeAction', function(payload)
+UgCore.Hooks.Register(UgCore.Enums.Hooks.Guard.BeforeAction, function(payload)
     -- payload: { source, action = 'warn'|'kick'|'ban', score, flags }
     if payload.action == 'ban' then
         payload.action = 'kick' -- softer while you review

@@ -9,7 +9,7 @@ Hooks run before an action. A handler can let it through, change it, or cancel i
 ## Register
 
 ```lua server.lua
-UgCore.Hooks.Register('Accounts:BeforeRemove', function(payload)
+UgCore.Hooks.Register(UgCore.Enums.Hooks.Accounts.BeforeRemove, function(payload)
     -- payload: { source, account, amount, reason }
     if payload.account == 'bank' and payload.amount > 50000 then
         return false -- cancel
@@ -28,7 +28,7 @@ end)
 </Warning>
 
 ```lua
-UgCore.Hooks.Register('Characters:BeforeCreate', function(payload)
+UgCore.Hooks.Register(UgCore.Enums.Hooks.Characters.BeforeCreate, function(payload)
     payload.name = payload.name:gsub('^%l', string.upper)
 
     return payload
@@ -38,7 +38,7 @@ end)
 ## Order
 
 ```lua
-UgCore.Hooks.Register('Players:BeforeRevive', handler, { priority = -10 })
+UgCore.Hooks.Register(UgCore.Enums.Hooks.Players.BeforeRevive, handler, { priority = -10 })
 ```
 
 Lower priority runs first, default `0`. Ties run in registration order.

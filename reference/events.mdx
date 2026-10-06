@@ -4,7 +4,12 @@ description: "Every event ug-core emits."
 icon: "bell"
 ---
 
-Subscribe with [`UgCore.Events.On`](/api/events). Names live in `UgCore.Enums.Events.<Group>.<Key>`. Events are emitted on the server unless noted.
+Subscribe with [`UgCore.Events.On`](/api/events). Every name below is `UgCore.Enums.Events.<Group>.<Key>`: use the enum, never the string. Events are emitted on the server unless noted.
+
+```lua
+-- ug-core:Players:Downed
+UgCore.Events.On(UgCore.Enums.Events.Players.Downed, function(source, cause) end)
+```
 
 <Info>`ug-core:*` events from any resource other than ug-core are dropped by `On` and `Once`.</Info>
 

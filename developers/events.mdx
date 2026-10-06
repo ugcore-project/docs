@@ -9,11 +9,11 @@ Events are after-the-fact notifications. They cannot block or change anything. U
 ## Listen
 
 ```lua
-local id = UgCore.Events.On('ug-core:Accounts:Changed', function(source, account, balance, delta, reason)
+local id = UgCore.Events.On(UgCore.Enums.Events.Accounts.Changed, function(source, account, balance, delta, reason)
     print(('%d: %s is now %d (%+d)'):format(source, account, balance, delta))
 end)
 
-UgCore.Events.Once('ug-core:Lifecycle:Ready', function()
+UgCore.Events.Once(UgCore.Enums.Events.Lifecycle.Ready, function()
     print('ug-core is ready')
 end)
 
@@ -32,7 +32,7 @@ Event names MUST start with your resource name:
 
 ```lua
 UgCore.Events.Emit('my-shop:Purchased', source, itemName)   -- ok
-UgCore.Events.Emit('ug-core:Players:Loaded', source)        -- error
+UgCore.Events.Emit(UgCore.Enums.Events.Players.Loaded, source)   -- error: reserved for ug-core
 ```
 
 Events are local events: every resource on the same side receives them.

@@ -134,6 +134,6 @@ Hooks allow or cancel. Changes to the payload are ignored.
 local ok, balance, err = UgCore.Accounts.Remove(source, 'cash', price, 'my-shop:water')
 
 if not ok then
-    return err -- 'insufficient_funds', 'not_loaded', ...
+    return err -- such as UgCore.Enums.Errors.InsufficientFunds
 end
 ```

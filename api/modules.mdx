@@ -39,6 +39,6 @@ Raises when the module is not enabled:
 [ug-core] Modules.Require: module "accounts" is not enabled. Enable it in config/modules.lua.
 ```
 
-Empty until ug-core has loaded its modules. Use `UgCore.Lifecycle.On('Ready', ...)` first.
+Empty until ug-core has loaded its modules. Use `UgCore.Lifecycle.On(UgCore.Enums.Lifecycle.Ready, ...)` first.
 
 See [Using modules](/developers/modules) for patterns, and each module page for its functions, errors, events, hooks and statebags.

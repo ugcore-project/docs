@@ -56,7 +56,7 @@ UgCore.Lifecycle.Await(state, timeout?) -> reached
 
 ```lua
 CreateThread(function()
-    if UgCore.Lifecycle.Await('Ready', 30000) then
+    if UgCore.Lifecycle.Await(UgCore.Enums.Lifecycle.Ready, 30000) then
         -- safe to use every module
     end
 end)

@@ -204,7 +204,7 @@ Always available.
 A paycheck loop for on-duty players:
 
 ```lua server.lua
-UgCore.Lifecycle.On('Ready', function()
+UgCore.Lifecycle.On(UgCore.Enums.Lifecycle.Ready, function()
     UgCore.Modules.Require('accounts')
     UgCore.Modules.Require('jobs')
 
