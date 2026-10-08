@@ -50,8 +50,12 @@
   "navbar": {
     "links": [
       {
-        "label": "API reference",
+        "label": "ug-core API",
         "href": "/api/overview"
+      },
+      {
+        "label": "ug-lib",
+        "href": "/ug-lib/introduction"
       }
     ],
     "primary": {
@@ -60,192 +64,321 @@
     }
   },
   "navigation": {
-    "tabs": [
+    "products": [
       {
-        "tab": "Documentation",
-        "icon": "book-open",
-        "groups": [
+        "product": "ug-core",
+        "description": "The framework: server-authoritative, headless, modular.",
+        "icon": "cube",
+        "tabs": [
           {
-            "group": "Getting started",
-            "pages": [
-              "index",
-              "introduction",
-              "installation",
-              "quickstart",
-              "architecture"
+            "tab": "Guides",
+            "icon": "book-open",
+            "groups": [
+              {
+                "group": "Getting started",
+                "pages": [
+                  "index",
+                  "introduction",
+                  "installation",
+                  "quickstart",
+                  "architecture"
+                ]
+              },
+              {
+                "group": "Server owners",
+                "pages": [
+                  "owners/configuration",
+                  "owners/modules",
+                  "owners/database",
+                  "owners/permissions",
+                  "owners/guard",
+                  "owners/console",
+                  "owners/troubleshooting"
+                ]
+              },
+              {
+                "group": "Resource developers",
+                "pages": [
+                  "developers/importing",
+                  "developers/modules",
+                  {
+                    "group": "Networking",
+                    "pages": [
+                      "developers/callbacks",
+                      "developers/net-events",
+                      "developers/schemas"
+                    ]
+                  },
+                  {
+                    "group": "Events and state",
+                    "pages": [
+                      "developers/events",
+                      "developers/hooks",
+                      "developers/lifecycle",
+                      "developers/statebags"
+                    ]
+                  },
+                  "developers/versioning"
+                ]
+              },
+              {
+                "group": "Concepts",
+                "pages": [
+                  "concepts/security",
+                  "concepts/death-system"
+                ]
+              }
             ]
           },
           {
-            "group": "For server owners",
-            "pages": [
-              "owners/configuration",
-              "owners/modules",
-              "owners/database",
-              "owners/permissions",
-              "owners/guard",
-              "owners/console",
-              "owners/troubleshooting"
+            "tab": "API",
+            "icon": "code",
+            "groups": [
+              {
+                "group": "Overview",
+                "pages": [
+                  "api/overview"
+                ]
+              },
+              {
+                "group": "Core",
+                "pages": [
+                  "api/enums",
+                  "api/events",
+                  "api/lifecycle",
+                  "api/config",
+                  "api/logger",
+                  "api/version",
+                  "api/modules"
+                ]
+              },
+              {
+                "group": "Networking and security",
+                "pages": [
+                  "api/schema",
+                  "api/ratelimit",
+                  "api/callback",
+                  "api/network",
+                  "api/guard",
+                  "api/hooks"
+                ]
+              },
+              {
+                "group": "Players and characters",
+                "pages": [
+                  "api/identity",
+                  {
+                    "group": "Players",
+                    "pages": [
+                      "api/players-death"
+                    ],
+                    "root": "api/players"
+                  },
+                  "api/player",
+                  "api/localplayer",
+                  "api/characters",
+                  {
+                    "group": "Permissions",
+                    "pages": [
+                      "api/permissions-groups"
+                    ],
+                    "root": "api/permissions"
+                  }
+                ]
+              },
+              {
+                "group": "Economy and items",
+                "pages": [
+                  "api/accounts",
+                  "api/items",
+                  {
+                    "group": "Inventory",
+                    "pages": [
+                      "api/inventory-containers",
+                      "api/inventory-client"
+                    ],
+                    "root": "api/inventory"
+                  },
+                  {
+                    "group": "Weapons",
+                    "pages": [
+                      "api/weapons-client"
+                    ],
+                    "root": "api/weapons"
+                  },
+                  {
+                    "group": "Shops",
+                    "pages": [
+                      "api/shops-client"
+                    ],
+                    "root": "api/shops"
+                  }
+                ]
+              },
+              {
+                "group": "Roles and world",
+                "pages": [
+                  "api/jobs",
+                  "api/gangs",
+                  "api/sessions"
+                ]
+              },
+              {
+                "group": "Tools",
+                "pages": [
+                  "api/commands",
+                  "api/locale"
+                ]
+              }
             ]
           },
           {
-            "group": "For developers",
-            "pages": [
-              "developers/importing",
-              "developers/modules",
-              "developers/callbacks",
-              "developers/net-events",
-              "developers/schemas",
-              "developers/events",
-              "developers/hooks",
-              "developers/lifecycle",
-              "developers/statebags",
-              "developers/versioning"
-            ]
-          },
-          {
-            "group": "Concepts",
-            "pages": [
-              "concepts/security",
-              "concepts/death-system"
+            "tab": "Reference",
+            "icon": "table-list",
+            "groups": [
+              {
+                "group": "Reference",
+                "pages": [
+                  "reference/error-codes",
+                  "reference/events",
+                  "reference/hooks",
+                  "reference/statebags",
+                  "reference/convars",
+                  "reference/config-files"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
-        "icon": "code",
-        "groups": [
-          {
-            "group": "Overview",
-            "pages": [
-              "api/overview"
-            ]
-          },
-          {
-            "group": "Core",
-            "pages": [
-              "api/enums",
-              "api/events",
-              "api/lifecycle",
-              "api/config",
-              "api/logger",
-              "api/version",
-              "api/modules"
-            ]
-          },
-          {
-            "group": "Networking and security",
-            "pages": [
-              "api/schema",
-              "api/ratelimit",
-              "api/callback",
-              "api/network",
-              "api/guard",
-              "api/hooks"
-            ]
-          },
-          {
-            "group": "Modules",
-            "pages": [
-              "api/identity",
-              "api/players",
-              "api/player",
-              "api/localplayer",
-              "api/permissions",
-              "api/characters",
-              "api/accounts",
-              "api/items",
-              "api/inventory",
-              "api/weapons",
-              "api/shops",
-              "api/jobs",
-              "api/gangs",
-              "api/sessions",
-              "api/commands",
-              "api/locale"
-            ]
-          },
-          {
-            "group": "Reference",
-            "pages": [
-              "reference/error-codes",
-              "reference/events",
-              "reference/hooks",
-              "reference/statebags",
-              "reference/convars",
-              "reference/config-files"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "ug-lib",
+        "product": "ug-lib",
+        "description": "UI components and utilities, with or without ug-core.",
         "icon": "wand-magic-sparkles",
-        "groups": [
+        "tabs": [
           {
-            "group": "Getting started",
-            "pages": [
-              "ug-lib/introduction",
-              "ug-lib/installation",
-              "ug-lib/configuration",
-              "ug-lib/importing",
-              "ug-lib/customization",
-              "ug-lib/with-ugcore",
-              "ug-lib/security"
+            "tab": "Guides",
+            "icon": "book-open",
+            "groups": [
+              {
+                "group": "Getting started",
+                "pages": [
+                  "ug-lib/introduction",
+                  "ug-lib/installation",
+                  "ug-lib/importing"
+                ]
+              },
+              {
+                "group": "Server owners",
+                "pages": [
+                  "ug-lib/configuration",
+                  "ug-lib/customization"
+                ]
+              },
+              {
+                "group": "Resource developers",
+                "pages": [
+                  "ug-lib/with-ugcore",
+                  "ug-lib/security"
+                ]
+              }
             ]
           },
           {
-            "group": "UI",
-            "pages": [
-              "ug-lib/notify",
-              "ug-lib/textui",
-              "ug-lib/progress",
-              "ug-lib/skillcheck",
-              "ug-lib/dialog",
-              "ug-lib/context",
-              "ug-lib/menu",
-              "ug-lib/radial",
-              "ug-lib/clipboard"
-            ]
-          },
-          {
-            "group": "Client utilities",
-            "pages": [
-              "ug-lib/cache",
-              "ug-lib/streaming",
-              "ug-lib/entity",
-              "ug-lib/raycast",
-              "ug-lib/draw",
-              "ug-lib/animation",
-              "ug-lib/zone",
-              "ug-lib/keybind"
-            ]
-          },
-          {
-            "group": "Shared utilities",
-            "pages": [
-              "ug-lib/enums",
-              "ug-lib/math",
-              "ug-lib/table",
-              "ug-lib/string",
-              "ug-lib/format",
-              "ug-lib/async",
-              "ug-lib/locale",
-              "ug-lib/version"
+            "tab": "API",
+            "icon": "code",
+            "groups": [
+              {
+                "group": "UI",
+                "pages": [
+                  {
+                    "group": "Feedback",
+                    "pages": [
+                      "ug-lib/notify",
+                      "ug-lib/textui",
+                      "ug-lib/progress",
+                      "ug-lib/skillcheck"
+                    ]
+                  },
+                  {
+                    "group": "Input",
+                    "pages": [
+                      "ug-lib/dialog",
+                      "ug-lib/context",
+                      "ug-lib/menu",
+                      "ug-lib/radial"
+                    ]
+                  },
+                  "ug-lib/clipboard"
+                ]
+              },
+              {
+                "group": "Client utilities",
+                "pages": [
+                  {
+                    "group": "World",
+                    "pages": [
+                      "ug-lib/cache",
+                      "ug-lib/entity",
+                      "ug-lib/raycast",
+                      "ug-lib/draw"
+                    ]
+                  },
+                  {
+                    "group": "Assets and animation",
+                    "pages": [
+                      "ug-lib/streaming",
+                      "ug-lib/animation"
+                    ]
+                  },
+                  {
+                    "group": "Areas and keys",
+                    "pages": [
+                      "ug-lib/zone",
+                      "ug-lib/keybind"
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "Shared utilities",
+                "pages": [
+                  "ug-lib/enums",
+                  {
+                    "group": "Data",
+                    "pages": [
+                      "ug-lib/math",
+                      "ug-lib/table",
+                      "ug-lib/string",
+                      "ug-lib/format"
+                    ]
+                  },
+                  "ug-lib/async",
+                  "ug-lib/locale",
+                  "ug-lib/version"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "Contributing",
+        "product": "Contributing",
+        "description": "Workflow, conventions and tests for both repositories.",
         "icon": "code-pull-request",
-        "groups": [
+        "tabs": [
           {
-            "group": "Contributing",
-            "pages": [
-              "contributing/overview",
-              "contributing/conventions",
-              "contributing/testing"
+            "tab": "Contributing",
+            "icon": "code-pull-request",
+            "groups": [
+              {
+                "group": "Contributing",
+                "pages": [
+                  "contributing/overview",
+                  "contributing/conventions",
+                  "contributing/testing"
+                ]
+              }
             ]
           }
         ]

@@ -15,83 +15,11 @@ Permissions are FiveM ACEs, groups are ACE principals `group.<name>`. Both are s
 
 `target` is a player source or an identifier such as `license:abc`. Identifiers work for offline players. Permission names are letters, digits, dots, dashes and underscores, such as `my-garage.admin`.
 
-## Groups
-
-Groups come from `config/permissions.lua`. Read them with `GetGroupDefinition`.
-
-### AddGroup
-
-```lua
-UgCore.Permissions.AddGroup(target, group, by?) -> ok, errorCode
-```
-
-**MUST run in a thread.** Adds the target to the group and applies it right away. Adding a member again does nothing and returns `true`.
-
-<ResponseField name="group" type="string" required>A group from `config/permissions.lua`.</ResponseField>
-<ResponseField name="by" type="string">Who added it. Up to 64 characters.</ResponseField>
-
-### RemoveGroup
-
-```lua
-UgCore.Permissions.RemoveGroup(target, group) -> ok, removed, errorCode
-```
-
-**MUST run in a thread.** `removed` is `false` when the target was not a member. Also deletes stored memberships of groups no longer in the config.
-
-### GetGroups
-
-```lua
-UgCore.Permissions.GetGroups(target) -> string[]
-```
-
-The target's groups, highest weight first. Inherited groups are not listed.
-
-### IsInGroup
-
-```lua
-UgCore.Permissions.IsInGroup(target, group) -> boolean
-```
-
-True for direct members and through inheritance: a `founder` that inherits `admin` is also in `admin`.
-
-### GetWeight
-
-```lua
-UgCore.Permissions.GetWeight(target) -> integer
-```
-
-The highest weight of the target's groups. `0` without groups.
-
-### CanTarget
-
-```lua
-UgCore.Permissions.CanTarget(actor, target) -> boolean
-```
-
-True when `actor` has a strictly higher weight than `target`. Source `0`, the server console, outranks everyone and is outranked by no one.
-
-```lua
-UgCore.Commands.Register('kick', {
-    permission = 'my-admin.kick',
-    args = { { name = 'target', type = 'player' } },
-}, function(source, args)
-    if not UgCore.Permissions.CanTarget(source, args.target) then
-        return
-    end
-
-    UgCore.Players.Kick(args.target)
-end)
-```
-
-### GetGroupDefinition
-
-```lua
-UgCore.Permissions.GetGroupDefinition(group) -> { label, weight, inherits?, permissions }?
-```
-
-A copy of the group from the config. `nil` for unknown groups.
-
-<Warning>`IsInGroup`, `GetGroups`, `GetWeight` and `CanTarget` only know memberships managed by UgCore, not `add_principal` lines in `server.cfg`.</Warning>
+<Columns cols={1}>
+  <Card title="Groups" icon="users-gear" href="/api/permissions-groups">
+    Staff groups with weights, inheritance and targeting.
+  </Card>
+</Columns>
 
 ## Single permissions
 

@@ -13,6 +13,12 @@ import { ModuleInfo } from "/snippets/module-info.jsx";
 
 Shops sell [items](/api/items) for an [account](/api/accounts). Prices, stock, distance and access are decided on the server. A client only says which item, by its position in the shop, and how many.
 
+<Columns cols={1}>
+  <Card title="Client and security" icon="display" href="/api/shops-client">
+    Client functions and what the server checks on every purchase.
+  </Card>
+</Columns>
+
 ## Config
 
 ```lua config/shops.lua
@@ -48,7 +54,7 @@ return {
 | `distance` | Meters from any of the coords, 0.5 to 20. Defaults to 2.5. |
 | `account` | The account that pays, from `config/accounts.lua`. |
 | `items` | Up to 200, each sold once. |
-| `jobs`, `gangs`, `groups` | Access, like [stashes](/api/inventory#stashes). None listed means everyone. |
+| `jobs`, `gangs`, `groups` | Access, like [stashes](/api/inventory-containers#stashes). None listed means everyone. |
 
 | Item field | Meaning |
 | --- | --- |
@@ -124,34 +130,6 @@ UgCore.Shops.Restock(name, item?) -> boolean
 
 Refills limited items to their `stock` now. Without `item`, every limited item of the shop.
 
-## Client
-
-```lua
-UgCore.Shops.GetAll() -> table<string, { label, coords }>
-UgCore.Shops.Open(name) -> ok, errorCode, listing
-UgCore.Shops.Buy(name, index, count) -> ok, errorCode
-```
-
-`GetAll` reads positions from `GlobalState[UgCore.Enums.GlobalState.Shops]`, for blips and markers. `Open` and `Buy` **MUST run in a thread**.
-
-<ResponseField name="listing" type="table">
-  <Expandable title="fields">
-    <ResponseField name="label" type="string" />
-    <ResponseField name="account" type="string" />
-    <ResponseField name="items" type="{ index, name, price, stock? }[]">`stock` is missing for items that never run out.</ResponseField>
-  </Expandable>
-</ResponseField>
-
-```lua client.lua
-CreateThread(function()
-    local ok, err, listing = UgCore.Shops.Open('general_store')
-
-    if ok then
-        -- show listing.items with labels from UgCore.Items.Get(item.name)
-    end
-end)
-```
-
 ## Errors
 
 | Code | When |
@@ -162,13 +140,6 @@ end)
 | `cannot_carry` | The items do not fit in the player's inventory. |
 | `insufficient_funds` | The account balance is too low. |
 | `not_loaded` | No character is loaded. |
-
-## Security
-
-| Callback | Rate | Checks |
-| --- | --- | --- |
-| `ug-core:ShopOpen` | 3 per second | Loaded, alive, range and access. Replies the listing. |
-| `ug-core:ShopBuy` | 4 per second | Loaded, alive, then every [purchase](#how-a-purchase-works) step. |
 
 ## Events
 

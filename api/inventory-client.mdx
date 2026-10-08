@@ -1,0 +1,102 @@
+---
+title: "Inventory: client and ui"
+sidebarTitle: "Client and UI"
+description: "Client functions, building an inventory UI, and what the server checks."
+icon: "display"
+---
+
+<Badge color="green">Client</Badge> Part of [Inventory](/api/inventory).
+
+## Client
+
+The player's own inventory, sent by the server to that player only. Reads are local:
+
+```lua
+UgCore.Inventory.IsLoaded() -> boolean
+UgCore.Inventory.GetItems() -> UgInventorySlot[]
+UgCore.Inventory.GetSlot(slot) -> UgInventorySlot?
+UgCore.Inventory.Count(name) -> integer
+UgCore.Inventory.HasItem(name, count?) -> boolean
+UgCore.Inventory.GetWeight() -> integer
+UgCore.Inventory.GetMaxWeight() -> integer
+UgCore.Inventory.GetSlots() -> integer
+```
+
+Actions ask the server, which checks everything again. They **MUST run in a thread** and return `ok, errorCode`:
+
+```lua
+UgCore.Inventory.Move(fromSlot, toSlot, count?) -> ok, errorCode
+UgCore.Inventory.Use(slot) -> ok, errorCode
+UgCore.Inventory.Give(target, slot, count?) -> ok, errorCode
+UgCore.Inventory.Refresh() -> ok, errorCode
+UgCore.Inventory.Drop(slot, count?) -> ok, errorCode
+```
+
+`Give` needs the other player within `giveDistance` meters, measured on the server.
+
+The other inventory:
+
+```lua
+UgCore.Inventory.Open(kind, key) -> ok, errorCode
+UgCore.Inventory.Close() -> ok, errorCode
+UgCore.Inventory.MoveBetween(from, fromSlot, to, toSlot, count?) -> ok, errorCode
+UgCore.Inventory.GetOther() -> { label, slots, maxWeight, items }?
+UgCore.Inventory.GetDrops() -> table<string, vector3>
+```
+
+| `kind` | `key` |
+| --- | --- |
+| `stash` | Stash name |
+| `trunk`, `glovebox` | Vehicle entity. Sent as its network id. |
+| `drop` | Drop id, from `GetDrops` |
+
+`from` and `to` are `'player'` or `'other'`.
+
+### Build an inventory UI
+
+```lua client.lua
+UgCore.Events.On(UgCore.Enums.Events.Inventory.Changed, function(changes, ref)
+    -- ref is 'player' or 'other'
+    if changes == nil then
+        -- full sync: redraw everything from UgCore.Inventory.GetItems()
+        return
+    end
+
+    for _, change in ipairs(changes) do
+        -- change.slot is now change.item, or empty when change.item is nil
+    end
+end)
+
+UgCore.Events.On(UgCore.Enums.Events.Inventory.Opened, function(inventory)
+    -- show inventory.label, inventory.slots, inventory.items next to the player's
+end)
+
+UgCore.Events.On(UgCore.Enums.Events.Inventory.Closed, function()
+    -- hide the second panel
+end)
+
+RegisterNUICallback('move', function(data, reply)
+    CreateThread(function()
+        local ok, err = UgCore.Inventory.Move(data.from, data.to, data.count)
+        reply({ ok = ok, error = err })
+    end)
+end)
+```
+
+On clients, `Changed` gets `(changes, ref)`: `nil` after a full sync, or the list of changed slots. `Opened` gets the opened inventory and `Closed` nothing.
+
+## Security
+
+Clients send slots and counts, never items, metadata or inventory ids. Their own inventory is `player`, the open one `other`.
+
+| Callback | Rate | Checks |
+| --- | --- | --- |
+| `ug-core:InventoryOpen` | 3 per second | Loaded, alive, then access and reach for the kind. Replies the opened inventory. |
+| `ug-core:InventoryClose` | 5 per second | Loaded. |
+| `ug-core:InventoryMove` | 10 per second | Loaded, alive, `other` still within reach. `other` without an open inventory is flagged in Guard. |
+| `ug-core:InventoryDrop` | 3 per second | Loaded, alive. The drop is at the ped position read on the server. |
+| `ug-core:InventoryUse` | 4 per second | Loaded, alive, then the [Use](/api/inventory#use) checks. |
+| `ug-core:InventoryGive` | 2 per second | Loaded, alive, target loaded and near, measured on the server. |
+| `ug-core:InventoryRefresh` | 2 per 5 seconds | Loaded. |
+
+Each replies `true` or an error code. The client functions above call them for you.

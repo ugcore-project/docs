@@ -11,6 +11,12 @@ import { ModuleInfo } from "/snippets/module-info.jsx";
 
 <ModuleInfo name="players" required deps={["identity"]} server="Players" client="LocalPlayer" />
 
+<Columns cols={1}>
+  <Card title="Death state" icon="heart-pulse" href="/api/players-death">
+    Downed and dead states, injuries, revive and respawn.
+  </Card>
+</Columns>
+
 ## Lookup
 
 ```lua
@@ -66,72 +72,6 @@ UgCore.Players.Kick(source, reason?) -> ok, errorCode
 
 <ResponseField name="reason" type="string">Shown to the player. A generic message when nil.</ResponseField>
 
-## Death state
-
-See the [Death system](/concepts/death-system) for states, rules and the downed flow.
-
-### Read
-
-```lua
-UgCore.Players.GetDeathState(source) -> 'Alive' | 'Downed' | 'Dead'
-UgCore.Players.IsDead(source) -> boolean
-UgCore.Players.IsDowned(source) -> boolean
-UgCore.Players.GetInjuries(source) -> UgInjury[]
-UgCore.Players.GetCauseOfDeath(source) -> UgCauseOfDeath?
-```
-
-<ResponseField name="UgInjury" type="table">
-  <Expandable title="fields">
-    <ResponseField name="region" type="UgBodyRegion" />
-    <ResponseField name="category" type="UgDamageCategory" />
-    <ResponseField name="weapon" type="integer?">Weapon hash of the last hit.</ResponseField>
-    <ResponseField name="attacker" type="integer?">Player source of the last hit, when confirmed.</ResponseField>
-    <ResponseField name="hits" type="integer" />
-    <ResponseField name="lastAt" type="integer">Unix seconds.</ResponseField>
-  </Expandable>
-</ResponseField>
-<ResponseField name="UgCauseOfDeath" type="table">
-  <Expandable title="fields">
-    <ResponseField name="region" type="UgBodyRegion" />
-    <ResponseField name="category" type="UgDamageCategory" />
-    <ResponseField name="weapon" type="integer?" />
-    <ResponseField name="killer" type="integer?">Only when a recorded `weaponDamageEvent` confirms it.</ResponseField>
-    <ResponseField name="at" type="integer">Unix seconds.</ResponseField>
-  </Expandable>
-</ResponseField>
-
-### Change
-
-```lua
-UgCore.Players.ClearInjuries(source, region?) -> ok, errorCode
-UgCore.Players.Down(source, cause?) -> ok, errorCode
-UgCore.Players.Kill(source, cause?) -> ok, errorCode
-UgCore.Players.Revive(source, options?) -> ok, errorCode
-UgCore.Players.Respawn(source, coords?) -> ok, errorCode
-```
-
-| Function | From | To | Hook |
-| --- | --- | --- | --- |
-| `Down` | `Alive` | `Downed` | `Players:BeforeDown` |
-| `Kill` | `Alive`, `Downed` | `Dead` | |
-| `Revive` | `Downed`, `Dead` | `Alive`, in place | `Players:BeforeRevive` |
-| `Respawn` | `Downed`, `Dead` | `Alive`, at `coords` | `Players:BeforeRespawn` |
-
-<ResponseField name="Revive options" type="UgReviveOptions">
-  <Expandable title="fields">
-    <ResponseField name="by" type="integer">Player source who revived.</ResponseField>
-    <ResponseField name="reason" type="string" />
-    <ResponseField name="health" type="integer" default="200">101 to 200.</ResponseField>
-    <ResponseField name="clearInjuries" type="boolean" />
-  </Expandable>
-</ResponseField>
-<ResponseField name="coords" type="vector4">Respawn position. Defaults to `respawn.coords` in `config/players.lua`. Respawn always clears injuries.</ResponseField>
-
-```lua
--- An ambulance resource, after its own job, item and distance checks
-local ok, err = UgCore.Players.Revive(target, { by = source, reason = 'cpr', clearInjuries = false })
-```
-
 ## Errors
 
 | Function | Code | When |
@@ -157,15 +97,6 @@ Invalid keys, values, regions, options and coordinates raise.
 
 `Loaded` fires when a character is loaded, or at join without the `characters` module.
 
-## Hooks
-
-| Hook | Payload | Cancelling |
-| --- | --- | --- |
-| `Players:BeforeDown` | `{ source, cause }` | Keeps the player alive. `Down` returns `no_permission`. |
-| `Players:BeforeBleedout` | `{ source }` | Keeps the player downed. The bleedout retries later. |
-| `Players:BeforeRevive` | `{ source, by, reason, health, clearInjuries }` | `Revive` returns `no_permission`. |
-| `Players:BeforeRespawn` | `{ source, coords }` | `Respawn` returns `no_permission`. |
-
 ## Statebags
 
 Index them with `UgCore.Enums.StateBags`. See [Statebags](/reference/statebags).
@@ -177,11 +108,3 @@ Index them with `UgCore.Enums.StateBags`. See [Statebags](/reference/statebags).
 | `Metadata` | `ug-core:Metadata` | Metadata set with `replicate = true` |
 | `DeathState` | `ug-core:DeathState` | `'Alive'`, `'Downed'` or `'Dead'` |
 | `Injuries` | `ug-core:Injuries` | `UgInjury[]` |
-
-## Enums
-
-| Enum | Values |
-| --- | --- |
-| `UgCore.Enums.DeathState` | `Alive`, `Downed`, `Dead` |
-| `UgCore.Enums.BodyRegion` | `Head`, `Neck`, `Torso`, `LeftArm`, `RightArm`, `LeftLeg`, `RightLeg`, `Unknown` |
-| `UgCore.Enums.DamageCategory` | `Gunshot`, `Stab`, `Blunt`, `Explosion`, `Fire`, `Fall`, `Vehicle`, `Drowning`, `Animal`, `Unknown` |

@@ -9,15 +9,24 @@
 
 ## Structure
 
-- `index.mdx`: landing page in custom mode.
-- Getting started: `introduction`, `installation`, `quickstart`, `architecture`.
-- `owners/`: server owners. Configuration, modules, database, permissions, Guard, console, troubleshooting.
-- `developers/`: resource developers. Guides with examples.
-- `concepts/`: security model and death system.
-- `api/`: one page per `UgCore.<Namespace>`. Signatures, parameters with `ResponseField`, one example.
-- `reference/`: exhaustive tables. Error codes, events, hooks, statebags, convars, config files.
-- `contributing/`: contribution workflow, conventions, testing.
-- `ug-lib/`: the ug-lib tab, flat: guides and one page per `UgLib.<Namespace>`. The link checker does not resolve deeper folders. The `ug-lib` repository is its source of truth.
+Navigation uses Mintlify `products`: a dropdown at the top of the sidebar picks the product, and each product has its own tabs.
+
+- **ug-core**: tabs Guides, API and Reference.
+  - `index.mdx` (landing page in custom mode), `introduction`, `installation`, `quickstart`, `architecture`: Getting started.
+  - `owners/`: server owners. Configuration, modules, database, permissions, Guard, console, troubleshooting.
+  - `developers/`: resource developers. Guides with examples, grouped into Networking and Events and state.
+  - `concepts/`: security model and death system.
+  - `api/`: one page per `UgCore.<Namespace>`. Signatures, parameters with `ResponseField`, one example. Grouped by area: Core, Networking and security, Players and characters, Economy and items, Roles and world, Tools.
+  - `reference/`: exhaustive tables. Error codes, events, hooks, statebags, convars, config files.
+- **ug-lib**: tabs Guides and API. `ug-lib/`, flat: guides and one page per `UgLib.<Namespace>`. The `ug-lib` repository is its source of truth.
+- **Contributing**: `contributing/`, workflow, conventions and testing.
+
+Rules:
+
+- Folders stay one level deep (`api/players.mdx`). The link checker does not resolve deeper folders. Nesting lives in `docs.json` groups, never in folders.
+- A page past about 150 lines is split into subpages named `<page>-<part>.mdx` (`api/inventory-containers`). The parent keeps the overview and links its subpages with a `Columns` of `Card`s. In `docs.json` they form a group whose `root` is the parent page, so the group header opens it.
+- Subpages start with the side badge and `Part of [Parent](/api/parent).`. Their title is `<Parent>: <part>`, their `sidebarTitle` the part alone.
+- Every page on disk MUST be in the navigation.
 
 ## Terminology
 

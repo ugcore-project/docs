@@ -1,0 +1,43 @@
+---
+title: "Shops: client and security"
+sidebarTitle: "Client and security"
+description: "Client functions and what the server checks on every purchase."
+icon: "display"
+---
+
+<Badge color="green">Client</Badge> Part of [Shops](/api/shops).
+
+## Client
+
+```lua
+UgCore.Shops.GetAll() -> table<string, { label, coords }>
+UgCore.Shops.Open(name) -> ok, errorCode, listing
+UgCore.Shops.Buy(name, index, count) -> ok, errorCode
+```
+
+`GetAll` reads positions from `GlobalState[UgCore.Enums.GlobalState.Shops]`, for blips and markers. `Open` and `Buy` **MUST run in a thread**.
+
+<ResponseField name="listing" type="table">
+  <Expandable title="fields">
+    <ResponseField name="label" type="string" />
+    <ResponseField name="account" type="string" />
+    <ResponseField name="items" type="{ index, name, price, stock? }[]">`stock` is missing for items that never run out.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+```lua client.lua
+CreateThread(function()
+    local ok, err, listing = UgCore.Shops.Open('general_store')
+
+    if ok then
+        -- show listing.items with labels from UgCore.Items.Get(item.name)
+    end
+end)
+```
+
+## Security
+
+| Callback | Rate | Checks |
+| --- | --- | --- |
+| `ug-core:ShopOpen` | 3 per second | Loaded, alive, range and access. Replies the listing. |
+| `ug-core:ShopBuy` | 4 per second | Loaded, alive, then every [purchase](/api/shops#how-a-purchase-works) step. |
