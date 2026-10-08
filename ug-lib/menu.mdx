@@ -21,6 +21,8 @@ UgLib.Menu.SetItem(id, index, fields)
 <ResponseField name="title" type="string" required />
 <ResponseField name="items" type="table[]" required>1 to 100 items.</ResponseField>
 <ResponseField name="position" type="UgPosition">Defaults to `settings.menuPosition`.</ResponseField>
+<ResponseField name="color" type="Color | #rrggbb">Replaces the accent. See [Customization](/ug-lib/customization).</ResponseField>
+<ResponseField name="fixed" type="boolean" default="false">Keeps your `position` when the player chose others in their [settings](/ug-lib/customization#player-settings).</ResponseField>
 <ResponseField name="onSelect" type="function">`(index, scrollIndex, args)` on the select key.</ResponseField>
 <ResponseField name="onSelected" type="function">`(index, scrollIndex, args)` when the selection moves.</ResponseField>
 <ResponseField name="onSideScroll" type="function">`(index, scrollIndex, args)`.</ResponseField>
@@ -29,7 +31,7 @@ UgLib.Menu.SetItem(id, index, fields)
 <ResponseField name="canClose" type="boolean" default="true">The back key closes.</ResponseField>
 <ResponseField name="disableInput" type="boolean" default="false">Blocks movement and combat while open.</ResponseField>
 
-Items: `label`, `description` (shown while selected), `icon`, `values` (side-scroll labels), `defaultIndex`, `checked` (makes a checkbox, not with `values`), `progress`, `close` (default true) and `args`. `scrollIndex` is nil for items without values.
+Items: `label`, `description` (shown while selected), `icon`, `iconColor`, `values` (side-scroll labels), `defaultIndex`, `checked` (makes a checkbox, not with `values`), `progress`, `close` (default true) and `args`. `scrollIndex` is nil for items without values.
 
 ## Keys
 
@@ -37,7 +39,7 @@ ug-lib owns the keys: up, down, left, right, select and back, with `settings.men
 
 - Select on a checkbox toggles it. Select on an item with `close = false` calls `onSelect` and stays open. Otherwise the menu closes after `onSelect`.
 - One menu at a time: a new menu from any resource replaces the open one, and the old one's `onClose` runs.
-- `SetItem` changes `label`, `description`, `icon`, `values`, `checked` or `progress` of an item. An open menu updates in place and keeps its selection.
+- `SetItem` changes `label`, `description`, `icon`, `iconColor`, `values`, `checked` or `progress` of an item. An open menu updates in place and keeps its selection.
 
 ## Example
 

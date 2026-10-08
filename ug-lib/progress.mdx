@@ -19,6 +19,8 @@ UgLib.Progress.IsActive() -> boolean
 <ResponseField name="options.label" type="string">Up to 128 characters.</ResponseField>
 <ResponseField name="options.style" type="UgProgressStyle" default="Bar" />
 <ResponseField name="options.position" type="UgPosition">Defaults to `settings.progressPosition`.</ResponseField>
+<ResponseField name="options.color" type="Color | #rrggbb">Replaces the accent. See [Customization](/ug-lib/customization).</ResponseField>
+<ResponseField name="options.fixed" type="boolean" default="false">Keeps your `position` and `style` when the player chose others in their [settings](/ug-lib/customization#player-settings).</ResponseField>
 <ResponseField name="options.canCancel" type="boolean" default="true">The cancel key (`settings.cancelKey`) cancels it.</ResponseField>
 <ResponseField name="options.cancelOnMove" type="boolean" default="false">Movement stays enabled, and pressing a direction cancels.</ResponseField>
 <ResponseField name="options.disable" type="table">`{ move, sprint, car, combat, mouse }`. All but `mouse` default to true.</ResponseField>

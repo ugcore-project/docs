@@ -189,6 +189,7 @@
               "ug-lib/installation",
               "ug-lib/configuration",
               "ug-lib/importing",
+              "ug-lib/customization",
               "ug-lib/with-ugcore",
               "ug-lib/security"
             ]

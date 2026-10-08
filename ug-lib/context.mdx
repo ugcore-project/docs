@@ -24,15 +24,18 @@ UgLib.Context.GetOpen() -> string?
 <ResponseField name="onBack" type="function" />
 <ResponseField name="onClose" type="function">Closed without a choice.</ResponseField>
 <ResponseField name="canClose" type="boolean" default="true" />
+<ResponseField name="position" type="UgPosition">Defaults to `settings.contextPosition`.</ResponseField>
+<ResponseField name="color" type="Color | #rrggbb">Replaces the accent. See [Customization](/ug-lib/customization).</ResponseField>
+<ResponseField name="fixed" type="boolean" default="false">Keeps your `position` when the player chose others in their [settings](/ug-lib/customization#player-settings).</ResponseField>
 
-Items: `title`, `description`, `icon`, `iconColor` (a `Color`), `image` (`nui://` or `https://`), `disabled`, `readOnly`, `progress` (0 to 100), `colorScheme` (a `Color` for the bar), `arrow`, `metadata` (up to 10 `{ label, value }`, shown on hover), `menu` (id of a context to open), `onSelect(args)` and `args`.
+Items: `title`, `description`, `icon`, `iconColor` (a `Color` or `#rrggbb`), `image` (`nui://` or `https://`), `disabled`, `readOnly`, `progress` (0 to 100), `colorScheme` (a `Color` or `#rrggbb` for the bar), `arrow`, `metadata` (up to 10 `{ label, value }`, shown on hover), `menu` (id of a context to open), `onSelect(args)` and `args`.
 
 - `Open(id)` returns at once. Callbacks run in your resource. `args` never reach the page.
 - Opening a context replaces your own open one. It is not shown while another resource has a modal open.
 
 ## Inline
 
-`Open({ title, items, canClose?, timeout? })` waits and returns the chosen item's index and `args`. Inline items MUST NOT have `onSelect` or `menu`. MUST run in a thread.
+`Open({ title, items, canClose?, timeout?, position?, color?, fixed? })` waits and returns the chosen item's index and `args`. Inline items MUST NOT have `onSelect` or `menu`. MUST run in a thread.
 
 ## Example
 

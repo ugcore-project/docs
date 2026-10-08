@@ -17,7 +17,7 @@ Precedence, lowest to highest: default, file, convar. An invalid value logs an e
 | Key | Type | Default | Purpose |
 | --- | --- | --- | --- |
 | `locale` | string | `en` | Language of ug-lib labels, and the default of `UgLib.Locale`. |
-| `debug` | boolean | `false` | Debug logs on both sides, and the `uglib` client command. |
+| `debug` | string | `auto` | Debug logs on both sides, and the `uglib` client command. `auto` follows ug-core's `debug`, and is off without ug-core. `on` and `off` always win. `true` and `false` work too. |
 | `currency` | table | `{ symbol = '$', position = 'before' }` | Default of `Format.Money`. `position` is `before` or `after`. |
 | `notifyPosition` | string | `top-right` | Default anchor of notifications. |
 | `notifyDuration` | integer | `5000` | Default notification time in ms. `0` keeps it until dismissed. |
@@ -25,12 +25,16 @@ Precedence, lowest to highest: default, file, convar. An invalid value logs an e
 | `textUIPosition` | string | `bottom` | Default anchor of the text prompt. |
 | `progressPosition` | string | `bottom` | Default anchor of progress bars. |
 | `menuPosition` | string | `top-left` | Default anchor of keyboard menus. |
+| `contextPosition` | string | `center-right` | Default anchor of context menus. |
 | `cancelKey` | string | `X` | Cancels a progress action. |
 | `radialKey` | string | `F1` | Opens the global radial. An empty string disables it. |
 | `menuKeys` | table | arrows, `RETURN`, `BACK` | Keys of keyboard menus: `up`, `down`, `left`, `right`, `select`, `back`. |
 | `cacheInterval` | integer | `100` | How often the client cache reads the player, in ms. 50 to 1000. |
 | `zoneInterval` | integer | `250` | How often zones check the player, in ms. 50 to 2000. |
 | `sounds` | boolean | `true` | Frontend sounds in keyboard menus. |
+| `playerSettings` | boolean | `true` | Players MAY change their theme, accent, size, positions and styles. See [Customization](/ug-lib/customization#player-settings). |
+| `lockedSettings` | table | `{}` | Preferences players MUST NOT change, such as `{ 'accent', 'mode' }`. |
+| `settingsCommand` | string | `uisettings` | Chat command that opens the player settings. A new name needs a restart. |
 
 Anchors are `top-left`, `top`, `top-right`, `center-left`, `center`, `center-right`, `bottom-left`, `bottom` and `bottom-right`.
 
@@ -68,7 +72,7 @@ Settings use `ug-lib:<Key>`, theme options `ug-lib:Theme:<Key>`. Tables cannot b
 
 ```bash server.cfg
 set ug-lib:Locale "pt"
-set ug-lib:Debug "true"
+set ug-lib:Debug "on"
 set ug-lib:Theme:Mode "light"
 ```
 
@@ -78,10 +82,10 @@ set ug-lib:Theme:Mode "light"
 
 | Command | Shows |
 | --- | --- |
-| `uglib status` | Version, locale, theme, debug, and each file: generated, loaded or failed, with values from file and convars. |
+| `uglib status` | Version, locale, theme, debug mode and whether debug is on, and each file: generated, loaded or failed, with values from file and convars. |
 | `uglib config <name>` | Every value of `settings` or `theme` with its source. |
 
-`uglib` in F8, with `debug = true`:
+`uglib` in F8, while debug is on:
 
 | Command | Does |
 | --- | --- |

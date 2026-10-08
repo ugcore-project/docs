@@ -8,7 +8,7 @@ icon: "bullseye"
 <Badge color="green">Client</Badge> Through ug-lib.
 
 ```lua
-UgLib.SkillCheck.Start(difficulties, keys?) -> success, reason
+UgLib.SkillCheck.Start(difficulties, keys?, options?) -> success, reason
 UgLib.SkillCheck.Cancel() -> boolean
 UgLib.SkillCheck.IsActive() -> boolean
 ```
@@ -19,6 +19,8 @@ UgLib.SkillCheck.IsActive() -> boolean
   1 to 10 rounds. Each is a `UgLib.Enums.Difficulty` or `{ areaSize, speed }`: area 10 to 120 degrees, speed 0.1 to 1.0 degrees per ms.
 </ResponseField>
 <ResponseField name="keys" type="string[]" default="{ 'e' }">1 to 8 lower-case letters or digits. Each round asks for one of them.</ResponseField>
+<ResponseField name="options.position" type="UgPosition" default="Center" />
+<ResponseField name="options.color" type="Color | #rrggbb">Replaces the accent. See [Customization](/ug-lib/customization).</ResponseField>
 
 | Difficulty | Area | Speed |
 | --- | --- | --- |

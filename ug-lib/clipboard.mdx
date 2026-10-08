@@ -20,10 +20,12 @@ Copies 1 to 4096 characters to the player's clipboard.
 ```lua
 UgLib.Ui.CloseAll()
 UgLib.Ui.IsOpen(kind?) -> boolean
+UgLib.Ui.OpenSettings()
 ```
 
 - `CloseAll` closes every UI of every resource. Waiting calls end with `Closed`.
 - `IsOpen(kind)` is true when a UI of that `UgLib.Enums.UiType` is open. Without `kind`, it is true when a modal is open: a dialog, a context menu, a radial or a skill check.
+- `OpenSettings` opens the player settings, for a button in your own menu. See [Customization](/ug-lib/customization#player-settings).
 
 ## Example
 

@@ -13,7 +13,7 @@ The NUI page runs in the player's game. Injected scripts and executors can post 
 - **Values follow their fields.** A dialog answer is checked against each field: type, `required`, `min`, `max`, `step`, `maxLength`, options and dates. Strings lose control characters. A disabled field keeps its default.
 - **Timing is checked.** A skill check hit only counts when the needle could be in the area at the time the page reports.
 - **Payloads are rebuilt.** Every payload is rebuilt from known fields, on your side and again in ug-lib, because any resource can call its exports.
-- **No HTML.** The page renders text, never HTML. Formatted text uses a small markup: `**bold**`, `*italic*`, `~success~color~reset~`. Images MUST be `nui://` or `https://`.
+- **No HTML.** The page renders text, never HTML. Formatted text uses a small markup: `**bold**`, `*italic*`, `~success~color~reset~`. Images MUST be `nui://` or `https://`. Colors MUST be a theme token or `#rrggbb`, never raw CSS.
 - **Rate limits.** Non-final page events are limited to 20 per layer per second.
 
 A failed check resolves the call as `Cancelled`. It never raises in your code.

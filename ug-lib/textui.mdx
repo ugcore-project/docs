@@ -18,6 +18,8 @@ UgLib.TextUI.IsShown() -> boolean
 <ResponseField name="options.key" type="string">A key label, up to 16 characters, such as `E`.</ResponseField>
 <ResponseField name="options.icon" type="UgIcon" />
 <ResponseField name="options.position" type="UgPosition">Defaults to `settings.textUIPosition`.</ResponseField>
+<ResponseField name="options.color" type="Color | #rrggbb">Replaces the accent. See [Customization](/ug-lib/customization).</ResponseField>
+<ResponseField name="options.fixed" type="boolean" default="false">Keeps your `position` and `style` when the player chose others in their [settings](/ug-lib/customization#player-settings).</ResponseField>
 
 - Showing the same options again sends nothing, so calling `Show` every frame is fine. A change updates the prompt in place.
 - One prompt at a time across resources: a prompt from another resource replaces yours, and your `IsShown()` turns false.

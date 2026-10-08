@@ -15,11 +15,11 @@ UgLib.Radial.ClearItems()
 UgLib.Radial.SetEnabled(enabled)
 ```
 
-Items: `id` (1 to 64 letters, digits or `_ - . :`, unique in your tree), `label` (up to 64 characters), `icon`, `disabled`, and `items` for a submenu. Up to 50 items per ring and 3 levels. A ring shows 8 items at a time and pages the rest behind a "more" button.
+Items: `id` (1 to 64 letters, digits or `_ - . :`, unique in your tree), `label` (up to 64 characters), `icon`, `iconColor`, `disabled`, and `items` for a submenu. Up to 50 items per ring and 3 levels. A ring shows 8 items at a time and pages the rest behind a "more" button.
 
 ## One-off
 
-`Open({ items, title?, timeout? })` waits and returns the chosen item's `id`, or `nil, reason`. Its items MUST NOT have `onSelect`. MUST run in a thread.
+`Open({ items, title?, timeout?, color? })` waits and returns the chosen item's `id`, or `nil, reason`. Its items MUST NOT have `onSelect`. MUST run in a thread.
 
 ## Global radial
 
