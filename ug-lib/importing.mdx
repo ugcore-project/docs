@@ -11,7 +11,7 @@ fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
 
-ug_lib_version '1.0.0'
+uglib_version '1.0.0'
 dependency 'ug-lib'
 
 shared_script '@ug-lib/import.lua'
@@ -19,7 +19,7 @@ shared_script '@ug-lib/import.lua'
 
 The import defines one global in your resource: `UgLib`. It is read-only, and `UgLib.Internal` is private.
 
-`ug_lib_version` is optional. With it, your resource does not start against an older ug-lib:
+`uglib_version` is optional. With it, your resource does not start against an older ug-lib:
 
 ```text
 [ug-lib] my-shop requires ug-lib 1.2.0 or newer, found 1.0.0. Update ug-lib.
