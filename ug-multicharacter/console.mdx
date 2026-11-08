@@ -1,0 +1,39 @@
+---
+title: "Commands"
+description: "The ugmc console command and the switch command."
+icon: "terminal"
+---
+
+## `ugmc`
+
+Server console only. Players cannot run it.
+
+| Command | Does |
+| --- | --- |
+| `ugmc status` | Players in the scene, with their phase and for how long. |
+| `ugmc reopen <id>` | Saves and unloads the player's character, then sends them back to the selection. |
+
+```text
+> ugmc status
+  player 3: selecting for 42 s
+  player 7: placing for 3 s, character 12
+ug-multicharacter: 2 player(s) in the scene.
+```
+
+## Switch command
+
+Set `switchCommand` to let players go back to the selection themselves:
+
+```lua config.lua
+switchCommand = 'logout',
+```
+
+`/logout` saves and unloads the character, then plays a short intro back onto the lineup. A downed or dead character stays downed or dead, and goes back where it was when chosen again. A new name needs a restart of the resource.
+
+## From another resource
+
+Send a player back to the selection from your own server code with `ExecuteCommand(('ugmc reopen %d'):format(source))`. `ugmc` is restricted, so your resource needs the ACE:
+
+```bash server.cfg
+add_ace resource.my-resource command.ugmc allow
+```

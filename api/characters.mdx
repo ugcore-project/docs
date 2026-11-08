@@ -27,6 +27,8 @@ UgCore.Characters.GetAll(source) -> ok, characters, errorCode
     <ResponseField name="id" type="integer" />
     <ResponseField name="name" type="string">Display name.</ResponseField>
     <ResponseField name="data" type="table">Fields such as first name and birth date, set by your character creator.</ResponseField>
+    <ResponseField name="position" type="vector4?">Last saved position and heading. See [GetPosition](#getposition).</ResponseField>
+    <ResponseField name="deathState" type="UgDeathState">Saved death state. `Alive` when nothing is saved or `persistDeathState` is off. A character loads in this state.</ResponseField>
     <ResponseField name="createdAt" type="integer">Unix seconds.</ResponseField>
     <ResponseField name="lastPlayed" type="integer?">Unix seconds.</ResponseField>
   </Expandable>
@@ -74,6 +76,19 @@ UgCore.Characters.GetActive(source) -> UgCharacter?
 ```
 
 The loaded character. Use `UgCore.Players.Get(source).characterId` or the `ug-core:Player` statebag when you only need the id.
+
+## GetPosition
+
+```lua
+UgCore.Characters.GetPosition(characterId) -> ok, position, errorCode
+```
+
+The last saved position as a `vector4` (`x`, `y`, `z`, heading), or `nil` before the first save. MUST run in a thread.
+
+- The position is read from the ped on the server, never from the client.
+- It is saved on unload, disconnect and resource stop, and every `positionInterval` ms while playing.
+- A ped at the map origin has not spawned yet: the saved position is kept.
+- `persistPosition = false` in `config/characters.lua` stops saving.
 
 ## Errors
 

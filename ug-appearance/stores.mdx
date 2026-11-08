@@ -1,0 +1,77 @@
+---
+title: "Stores and uniforms"
+description: "Store points, job stores, wardrobes, saved outfits and uniforms."
+icon: "store"
+---
+
+## Stores
+
+Each entry of `stores` is one point in the world. Players walk into it, see a prompt and press the interact key.
+
+```lua config.lua
+stores = {
+    { id = 'clothing1', kind = 'clothing', coords = vector3(72.3, -1399.1, 29.4), blip = true },
+    { id = 'vip', kind = 'barber', coords = vector3(-814.3, -183.8, 37.6), prices = { hair = 0 }, blip = { label = 'VIP barber' } },
+    { id = 'mrpd', kind = 'wardrobe', coords = vector3(461.4, -998.0, 30.7), job = 'police', blip = false },
+},
+```
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `id` | string | Unique name. Logs and the console use it. |
+| `kind` | string | `clothing`, `barber`, `tattoo`, `surgeon` or `wardrobe`. |
+| `coords` | vector3 | The point. |
+| `radius` | number | Meters to open it. Default `storeRadius`. |
+| `label` | string | Prompt and blip text. Default the kind's label in the locale file. |
+| `blip` | `true`, `false` or table | `true` uses the kind's blip from `blips`. A table overrides `sprite`, `color`, `scale` or `label`. |
+| `job`, `gang` | string | Only members see the point and its blip, and the server refuses others. |
+| `prices` | table | Overrides any of the default [prices](/ug-appearance/configuration#prices) at this store. |
+
+The default list holds 14 clothing stores, 7 barbers, 6 tattoo parlors and 1 surgeon at the game's shop doors. Check them on your server, since custom maps move doors.
+
+<Tip>
+  A job locker room is a `wardrobe` with `job` set and `blip = false`. Officers see their saved outfits and uniforms there, for free.
+</Tip>
+
+## Saved outfits
+
+At clothing stores and wardrobes, the Outfits tab lists the character's saved outfits.
+
+- **Save current outfit** saves the clothes and accessories the character *has paid for*, not the preview. A preview never becomes a free outfit.
+- **Wear** puts an outfit on for free.
+- At most `maxOutfits` per character. Names are 1 to 32 characters.
+
+Outfits belong to the character and are stored in `ug_outfits`.
+
+## Uniforms
+
+Uniforms are outfits you define for a job or gang. They show in the Outfits tab of clothing stores and wardrobes for members only, and are worn for free.
+
+```lua config.lua
+uniforms = {
+    police = {
+        {
+            label = 'Patrol',
+            male = {
+                components = { top = { drawable = 55, texture = 0 }, legs = { drawable = 35, texture = 0 } },
+                props = { hat = { drawable = 46, texture = 0 } },
+            },
+            female = {
+                components = { top = { drawable = 48, texture = 0 }, legs = { drawable = 34, texture = 0 } },
+            },
+        },
+        { label = 'Command', grades = { 4, 5 }, male = { components = { top = { drawable = 200, texture = 0 } } } },
+    },
+},
+```
+
+- The key is a job or gang name from ug-core.
+- `grades` limits a uniform to those grades. Without it, every grade sees it.
+- `male` and `female` match the freemode models. Pieces left out stay as they are.
+- Component names: `mask`, `arms`, `legs`, `bag`, `shoes`, `accessory`, `undershirt`, `armor`, `decals`, `top`. Prop names: `hat`, `glasses`, `ears`, `watch`, `bracelet`. A prop `drawable` of `-1` removes it.
+
+The server filters uniforms by the player's job or gang and grade every time, so changing jobs takes effect at once.
+
+## Opening stores from code
+
+Housing, job and admin resources MAY open a store without a point. See [Integration](/ug-appearance/integration#server-exports).

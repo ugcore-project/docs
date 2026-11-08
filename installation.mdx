@@ -25,12 +25,13 @@ icon: "download"
 
 <Steps>
   <Step title="Download ug-core">
-    Clone or download the repository into your resources folder:
+    Download `ug-core-<version>.zip` from the [latest release](https://github.com/ugcore-project/ug-core/releases/latest) and extract it into your resources folder, for example `resources/[ug]/ug-core`.
 
-    ```bash
-    cd resources/[ug]
-    git clone https://github.com/ugcore-project/ug-core.git
-    ```
+    The archive holds only what the server runs. The repository also has tests and tooling: clone it only to contribute.
+
+    <Tip>
+      Each release lists its changes and has a `.sha256` file to verify the download.
+    </Tip>
   </Step>
 
   <Step title="Configure server.cfg">
@@ -59,13 +60,10 @@ icon: "download"
 
     ```text Server console
       _   _  ____    ____
-     | | | |/ ___|  / ___|___  _ __ ___
-     | | | | |  _  | |   / _ \| '__/ _ \
-     | |_| | |_| | | |__| (_) | | |  __/
-      \___/ \____|  \____\___/|_|  \___|
-
-     ug-core v1.0.0 · LuaGLM 5.4 · OneSync on
-     Up to date.
+     | | | |/ ___|  / ___|___  _ __ ___     Welcome to Los Santos RP!
+     | | | | |  _  | |   / _ \| '__/ _ \    ug-core v1.0.0 · Up to date.
+     | |_| | |_| | | |__| (_) | | |  __/    FXServer 17000 · 48 slots · game build 3258
+      \___/ \____|  \____\___/|_|  \___|    Type ug here to inspect the framework · ugcore.urging.ch
 
     [INFO] Config: generated config/core.lua.
     [INFO] Config: generated config/modules.lua.
@@ -103,6 +101,18 @@ icon: "download"
     Players who connect during boot see "The server is starting. Please wait." until ug-core is ready, for at most 60 seconds.
   </Accordion>
 </AccordionGroup>
+
+## Updating
+
+Extract the new release over your `ug-core` folder and restart. The archive ships `config/` empty, so your config files stay as they are. New options are logged once with their default, and migrations run on boot.
+
+<Warning>
+  Do not delete the folder before extracting: that deletes `config/` too.
+</Warning>
+
+Releases follow semantic versioning. A new MAJOR version MAY need changes to your config or resources: read its notes first.
+
+The `dev-build` pre-release on GitHub is the latest `dev` branch, rebuilt on every change. It MAY break: use it on test servers only. Servers on a release are never told about it.
 
 ## If boot fails
 

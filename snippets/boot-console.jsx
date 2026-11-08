@@ -10,13 +10,10 @@ export const BootConsole = () => {
 
   const lines = [
     { text: "  _   _  ____    ____", tone: "banner", delay: 60 },
-    { text: " | | | |/ ___|  / ___|___  _ __ ___", tone: "banner", delay: 60 },
-    { text: " | | | | |  _  | |   / _ \\| '__/ _ \\", tone: "banner", delay: 60 },
-    { text: " | |_| | |_| | | |__| (_) | | |  __/", tone: "banner", delay: 60 },
-    { text: "  \\___/ \\____|  \\____\\___/|_|  \\___|", tone: "banner", delay: 300 },
-    { text: "", tone: "meta", delay: 60 },
-    { text: " ug-core v1.0.0 · LuaGLM 5.4 · OneSync on", tone: "meta", delay: 350 },
-    { text: " Up to date.", tone: "ok", delay: 500 },
+    { text: " | | | |/ ___|  / ___|___  _ __ ___     Welcome to Los Santos RP!", tone: "banner", delay: 60 },
+    { text: " | | | | |  _  | |   / _ \\| '__/ _ \\    ug-core v1.0.0 · Up to date.", tone: "banner", delay: 60 },
+    { text: " | |_| | |_| | | |__| (_) | | |  __/    FXServer 17000 · 48 slots · game build 3258", tone: "banner", delay: 60 },
+    { text: "  \\___/ \\____|  \\____\\___/|_|  \\___|    Type ug here to inspect the framework · ugcore.urging.ch", tone: "banner", delay: 500 },
     { text: "", tone: "meta", delay: 80 },
     { tag: "[INFO]", text: " Lifecycle: Configured (14 ms)", tone: "info", delay: 220 },
     { tag: "[INFO]", text: " Lifecycle: Initializing (1 ms)", tone: "info", delay: 220 },

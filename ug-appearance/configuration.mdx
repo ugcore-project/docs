@@ -1,0 +1,90 @@
+---
+title: "Configuration"
+description: "Every option of config.lua."
+icon: "sliders"
+---
+
+On the first start, `config.example.lua` is copied to `config.lua`. Edit `config.lua` only. Updates never overwrite it, and a key you remove uses its default. Unknown keys and wrong values stop the resource with every problem listed.
+
+Stores, outfits and uniforms have their own page: [Stores and uniforms](/ug-appearance/stores).
+
+## Options
+
+| Key | Type | Default | Purpose |
+| --- | --- | --- | --- |
+| `models` | string[] | `mp_m_freemode_01`, `mp_f_freemode_01` | Models the creator and the admin editor offer. Stores never change the model. |
+| `stores` | table[] | the game's 28 shops | Store points. See [Stores](/ug-appearance/stores). |
+| `blips` | table | a sprite and color per kind | Default blip of each store kind. |
+| `prices` | table | see below | What each change costs. |
+| `payment.accounts` | string[] | `{ 'cash', 'bank' }` | ug-core accounts tried in order. |
+| `storeRadius` | number | `2.0` | Meters from a store point to open it, when the store sets no `radius`. |
+| `maxOutfits` | integer | `20` | Saved outfits per character. |
+| `maxTattoos` | integer | `60` | Tattoos per appearance. |
+| `uniforms` | table | `{}` | Job and gang uniforms. See [Uniforms](/ug-appearance/stores#uniforms). |
+| `poses` | table[] | idle, hands up, arms crossed, impatient | Preview poses. |
+| `camera` | table | see below | The studio camera. |
+| `adminCommand` | string or `false` | `'appearance'` | Command that opens the full editor. `false` turns it off. |
+| `interactKey` | string | `'E'` | Default key to open a store. Players MAY rebind it in the game's key bindings. |
+
+## Prices
+
+```lua config.lua
+prices = {
+    component = 60,      -- each changed piece of clothing
+    prop = 40,           -- each changed accessory
+    overlay = 30,        -- each changed beard, eyebrow or makeup layer
+    hair = 80,           -- once when the hair changed
+    heritage = 1500,     -- once when the parents or resemblance changed
+    features = 1000,     -- once when any face feature changed
+    eyes = 300,
+    skin = 200,
+    tattoo = 150,        -- each added tattoo
+    tattooRemoval = 50,  -- each removed tattoo
+},
+```
+
+The server computes every bill from its own copy of the saved appearance. A store MAY override any of these prices with its own `prices` table.
+
+## Payment
+
+`payment.accounts` lists the ug-core accounts that pay, in order. The first account that holds the whole amount pays it, with a ledger row named after the store kind (`ug-appearance:clothing`). When none holds it, the save is refused and nothing changes.
+
+Without ug-core's **accounts** module, every store is free. Wardrobes, the creator and the admin editor are always free.
+
+## Poses
+
+```lua config.lua
+poses = {
+    { id = 'idle' },
+    { id = 'handsUp', dict = 'missminuteman_1ig_2', name = 'handsup_base' },
+    { id = 'impatient', scenario = 'WORLD_HUMAN_STAND_IMPATIENT' },
+},
+```
+
+A pose is an animation (`dict`, `name`, optional `flag`), a scenario, or nothing (`idle`). The label comes from `poses.<id>` in `locales/<code>.json`. The page shows the pose picker when there are at least two poses.
+
+## Camera
+
+```lua config.lua
+camera = {
+    duration = 600,
+    ease = 'inOut',
+    minDistance = 0.5,
+    maxDistance = 4.0,
+    presets = {
+        face = { distance = 0.8, height = 0.65, fov = 35 },
+        upper = { distance = 1.5, height = 0.3, fov = 40 },
+        lower = { distance = 1.6, height = -0.45, fov = 40 },
+        feet = { distance = 1.2, height = -0.85, fov = 40 },
+        full = { distance = 2.8, height = 0.0, fov = 45 },
+    },
+},
+```
+
+- `duration` and `ease` (`linear`, `inOut`, `in`, `out`) shape every camera move.
+- Each preset sets the distance in front of the ped, the height from its center and the field of view. Each category picks a preset, and the player MAY switch.
+- The mouse wheel zooms between `minDistance` and `maxDistance`.
+
+## Languages
+
+Labels come from `locales/<code>.json`, picked by ug-lib's locale setting. English and Portuguese ship with the resource. To add a language, copy `locales/en.json` and translate the values. Every locale MUST have the same keys.

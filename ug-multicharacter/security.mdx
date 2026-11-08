@@ -1,0 +1,31 @@
+---
+title: "Security"
+description: "What the server checks, and why the page cannot be trusted."
+icon: "shield-halved"
+---
+
+The page runs in the player's game, and injected scripts can post anything to it. `ug-multicharacter` treats every request as untrusted, and checks it at three levels: the page bridge in Lua, the ug-core callback, and the server rule.
+
+## What is checked
+
+| Action | Checks |
+| --- | --- |
+| Opening the scene | Only players without a loaded character. Each player sees only their own characters. |
+| Creating | Only configured field names and offered bodies pass the page bridge. The server checks every value again with a schema built from your config: names, real dates, age, options. ug-core enforces `maxCharacters`. |
+| Deleting | The player MUST type the name in the page. The server checks ownership and a cooldown between deletes. |
+| Spawning | The page sends a place id, never coordinates. The server resolves the destination. Downed and dead characters always go back where they were. |
+| Arriving | The server reads the ped's position and loads the character only within 10 m of the destination. |
+
+Every callback has a schema and a rate limit through ug-core. One request at a time per player: a second one while the first waits on the database is refused. The page bridge also refuses more than 30 page events per second.
+
+## Privacy and isolation
+
+- The page gets names, birth dates, last played dates, street names and death states. Never character ids, raw data or coordinates.
+- While choosing, each player is alone in a private routing bucket, so nobody sees another player's scene or ped. With ug-core's sessions module, it is a session of its own.
+
+## What it never does
+
+- Load a character before the player arrived.
+- Trust a coordinate, a character id or a spawn choice from the page.
+- Revive a downed or dead character by sending it somewhere else.
+- Tell a kicked player which check failed.

@@ -1,0 +1,61 @@
+---
+title: "Integration"
+description: "Exports for housing, jobs, admin tools and character selection."
+icon: "plug"
+---
+
+Call these exports from your own resources. They are the only supported way in: never write the `ug_appearances` or `ug_outfits` tables yourself.
+
+## Server exports
+
+<Badge color="blue">Server</Badge>
+
+| Export | Returns | Does |
+| --- | --- | --- |
+| `OpenStore(source, kind, options?)` | `ok, errorCode?` | Opens a store of `kind` (`clothing`, `barber`, `tattoo`, `surgeon`, `wardrobe`, `admin`) for the player, without a point. `options.free = true` makes it free. |
+| `OpenWardrobe(source)` | `ok, errorCode?` | Opens the wardrobe: saved outfits and uniforms, free. |
+| `GetAppearance(characterId)` | table or `nil` | The saved appearance of a character. |
+
+The player MUST have a loaded character, or the result is `false, 'not_loaded'`. Your resource is trusted: check distance, ownership or job yourself before you call.
+
+```lua server.lua
+-- A housing resource: the wardrobe of the house the player stands in.
+UgCore.Network.Register('Wardrobe', {
+    schema = UgCore.Schema.Define({}),
+    rate = { max = 2, per = 5000 },
+    requirePlayer = true,
+}, function(source)
+    if isInsideOwnHouse(source) then
+        exports['ug-appearance']:OpenWardrobe(source)
+    end
+end)
+```
+
+## Client exports
+
+<Badge color="green">Client</Badge>
+
+| Export | Returns | Does |
+| --- | --- | --- |
+| `OpenCreator(ped, options?)` | appearance or `nil` | Waits while the player creates a look over `ped`. `options.models` limits the models. Returns `nil` when cancelled. Only for players without a loaded character. |
+| `Apply(ped, appearance)` | boolean | Dresses any ped of the appearance's model, such as a preview or lineup ped. |
+| `Fetch(characterIds)` | table | The saved appearances of the player's own characters, by id. Waits on the server. |
+
+`OpenCreator` and `Fetch` MUST run in a thread.
+
+## Character selection
+
+`ug-multicharacter` uses the client exports when `ug-appearance` is started. Nothing to configure:
+
+- The lineup shows each character in its saved look.
+- After the creation form, the creator opens over the new character. Its model replaces the body chosen in the form. Cancelling returns to the form with the values kept.
+- The character is created, then `ug-appearance` saves the look for it on the server.
+- Playing a character puts its look on the player.
+
+Keep `models` here and `appearance.models` in ug-multicharacter's config the same. A model that is only in one list is refused when the character is created.
+
+See the [appearance contract](/ug-multicharacter/appearance) on the ug-multicharacter side.
+
+## Loading
+
+When ug-core loads a character, `ug-appearance` dresses the player with the saved look. Resources that change the player's model, such as a ped menu, SHOULD call `Apply` with `GetAppearance` afterwards to restore it.

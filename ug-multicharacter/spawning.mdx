@@ -1,0 +1,48 @@
+---
+title: "Spawning"
+description: "Where characters arrive, the picker, and how arrival is checked."
+icon: "location-dot"
+---
+
+There is no separate spawn resource. When a player chooses a character, this resource decides where it goes, flies the camera there and checks the player arrived before the character loads.
+
+## Where a character goes
+
+| Character | Destination |
+| --- | --- |
+| Downed or dead | Its last position, always. Disconnecting never revives a player. |
+| Chose "Last location" | Its last position, or `spawn.default` when it has none. |
+| Never placed, `firstSpawn = 'default'` | `spawn.default`. |
+| Chose a spawn point | That point's `coords`. |
+
+The last position is saved by ug-core, read from the player's ped on the server. See [`Characters.GetPosition`](/api/characters#getposition).
+
+## The picker
+
+"Where to?" lists "Last location" (with the street name, or "Arrival point" for a character never placed) and your `spawn.points`. It does not show when there is only one place to go: downed or dead characters, no spawn points, or new characters under `firstSpawn = 'default'`.
+
+Hovering a place cuts to it and orbits overhead. A point MAY set its own flyover pose:
+
+```lua config.lua
+spawn = {
+    points = {
+        {
+            id = 'pier',
+            label = 'Del Perro Pier',
+            coords = vector4(-1604.6, -1048.6, 13.0, 50.0),
+            camera = { coords = vector3(-1660.0, -1100.0, 60.0), rotation = vector3(-25.0, 0.0, -40.0), fov = 55.0 },
+        },
+    },
+},
+```
+
+`id` is letters, digits, `_` or `-`, unique, and never `last`.
+
+## Arrival
+
+1. The server picks the destination and sends it to the player.
+2. The camera dives toward it and fades out. The player is placed once the ground under them has loaded.
+3. The server reads the player's position and checks they are within 10 m.
+4. Only then does the character load, in the normal routing bucket.
+
+A player who is not there gets one retry. A second miss flags them in [Guard](/owners/guard) and kicks them with the generic message.

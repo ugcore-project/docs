@@ -1,0 +1,95 @@
+---
+title: "Cinematic"
+description: "Shots, fades, letterbox and how to write your own intro."
+icon: "film"
+---
+
+Every camera move is a **shot**: a start pose, an end pose, a duration and an easing curve. Cuts between places always hide behind a fade. Black bars slide in while a sequence plays and stay thin at rest.
+
+## What players see
+
+| Moment | Shot | Config |
+| --- | --- | --- |
+| Join | Black, then a fade in on a high establishing shot. A 6 to 8 s descent onto the lineup while the title card shows. Enter or Escape skips. | `intro`, `title` |
+| Hover | A 650 ms glide to the character, at chest height. | `focus` |
+| Select | The character waves while the camera pushes in. Bars to full, fade out. | `select` |
+| Create | A glide to a full-body shot of the new character. | `create` |
+| Spawn picker | A cut to each hovered place, slowly orbiting overhead. | `flyover` |
+| Spawn | A dive from the orbit toward the destination, a fade, then a shot behind the player that eases into the game camera. | `dive`, `arrival` |
+| Back to the selection | A short pull back onto the lineup. | `reopen` |
+
+The default scene is the terrace of the Galileo Observatory at dusk, the city behind the characters.
+
+The camera, fades, bars, timecycle and HUD are always restored when the scene closes, also after an error or when the resource stops.
+
+## Tuning each moment
+
+Every moment is a table in `cinematic`. Set only the keys you change: tables merge per key.
+
+```lua config.lua
+cinematic = {
+    focus = { fov = 34.0 },                -- a tighter hover
+    select = { animation = false },        -- no wave
+    flyover = { radius = 80.0, speed = 3.0 },
+    arrival = { hold = 800 },
+},
+```
+
+| Key | Fields | Default |
+| --- | --- | --- |
+| `focus` | `duration`, `distance`, `height`, `fov`, `ease` | 650 ms, 2.4 m, 0.75 m, 38, `'inOut'` |
+| `select` | `duration`, `distance`, `fov`, `ease`, `animation` | 1600 ms, 1.45 m, 32, `'out'`, a wave |
+| `create` | `duration`, `distance`, `height`, `fov`, `ease` | 900 ms, 3.6 m, 0.15 m, 42, `'inOut'` |
+| `flyover` | `radius`, `height`, `speed` (degrees per second), `fov`, `fade` (ms between places) | 55 m, 38 m, 6, 50, 250 |
+| `dive` | `duration`, `distance` (behind the destination), `height`, `fov`, `ease` | 2400 ms, 7 m, 2.5 m, 45, `'in'` |
+| `arrival` | `distance`, `height`, `fov`, `hold` (ms on the shot), `handover` (ms to the game camera) | 3.2 m, 1.3 m, 50, 1400, 1500 |
+
+`distance` is in front of the character for `focus`, `select` and `create`, behind the player for `dive` and `arrival`. `height` is above the feet. `select.animation` is `{ dict, name }` or `false`.
+
+The title card waits `titleDelay` ms after the intro starts, then stays `titleDuration` ms.
+
+## Your own intro
+
+`cinematic.intro` takes a list of shots instead of `true`. `cinematic.reopen` works the same for the short shot played when a player comes back to the selection: `true` builds it, a list replaces it, `false` fades straight onto the lineup.
+
+```lua config.lua
+cinematic = {
+    intro = {
+        {
+            from = { coords = vector3(-430.0, 1180.0, 420.0), rotation = vector3(-20.0, 0.0, 175.0), fov = 60.0 },
+            to = { coords = vector3(-434.0, 1130.0, 385.0), rotation = vector3(-16.0, 0.0, 178.0), fov = 55.0 },
+            duration = 4000,
+            ease = 'out',
+            fadeIn = true,
+            letterbox = true,
+        },
+        {
+            from = { coords = vector3(-437.0, 1100.0, 362.0), rotation = vector3(-10.0, 0.0, 179.0), fov = 50.0 },
+            to = { coords = vector3(-438.8, 1081.2, 353.3), rotation = vector3(-5.0, 0.0, 180.0), fov = 45.0 },
+            duration = 3000,
+            ease = 'inOut',
+            letterbox = false,
+        },
+    },
+},
+```
+
+| Field | Purpose |
+| --- | --- |
+| `from`, `to` | Poses: `coords`, `rotation` as `vector3(pitch, roll, heading)` in degrees, `fov` 10 to 120. |
+| `duration` | Ms, 100 to 60000. |
+| `ease` | `'linear'`, `'in'`, `'out'` or `'inOut'` (default). |
+| `fadeIn` | Fade in from black as the shot starts. Use it on the first shot. |
+| `fadeOut` | Fade to black as the shot ends. |
+| `letterbox` | `true` slides the bars to full for this shot, `false` back to thin. |
+
+Two shots in a row whose poses do not meet are a cut. End the last shot on your `scene.camera`, so the selection starts where the intro stops.
+
+<Tip>
+  To find a pose, fly a free camera (for example with a noclip resource) to the spot, then read its position and rotation.
+</Tip>
+
+## Letterbox and look
+
+- `cinematic.letterbox = false` removes the bars.
+- `cinematic.timecycle` applies a timecycle modifier, for a color grade, while the scene is open. Test it on your server: names differ in what they do at night or in rain.

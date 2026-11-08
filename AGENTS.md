@@ -19,6 +19,8 @@ Navigation uses Mintlify `products`: a dropdown at the top of the sidebar picks 
   - `api/`: one page per `UgCore.<Namespace>`. Signatures, parameters with `ResponseField`, one example. Grouped by area: Core, Networking and security, Players and characters, Economy and items, Roles and world, Tools.
   - `reference/`: exhaustive tables. Error codes, events, hooks, statebags, convars, config files.
 - **ug-lib**: tabs Guides and API. `ug-lib/`, flat: guides and one page per `UgLib.<Namespace>`. The `ug-lib` repository is its source of truth.
+- **ug-multicharacter**: tabs Guides (introduction, installation, configuration, cinematic, spawning) and Reference (security, commands, appearance contract). `ug-multicharacter/`, flat. The `ug-multicharacter` repository and its `config.example.lua` are the source of truth. Pages are for server owners: the resource has no public API.
+- **ug-appearance**: tabs Guides (introduction, installation, configuration, stores and uniforms) and Reference (security, commands, integration). `ug-appearance/`, flat. The `ug-appearance` repository and its `config.example.lua` are the source of truth. Pages are for server owners; integration documents the exports for resource developers.
 - **Contributing**: `contributing/`, workflow, conventions and testing.
 
 Rules:

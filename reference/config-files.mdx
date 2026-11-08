@@ -77,6 +77,8 @@ return {
 | Option | Type | Default | Notes |
 | --- | --- | --- | --- |
 | `maxCharacters` | integer | `4` | 1 to 32. Deleted characters do not count. |
+| `persistPosition` | boolean | `true` | Saves the last position, read from the ped on the server. |
+| `positionInterval` | integer | `300000` | Ms between saves while playing. `0`, or at least `30000`. `0` saves on unload, disconnect and stop only. |
 
 ## items
 

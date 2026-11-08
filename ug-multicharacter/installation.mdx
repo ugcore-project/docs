@@ -1,0 +1,74 @@
+---
+title: "Installation"
+description: "Requirements, start order and the first start."
+icon: "download"
+---
+
+## Requirements
+
+- OneSync.
+- [`ug-core`](/introduction) with the **characters** module enabled. With it, players stay unloaded until a character is chosen, and this resource is what chooses it.
+- [`ug-lib`](/ug-lib/introduction), for client utilities and the shared theme.
+- ug-core's characters config MUST allow no more characters than you have scene slots: `maxCharacters` in ug-core's `config/characters.lua` (default 4) against `scene.slots` in this resource's config (4 by default).
+
+## Download
+
+Download `ug-multicharacter-vX.Y.Z.zip` from the [releases](https://github.com/ugcore-project/ug-multicharacter/releases) and extract it into your resources folder, for example `resources/[ug]/ug-multicharacter`.
+
+<Accordion title="Building from source" icon="hammer">
+  The repository does not contain the built page. Build it once with Node.js 20.19 or newer:
+
+  ```bash
+  cd resources/[ug]/ug-multicharacter/web
+  npm ci
+  npm run build
+  ```
+
+  The build goes to `web/dist`, which the manifest serves.
+</Accordion>
+
+## Start order
+
+```bash server.cfg
+ensure oxmysql
+ensure ug-lib
+ensure ug-core
+ensure ug-appearance  # optional, see Appearance
+ensure ug-multicharacter
+```
+
+<Warning>
+  Run only one character selection resource. Others that load characters, spawn the player or control spawnmanager conflict with this one.
+</Warning>
+
+## First start
+
+The server console prints:
+
+```text
+[INFO] Generated config.lua.
+[ug-multicharacter] v1.0.0 ready: 3 spawn points, 4 slots.
+```
+
+When a player joins, their F8 console prints:
+
+```text
+[ug-multicharacter] Scene opened in 412 ms.
+[ug-multicharacter] Character loaded in 21530 ms.
+```
+
+When something is wrong, the resource logs every problem and stays idle instead of half working:
+
+```text
+[ERROR] config.lua: unknown key "isolat". Did you mean "isolate"?
+[ERROR] Config invalid: 1 error(s). ug-multicharacter stays idle.
+```
+
+```text
+[ERROR] config.lua: scene has 4 slots, ug-core maxCharacters is 6. Add slots or lower maxCharacters.
+[ERROR] ug-multicharacter stays idle.
+```
+
+<Note>
+  The default scene and spawn coordinates are examples. Walk to the places you want, read your position (for example with `/coords` from an admin resource) and set your own in [Configuration](/ug-multicharacter/configuration).
+</Note>

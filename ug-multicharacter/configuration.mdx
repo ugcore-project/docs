@@ -1,0 +1,119 @@
+---
+title: "Configuration"
+description: "One file for fields, the scene, spawn points and the cinematic."
+icon: "sliders"
+---
+
+## The file
+
+On the first start, `config.lua` is copied from `config.example.lua`. Edit `config.lua` only: updates never overwrite it.
+
+- A key you remove uses its default. Tables merge per key, lists replace: `spawn = { points = { ... } }` replaces every spawn point and keeps `spawn.default`.
+- Every value is checked when the resource starts. Every error is logged with its path, then the resource stays idle:
+
+```text
+[ERROR] config.lua: scene.slots[1].animation: MUST be { dict, name, flag? } or { scenario }
+[ERROR] config.lua: spawn.points[2]: id "last" is reserved
+[ERROR] Config invalid: 2 error(s). ug-multicharacter stays idle.
+```
+
+- The file runs in a sandbox: vectors, `math`, `string`, `table`, `tonumber`, `tostring`, `type`, `pairs` and `ipairs`.
+
+## Creation form
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `fields` | first name, last name, birth date, sex | The form, in order. Up to 12 fields. |
+| `ageRange` | `{ min = 18, max = 90 }` | Allowed age for `date` fields, counted to the day. |
+| `nameFormat` | `'{firstName} {lastName}'` | The character's name, from field names in braces. |
+| `appearance.models` | `{ 'mp_m_freemode_01', 'mp_f_freemode_01' }` | Bodies offered at creation. |
+
+A field is `{ name, type, label?, min?, max?, options? }`. Without `label`, the page shows the locale entry `fields.<name>` (see [Language](#language)).
+
+| Type | Rules |
+| --- | --- |
+| `text` | `min` to `max` characters (`max` required). Letters of every language, spaces, apostrophes and hyphens. No digits, symbols or extra spaces. |
+| `date` | A real `YYYY-MM-DD` day giving an age inside `ageRange`. Shown as a date picker. |
+| `select` | One of `options`: `{ { value = 'male' }, ... }`. Option labels come from `options.<name>.<value>` unless set. |
+
+`name` MUST be camelCase and unique. The page checks the same rules live, and the server checks them again.
+
+```lua config.lua
+fields = {
+    { name = 'firstName', type = 'text', min = 2, max = 24 },
+    { name = 'lastName', type = 'text', min = 2, max = 24 },
+    { name = 'birthDate', type = 'date' },
+    -- A label set here wins over every locale.
+    { name = 'nationality', type = 'select', label = 'Nationality', options = {
+        { value = 'us', label = 'American' },
+        { value = 'pt', label = 'Portuguese' },
+    } },
+},
+```
+
+## Scene
+
+| Key | Purpose |
+| --- | --- |
+| `scene.camera` | The rest shot. The default scene is the terrace of the Galileo Observatory: `{ coords = vector3(...), rotation = vector3(pitch, roll, heading), fov = 45.0 }`. |
+| `scene.slots` | One `{ coords = vector4(...), animation = ... }` per character, at least as many as ug-core's `maxCharacters`. |
+| `scene.placeholder` | `{ model, animation }` shown faintly on empty slots. |
+| `scene.time` | `{ hour, minute }` while the scene is open. |
+| `scene.weather` | A weather type such as `'EXTRASUNNY'`, while the scene is open. |
+
+An animation is `{ dict = '...', name = '...', flag = 1 }` or `{ scenario = 'WORLD_HUMAN_SMOKING' }`.
+
+<Tip>
+  Stand where each character should stand and use your position as the slot's `coords`. Put the camera a few meters in front, facing them: its `rotation.z` is the heading it looks at.
+</Tip>
+
+## Spawning
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `spawn.default` | Legion Square | Where a character without a saved position goes. |
+| `spawn.firstSpawn` | `'picker'` | `'picker'` lets new characters choose, `'default'` sends them to `spawn.default`. |
+| `spawn.points` | three examples | `{ id, label?, coords, camera? }`. Without `label`, the locale entry `spawns.<id>`. An empty list hides the picker. |
+
+See [Spawning](/ug-multicharacter/spawning) for the rules.
+
+## Isolation and players
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `isolate` | `true` | A private routing bucket while choosing, so other players never see the scene. |
+| `bucketBase` | `5000` | First bucket when ug-core's sessions module is off. Each player uses `bucketBase + id`. |
+| `allowDelete` | `true` | Players MAY delete their characters. |
+| `deleteCooldown` | `10000` | Ms between deletes, per player. |
+| `switchCommand` | `false` | A command that sends a player back to the selection, such as `'logout'`. |
+| `sounds` | `true` | Frontend sounds. |
+
+## Cinematic
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `cinematic.intro` | `true` | `true` builds the intro from the scene camera, a list of shots replaces it, `false` starts at the lineup. |
+| `cinematic.reopen` | `true` | The same for coming back to the selection: a short pull back, your shots, or `false` for a plain fade. |
+| `cinematic.letterbox` | `true` | Black bars during camera sequences. |
+| `cinematic.timecycle` | `false` | A timecycle modifier while the scene is open. |
+| `cinematic.fadeOut`, `cinematic.fadeIn` | `600`, `900` | Fade durations in ms. |
+| `cinematic.title` | `true` | `true` shows your server name in the intro, a string shows that text, `false` hides it. |
+| `cinematic.titleDelay`, `cinematic.titleDuration` | `1200`, `3800` | When the title card shows and for how long, in ms. |
+| `cinematic.focus`, `select`, `create`, `flyover`, `dive`, `arrival` | see Cinematic | Distance, height, fov, duration and easing of each moment. |
+
+See [Cinematic](/ug-multicharacter/cinematic) for each moment and to write your own intro.
+
+## Language
+
+Every text comes from `locales/<code>.json`, in ug-lib's language (`settings.locale` of ug-lib). English (`en`) and Portuguese (`pt`) ship with the resource. A key missing in your language falls back to English.
+
+| Group | Holds |
+| --- | --- |
+| `page` | Buttons, hints, errors and results on the page. |
+| `fields` | Field labels by field name: `fields.firstName`. |
+| `options` | Select option labels by field and value: `options.sex.female`. |
+| `spawns` | Spawn point labels by id: `spawns.legion`. |
+
+A `label` in `config.lua` wins over every locale, for servers with one language. To add a field or a spawn point in several languages, leave `label` out and add its key to each locale file. Without either, the page shows the field name or the spawn point id.
+
+To add a language, copy `locales/en.json` to `locales/<code>.json` and translate the values. `locales/*.json` is already in `files {}`.

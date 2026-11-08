@@ -363,6 +363,89 @@
         ]
       },
       {
+        "product": "ug-multicharacter",
+        "description": "Cinematic character selection, creation and spawning.",
+        "icon": "users-viewfinder",
+        "tabs": [
+          {
+            "tab": "Guides",
+            "icon": "book-open",
+            "groups": [
+              {
+                "group": "Getting started",
+                "pages": [
+                  "ug-multicharacter/introduction",
+                  "ug-multicharacter/installation"
+                ]
+              },
+              {
+                "group": "Server owners",
+                "pages": [
+                  "ug-multicharacter/configuration",
+                  "ug-multicharacter/cinematic",
+                  "ug-multicharacter/spawning"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Reference",
+            "icon": "table-list",
+            "groups": [
+              {
+                "group": "Reference",
+                "pages": [
+                  "ug-multicharacter/security",
+                  "ug-multicharacter/console",
+                  "ug-multicharacter/appearance"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "product": "ug-appearance",
+        "description": "Character creator, stores, outfits and uniforms.",
+        "icon": "shirt",
+        "tabs": [
+          {
+            "tab": "Guides",
+            "icon": "book-open",
+            "groups": [
+              {
+                "group": "Getting started",
+                "pages": [
+                  "ug-appearance/introduction",
+                  "ug-appearance/installation"
+                ]
+              },
+              {
+                "group": "Server owners",
+                "pages": [
+                  "ug-appearance/configuration",
+                  "ug-appearance/stores"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Reference",
+            "icon": "table-list",
+            "groups": [
+              {
+                "group": "Reference",
+                "pages": [
+                  "ug-appearance/security",
+                  "ug-appearance/console",
+                  "ug-appearance/integration"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
         "product": "Contributing",
         "description": "Workflow, conventions and tests for both repositories.",
         "icon": "code-pull-request",

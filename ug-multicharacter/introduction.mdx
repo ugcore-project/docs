@@ -1,0 +1,44 @@
+---
+title: "ug-multicharacter"
+description: "Cinematic character selection, creation and spawning for UgCore."
+icon: "users-viewfinder"
+---
+
+`ug-multicharacter` is where players meet their characters. They arrive to an intro over your scene, see their characters standing in a lineup, create new ones, and choose where to spawn with a camera that flies over the city.
+
+It is built on `ug-core` (characters, spawning rules, security) and `ug-lib` (utilities and the shared theme). There is no separate spawn resource: spawning lives here.
+
+## The flow
+
+<Steps>
+  <Step title="Intro">
+    The screen starts black. The camera fades in high over your scene and descends onto the lineup while your server name appears. Enter or Escape skips it.
+  </Step>
+  <Step title="Selection">
+    Every character stands in its own slot with its own animation. Hovering a card glides the camera to that character. Empty slots show a faint figure.
+  </Step>
+  <Step title="Creation">
+    An empty slot opens the creation form built from your config. Choosing a body changes the figure in the scene at once.
+  </Step>
+  <Step title="Spawn">
+    "Where to?" lists the last location and your spawn points. Hovering one flies the camera over it. Choosing dives to the ground and hands over to the game camera.
+  </Step>
+</Steps>
+
+## Principles
+
+- **The server decides.** Which characters exist, what a new character may be called, where a character goes and whether the player got there are decided on the server. The page only shows and asks. See [Security](/ug-multicharacter/security).
+- **Nothing snaps.** Every camera move is an eased shot, every cut hides behind a fade. See [Cinematic](/ug-multicharacter/cinematic).
+- **One config file.** `config.lua` is generated on the first start, never overwritten by updates, and checked with clear errors. See [Configuration](/ug-multicharacter/configuration).
+- **Swappable appearance.** Creation offers a body choice today. A future `ug-appearance` resource plugs in through a small contract. See [Appearance contract](/ug-multicharacter/appearance).
+
+## Next steps
+
+<Columns cols={2}>
+  <Card title="Installation" icon="download" href="/ug-multicharacter/installation">
+    Requirements, building the page and the first start.
+  </Card>
+  <Card title="Configuration" icon="sliders" href="/ug-multicharacter/configuration">
+    Fields, scene, spawn points and cinematic options.
+  </Card>
+</Columns>

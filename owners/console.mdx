@@ -144,18 +144,19 @@ add_ace group.admin ug.admin allow
 
 ## Version check
 
-On server start, ug-core asks GitHub for its latest release and shows the result in the boot banner:
+On server start, ug-core asks GitHub for its latest release and shows the result next to its version in the boot banner:
 
 ```text
- ug-core v1.0.0 · LuaGLM 5.4 · OneSync on
- Update available: v1.0.0 -> v1.1.0. https://github.com/ugcore-project/ug-core/releases/tag/v1.1.0
+ug-core v1.0.0 · Update available: v1.0.0 -> v1.1.0. https://github.com/ugcore-project/ug-core/releases/tag/v1.1.0
 ```
+
+The banner also welcomes your server by `sv_projectName` (or `sv_hostname`), and shows the FXServer build, your slots and the enforced game build, which help when you ask for support.
 
 | Line | Meaning |
 | --- | --- |
 | `Up to date.` | You run the latest release. |
 | `Update available: vX -> vY.` | A newer release exists. Read its notes before you update: MAJOR versions have breaking changes. |
-| `Ahead of the latest release vY.` | You run a build newer than the latest release, such as the `dev` branch. |
+| `Ahead of the latest release vY.` | You run a version that is not released yet. A `dev-build` shows `Up to date.`: its version is the release it builds on, plus `+dev`. |
 | `Version check unavailable.` | GitHub did not answer within 3 seconds, or there is no release yet. Boot continues normally. |
 | `Version check disabled.` | The check is turned off. |
 
