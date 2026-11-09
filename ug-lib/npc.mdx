@@ -1,0 +1,47 @@
+---
+title: "UgLib.Npc"
+sidebarTitle: "Npc"
+description: "Standing peds, such as shop clerks, that exist only near the player."
+icon: "user"
+---
+
+<Badge color="green">Client</Badge> Runs in your resource.
+
+```lua
+UgLib.Npc.Create(options) -> npc
+UgLib.Npc.Remove(npcOrId) -> boolean
+UgLib.Npc.GetPed(npcOrId) -> integer?
+UgLib.Npc.Clear() -> count
+```
+
+<ResponseField name="options.model" type="string | integer" required>Model name or hash.</ResponseField>
+<ResponseField name="options.coords" type="vector4" required>Position and heading. The feet stand at `z - 1`, so use the coords of a player standing there.</ResponseField>
+<ResponseField name="options.distance" type="number" default="50">The ped spawns within this distance and is deleted beyond it. At most 500.</ResponseField>
+<ResponseField name="options.animation" type="table">`{ dict, name, flag? }` or `{ scenario }`.</ResponseField>
+<ResponseField name="options.invincible" type="boolean" default="true" />
+<ResponseField name="options.frozen" type="boolean" default="true" />
+<ResponseField name="options.onSpawn" type="fun(npc)">Runs after the ped exists. `npc.ped` is its handle.</ResponseField>
+<ResponseField name="options.onDespawn" type="fun(npc)">Runs before the ped is deleted.</ResponseField>
+<ResponseField name="options.data" type="any">Kept on `npc.data`.</ResponseField>
+
+- Peds are local to the player: other players see their own copy.
+- They ignore events and never ragdoll, so shots and cars do not move them.
+- `GetPed` returns nil while the player is too far away. Do not keep the handle.
+- Your NPCs are deleted when your resource stops.
+
+## Example
+
+```lua client.lua
+local clerk = UgLib.Npc.Create({
+    model = 's_f_y_shop_mid',
+    coords = vector4(73.9, -1392.9, 29.4, 270.0),
+    distance = 40.0,
+    animation = { scenario = 'WORLD_HUMAN_STAND_IMPATIENT' },
+    onSpawn = function(npc)
+        print('clerk spawned', npc.ped)
+    end,
+})
+
+-- Later
+UgLib.Npc.Remove(clerk)
+```

@@ -1,0 +1,52 @@
+---
+title: "Installation"
+description: "Requirements, start order and the first start."
+icon: "download"
+---
+
+## Requirements
+
+- OneSync.
+- `ug-core` 1.0.0 or newer, started and ready.
+- `ug-lib` 1.0.0 or newer.
+
+The `jobs`, `gangs` and `inventory` modules of ug-core are optional. Conditions that need a disabled module never pass.
+
+## Start order
+
+```cfg server.cfg
+ensure oxmysql
+ensure ug-core
+ensure ug-lib
+ensure ug-target
+```
+
+<Warning>
+Remove `ox_target` from your server. ug-target provides `ox_target`, so resources that depend on it start against ug-target instead. Running both binds the same key twice.
+</Warning>
+
+## First start
+
+On the first start ug-target copies `config.example.lua` to `config.lua`. Updates never overwrite it.
+
+The server console prints one line when it is ready:
+
+```text
+[ug-target] v1.0.0 ready.
+```
+
+Each client prints one line in F8 once the key is bound:
+
+```text
+[ug-target] Ready: hold, anchored.
+```
+
+Players MAY rebind the key in **Settings > Key Bindings > FiveM**.
+
+## When it does not start
+
+| Console | Cause |
+| --- | --- |
+| `config.lua: ...` then `Config invalid: N error(s). ug-target stays idle.` | A value in `config.lua` is wrong. Every error is listed. |
+| `ug-core did not become ready.` | ug-core failed to boot. Check its output first. |
+| F8: `No config from the server.` | The server side stayed idle. Check the server console. |

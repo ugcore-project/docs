@@ -1,0 +1,30 @@
+---
+title: "ox_target scripts"
+description: "Run scripts written for ox_target without changes."
+icon: "right-left"
+---
+
+ug-target declares `provide 'ox_target'`. Resources that depend on `ox_target` start against it, and `exports.ox_target` calls reach ug-target.
+
+## Supported exports
+
+`addGlobalPed`, `addGlobalVehicle`, `addGlobalObject`, `addGlobalPlayer`, `addGlobalOption`, their `remove` forms, `addModel`, `removeModel`, `addEntity`, `removeEntity`, `addLocalEntity`, `removeLocalEntity`, `addSphereZone`, `addBoxZone`, `addPolyZone`, `removeZone`, `zoneExists`, `disableTargeting` and `isActive`.
+
+## How options translate
+
+| ox_target | ug-target |
+| --- | --- |
+| `groups` | `conditions.groups` |
+| `items`, `anyItem` | `conditions.items`, `conditions.anyItem` |
+| `canInteract(entity, distance, coords, name, bone)` | Called with the same arguments. |
+| `onSelect(data)`, `event`, `export` | Get ox_target's data table: the context plus the option's own fields. |
+| `serverEvent` | Triggered with the entity's network id, like ox_target. |
+| `command` | Run with `ExecuteCommand`. |
+| `menuName`, `openMenu` | Submenus. |
+| `offset`, `offsetAbsolute`, `offsetSize` | Ignored. |
+
+Other fields of an option are passed back in the data table, as ox_target does.
+
+<Tip>
+`serverEvent` handlers trust what the client sends. When you touch a script, move its effect to a [server action](/ug-target/server-actions) so the server checks distance and conditions.
+</Tip>

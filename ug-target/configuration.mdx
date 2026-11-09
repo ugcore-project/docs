@@ -1,0 +1,43 @@
+---
+title: "Configuration"
+description: "Every option in config.lua."
+icon: "sliders"
+---
+
+`config.lua` returns a table. Values left out use the defaults. Unknown keys are errors, with a suggestion for typos.
+
+```lua config.lua
+return {
+    trigger = 'hold',
+    key = 'LMENU',
+    layout = 'anchored',
+    maxDistance = 7.0,
+    defaultDistance = 2.5,
+    showDisabled = true,
+    outline = true,
+    outlineColor = { 59, 130, 246, 255 },
+    sounds = true,
+    allowWhileDowned = false,
+    allowInVehicle = true,
+    actionMargin = 1.5,
+    debug = false,
+}
+```
+
+| Key | Type | Default | Purpose |
+| --- | --- | --- | --- |
+| `trigger` | `'hold'` or `'toggle'` | `'hold'` | Hold the key to aim, or press to open and press again to close. |
+| `key` | string | `'LMENU'` | Default key, a FiveM key name. Players MAY rebind it. |
+| `layout` | `'anchored'` or `'list'` | `'anchored'` | Options next to the target, or beside the crosshair. |
+| `maxDistance` | number, 1 to 20 | `7.0` | Meters the aim reaches. Caps every option's `distance`. |
+| `defaultDistance` | number, 0.5 to 20 | `2.5` | Meters for options without `distance`. At most `maxDistance`. |
+| `showDisabled` | boolean | `true` | Show options whose conditions fail, greyed out with the reason. |
+| `outline` | boolean | `true` | Outline the vehicle or object you aim at. Peds are never outlined: it can crash the game. |
+| `outlineColor` | 4 integers, 0 to 255 | `{ 59, 130, 246, 255 }` | Outline color. The page takes its colors from the ug-lib theme. |
+| `sounds` | boolean | `true` | Frontend sounds. |
+| `allowWhileDowned` | boolean | `false` | Downed and dead players MAY aim. |
+| `allowInVehicle` | boolean | `true` | Players in a vehicle MAY aim. |
+| `actionMargin` | number, 0 to 10 | `1.5` | Meters the server adds to a server action's `distance`, for movement and latency. Server only. |
+| `debug` | boolean | `false` | Draw the aim point and nearby zones. |
+
+The page uses the ug-lib theme, so colors, radius, font and scale follow the rest of your UgCore screens.

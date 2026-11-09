@@ -1,0 +1,18 @@
+---
+title: "Console"
+description: "Inspect server actions from the server console."
+icon: "terminal"
+---
+
+`ugtarget` works in the server console only.
+
+```text
+> ugtarget status
+ug-target: 2 server action(s).
+  my-resource:Lockpick  2.0 m  hold 4000 ms, cooldown 10000 ms, conditions
+  ug-police:Cuff  2.0 m
+```
+
+## Debugging in game
+
+Set `debug = true` in `config.lua` to draw the aim point and the zones within 50 m while aiming. A zone created with `debug = true` is drawn even when `debug` is off.

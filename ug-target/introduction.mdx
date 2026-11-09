@@ -1,0 +1,43 @@
+---
+title: "ug-target"
+description: "Third-eye targeting for UgCore: options float next to what you aim at, and server actions are checked on the server."
+icon: "crosshairs"
+---
+
+`ug-target` lets players interact with the world by aiming at it. Hold `Left Alt`, look at a car, a person, a door or a counter, and its options float right next to it.
+
+It is built on `ug-core` (callbacks, Guard, jobs, gangs, inventory) and `ug-lib` (key bindings, raycasts, the shared theme). Scripts written for `ox_target` keep working: ug-target provides `ox_target` and answers its exports.
+
+## What players get
+
+- **Options in the world.** The menu hangs from the point you aim at and follows it as you move. A dashed line ties them together. Owners MAY switch to a classic list beside the crosshair.
+- **A reticle that reacts.** It breathes while idle and snaps brackets around anything with options.
+- **Keyboard, mouse wheel and controller.** Scroll or use the D-pad to move, `1` to `9` to pick, `E` or `A` to confirm, right-click or `B` to go back. No cursor needed. The number keys are key mappings, so players MAY rebind them in the FiveM settings.
+- **Cursor when you want it.** Left click locks the menu and frees the mouse. `Esc` or right-click leaves.
+- **Clear feedback.** Options you cannot use stay visible, greyed out with the reason: wrong job, missing items, cooling down. Hold options fill a ring. Failures shake and say why.
+- **Outline and sounds.** The entity you aim at glows in the accent color. Frontend sounds on move, pick and refusal.
+
+<Columns cols={2}>
+  <Card title="Installation" icon="download" href="/ug-target/installation">
+    Requirements, start order and the first start.
+  </Card>
+  <Card title="Configuration" icon="sliders" href="/ug-target/configuration">
+    Key, layout, distances, outline and sounds.
+  </Card>
+  <Card title="Client API" icon="code" href="/ug-target/api">
+    Options on entities, models and zones.
+  </Card>
+  <Card title="Server actions" icon="shield-halved" href="/ug-target/server-actions">
+    Effects that run on the server, checked there.
+  </Card>
+</Columns>
+
+## Used by
+
+- [ug-appearance](/ug-appearance/configuration): set `interaction = 'target'` to open stores by aiming at them or their clerk instead of pressing `E`.
+
+## Principles
+
+- **The menu is a hint, the server decides.** Conditions decide what the menu shows. Anything that changes the game state SHOULD be a server action, which checks distance, conditions, hold and cooldown again on the server. See [Security](/ug-target/security).
+- **Declarative first.** Jobs, gangs, duty, items and vehicle state are fields, not code. `canInteract` is for what fields cannot say.
+- **Fast when idle.** Nothing runs until the key is down. While aiming, options are rebuilt when the target changes, at most every 250 ms otherwise.

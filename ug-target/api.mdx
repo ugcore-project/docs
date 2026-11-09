@@ -1,0 +1,113 @@
+---
+title: "Client API"
+description: "Add options to entities, models, players and zones."
+icon: "code"
+---
+
+Every function is a client export of `ug-target`. Options belong to the resource that added them and are removed when it stops. Mistakes raise at once, with the export name and the field.
+
+```lua
+exports['ug-target']:AddModel('prop_atm_01', {
+    name = 'atm',
+    label = 'Use ATM',
+    icon = 'credit-card',
+    description = 'Cash and transfers',
+    distance = 1.5,
+    onSelect = function(context)
+        TriggerEvent('my-bank:open', context.coords)
+    end,
+})
+```
+
+## Where options go
+
+| Export | Arguments | Shows on |
+| --- | --- | --- |
+| `AddGlobalPed`, `AddGlobalVehicle`, `AddGlobalObject`, `AddGlobalPlayer` | `options` | Every entity of that kind. |
+| `AddModel` | `models`, `options` | Entities with one of the models (names or hashes). |
+| `AddEntity` | `netIds`, `options` | Networked entities, by network id. |
+| `AddLocalEntity` | `entities`, `options` | Local entities, by handle. |
+| `AddSphereZone` | `{ coords, radius, options, name?, debug? }` | A sphere. Returns the zone id. |
+| `AddBoxZone` | `{ coords, size?, rotation?, options, name?, debug? }` | A box, `size` in meters, `rotation` in degrees. Returns the zone id. |
+| `AddPolyZone` | `{ points, thickness?, minZ?, maxZ?, options, name?, debug? }` | A polygon of 3 to 64 points. Returns the zone id. |
+
+Each `Add` has a `Remove` with the same first argument and optional option names: `RemoveModel('prop_atm_01', 'atm')`. Without names, every option of the calling resource goes. `RemoveZone(idOrName)` and `ZoneExists(idOrName)` take a zone id or name.
+
+`options` is one option or a list of up to 64. An option with the `name` of one your resource already added replaces it.
+
+## Option fields
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `label` | string, required | Text on the row. |
+| `name` | string | Identifies the option for `Remove` and in the context. |
+| `icon` | string | A lucide name (`car`, `lock`) or a Font Awesome class (`fa-solid fa-car`). |
+| `iconColor` | string | Hex or a color name. |
+| `description` | string | Second line. |
+| `badge` | string | A small pill, such as `new` or `$50`. |
+| `distance` | number | Meters, capped by `maxDistance`. Default `defaultDistance`. |
+| `bones` | string or list | Only when the aim hits within 1 m of one of these bones, such as `door_dside_f`. |
+| `conditions` | table | See below. |
+| `canInteract` | function | `canInteract(context)`. Return false to hide the option. Keep it cheap: it runs on every rebuild. |
+| `onSelect` | function | `onSelect(context)`. |
+| `event` | string | Local event triggered with the context. |
+| `command` | string | Command run with `ExecuteCommand`. |
+| `export` | string | `resource.function`, called with `(nil, context)`. |
+| `serverAction` | string | `resource:Name` of a [server action](/ug-target/server-actions). |
+| `onResult` | function | `onResult(ok, value, errorCode)` after a server action. |
+| `serverEvent` | string | Legacy. Prefer `serverAction`. |
+| `hold` | integer, ms | The player holds the confirm key this long. Up to 10000. |
+| `cooldown` | integer, ms | The option is disabled this long after use, with a countdown. |
+| `openMenu` | string | Opens a submenu instead of running. |
+| `menu` | string | The submenu this option belongs to. |
+| `order` | integer | Lower first. Ties keep registration order. |
+| `keepOpen` | boolean | Stay open after picking, for repeatable actions. |
+| `data` | table | Your data, passed back in `context.data`. |
+
+An option needs one of `onSelect`, `event`, `command`, `export`, `serverAction`, `serverEvent` or `openMenu`. Several MAY be set: they run in that order.
+
+## Conditions
+
+```lua
+conditions = {
+    job = { police = 2 },          -- name, list of names, or name = minimum grade
+    gang = 'vagos',
+    groups = { 'police', 'ems' },  -- a job or a gang
+    onDuty = true,
+    items = { lockpick = 1 },      -- name, list, or name = count
+    anyItem = false,               -- true: one of the items is enough
+    inVehicle = false,
+}
+```
+
+Jobs and gangs come from ug-core statebags, items from ug-core's inventory module. A failed condition shows the option greyed out with its reason, or hides it when `showDisabled` is off. Server actions check the same conditions again on the server.
+
+## Context
+
+`onSelect`, `canInteract`, `event` and `export` receive:
+
+| Field | Type |
+| --- | --- |
+| `kind` | `ped`, `vehicle`, `object`, `player` or `zone` |
+| `coords` | `vector3`, where the aim hit |
+| `distance` | meters from the player's ped |
+| `entity`, `model`, `netId` | the entity, when there is one |
+| `bone` | bone index, for options with `bones` |
+| `zone` | zone name or id, for zone options |
+| `name`, `data` | the option's name and data |
+
+## Submenus
+
+```lua
+exports['ug-target']:AddGlobalVehicle({
+    { label = 'Doors', icon = 'door-open', openMenu = 'doors' },
+    { label = 'Front left', menu = 'doors', bones = 'door_dside_f', onSelect = openDoor },
+    { label = 'Front right', menu = 'doors', bones = 'door_pside_f', onSelect = openDoor },
+})
+```
+
+## State
+
+- `Disable(state)`: turns targeting off while any resource asks, such as a phone or a cutscene.
+- `IsActive()`: true while the player aims.
+- The local event `ug-target:Toggled` fires with `true` and `false` when targeting opens and closes, for HUDs.

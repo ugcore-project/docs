@@ -24,6 +24,7 @@ stores = {
 | `radius` | number | Meters to open it. Default `storeRadius`. |
 | `label` | string | Prompt and blip text. Default the kind's label in the locale file. |
 | `blip` | `true`, `false` or table | `true` uses the kind's blip from `blips`. A table overrides `sprite`, `color`, `scale` or `label`. |
+| `ped` | `true`, `false` or table | A clerk NPC. `true` uses the kind's NPC from `peds` at `coords`. A table overrides `model`, `coords` (vector4) or `animation`. |
 | `job`, `gang` | string | Only members see the point and its blip, and the server refuses others. |
 | `prices` | table | Overrides any of the default [prices](/ug-appearance/configuration#prices) at this store. |
 
@@ -33,12 +34,50 @@ The default list holds 14 clothing stores, 7 barbers, 6 tattoo parlors and 1 sur
   A job locker room is a `wardrobe` with `job` set and `blip = false`. Officers see their saved outfits and uniforms there, for free.
 </Tip>
 
+## Store NPCs
+
+A store with `ped` gets a clerk standing at it. Players walk up to the clerk and press the interact key, like at any store point. Clerks need [ug-lib](/ug-lib/npc) and spawn only within 50 meters, so far away stores cost nothing.
+
+```lua config.lua
+peds = {
+    clothing = { model = 's_f_y_shop_mid', animation = { scenario = 'WORLD_HUMAN_STAND_IMPATIENT' } },
+},
+stores = {
+    -- The clerk stands at the store point, facing north.
+    { id = 'binco', kind = 'clothing', coords = vector3(73.9, -1392.9, 29.4), blip = true, ped = true },
+    -- Its own spot, heading and model. The point that opens the store stays at coords.
+    { id = 'vip', kind = 'barber', coords = vector3(-814.3, -183.8, 37.6),
+        ped = { model = 'a_m_y_hipster_01', coords = vector4(-815.3, -182.2, 37.6, 210.0) } },
+},
+```
+
+- `animation` is `{ dict, name, flag? }` or `{ scenario }`.
+- Clerks are local to each player, invincible and frozen. They hide while the editor is open, so they never stand in the shot.
+- The default stores have no clerks: their points are the shop doors. Set `coords` where a player stands at the counter, then add `ped`.
+- A kind left out of `peds` needs a `model` on each store ped. Wardrobes have none by default.
+
+## Tattoo stores
+
+Tattoo stores take the character's clothes off for the preview, so tattoos on the body show. `tattooOutfit` holds what they wear instead, per freemode model:
+
+```lua config.lua
+tattooOutfit = {
+    male = { components = { top = { drawable = 15, texture = 0 } }, props = { hat = { drawable = -1, texture = 0 } } },
+    female = { components = { top = { drawable = 15, texture = 0 } }, props = { hat = { drawable = -1, texture = 0 } } },
+},
+```
+
+- Only the preview changes. The clothes are never billed or saved, and come back when the editor closes, saved or not.
+- Other models keep their clothes. `tattooOutfit = false` keeps everyone dressed.
+
 ## Saved outfits
 
 At clothing stores and wardrobes, the Outfits tab lists the character's saved outfits.
 
 - **Save current outfit** saves the clothes and accessories the character *has paid for*, not the preview. A preview never becomes a free outfit.
 - **Wear** puts an outfit on for free.
+- **Replace** saves the paid-for clothes into an existing outfit, after a confirmation.
+- **Rename** edits the name in place. **Delete** asks first.
 - At most `maxOutfits` per character. Names are 1 to 32 characters.
 
 Outfits belong to the character and are stored in `ug_outfits`.

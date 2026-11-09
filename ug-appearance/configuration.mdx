@@ -15,16 +15,19 @@ Stores, outfits and uniforms have their own page: [Stores and uniforms](/ug-appe
 | `models` | string[] | `mp_m_freemode_01`, `mp_f_freemode_01` | Models the creator and the admin editor offer. Stores never change the model. |
 | `stores` | table[] | the game's 28 shops | Store points. See [Stores](/ug-appearance/stores). |
 | `blips` | table | a sprite and color per kind | Default blip of each store kind. |
+| `peds` | table | a clerk per kind, none for wardrobes | Default NPC of each store kind, `{ model, animation? }`. See [Store NPCs](/ug-appearance/stores#store-npcs). |
 | `prices` | table | see below | What each change costs. |
 | `payment.accounts` | string[] | `{ 'cash', 'bank' }` | ug-core accounts tried in order. |
 | `storeRadius` | number | `2.0` | Meters from a store point to open it, when the store sets no `radius`. |
 | `maxOutfits` | integer | `20` | Saved outfits per character. |
 | `maxTattoos` | integer | `60` | Tattoos per appearance. |
+| `tattooOutfit` | table or `false` | bare skin for both freemode models | What tattoo stores undress. See [Tattoo stores](/ug-appearance/stores#tattoo-stores). |
 | `uniforms` | table | `{}` | Job and gang uniforms. See [Uniforms](/ug-appearance/stores#uniforms). |
 | `poses` | table[] | idle, hands up, arms crossed, impatient | Preview poses. |
 | `camera` | table | see below | The studio camera. |
 | `adminCommand` | string or `false` | `'appearance'` | Command that opens the full editor. `false` turns it off. |
 | `interactKey` | string | `'E'` | Default key to open a store. Players MAY rebind it in the game's key bindings. |
+| `interaction` | `'key'` or `'target'` | `'key'` | `'key'`: walk in and press `interactKey`. `'target'`: aim at the store or its clerk with [ug-target](/ug-target/introduction). Without ug-target started, stores use the key. |
 
 ## Prices
 

@@ -335,6 +335,7 @@
                     "group": "Areas and keys",
                     "pages": [
                       "ug-lib/zone",
+                      "ug-lib/npc",
                       "ug-lib/keybind"
                     ]
                   }
@@ -439,6 +440,53 @@
                   "ug-appearance/security",
                   "ug-appearance/console",
                   "ug-appearance/integration"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "product": "ug-target",
+        "description": "Third-eye targeting with server-checked actions.",
+        "icon": "crosshairs",
+        "tabs": [
+          {
+            "tab": "Guides",
+            "icon": "book-open",
+            "groups": [
+              {
+                "group": "Getting started",
+                "pages": [
+                  "ug-target/introduction",
+                  "ug-target/installation"
+                ]
+              },
+              {
+                "group": "Server owners",
+                "pages": [
+                  "ug-target/configuration"
+                ]
+              },
+              {
+                "group": "Developers",
+                "pages": [
+                  "ug-target/api",
+                  "ug-target/server-actions",
+                  "ug-target/ox-target"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Reference",
+            "icon": "table-list",
+            "groups": [
+              {
+                "group": "Reference",
+                "pages": [
+                  "ug-target/security",
+                  "ug-target/console"
                 ]
               }
             ]
