@@ -1,0 +1,33 @@
+---
+title: "Introduction"
+description: "The inventory screen for UgCore, on top of ug-core's server-authoritative inventory."
+icon: "boxes-stacked"
+---
+
+ug-inventory is the inventory screen. Press one key and it opens with whatever is in reach: the glovebox of the car you sit in, the closest trunk, a bag on the ground, a stash or a shop. Your character stands in the middle, between your pockets and the other side.
+
+ug-inventory holds no inventory logic. Items, weights, stacks, containers, weapons and shops live in ug-core, which checks every move, distance and price on the server. This resource shows them, and asks.
+
+## What players get
+
+- **Smart open key.** `TAB` opens the closest glovebox, trunk, drop, stash or shop in reach, or the pockets alone. Locked trunks are skipped.
+- **Character on stage.** The character stands in the middle, drawn by the game like in the pause menu, with the weapon in hand above it.
+- **Drag and drop.** Onto a slot to move, merge or swap, onto the ground panel to drop, onto the workbench to fit.
+- **Mouse shortcuts.** Double-click uses an item or takes it from the other side. Shift-click moves the stack, Ctrl-click moves one.
+- **Quantity bar.** How many units drags, moves, gives and drops take: all, a preset or any number.
+- **Quick actions.** Right-click for use, give and drop, with the players nearby to give to.
+- **Weapon workbench.** Serial, durability, ammo and attachments. Drop an attachment or tint on the weapon to fit it.
+- **Shops.** Prices, stock and what you can afford against your balance.
+- **Quick-use wheel and hotbar.** Hold `Z` and point at a slot, or press `1` to `5`.
+- **Pickup toasts.** Items gained and lost slide in at the edge of the screen.
+- **Clothing slots.** Fourteen pieces around the character. Take one off with an animation, or store it as an item.
+
+## What server owners get
+
+- One `config.lua` for keys, distances, features, clothing and the whole look: [Configuration](/ug-inventory/configuration).
+- Item images: one file per item in `images/`.
+- Moves show at once. When ug-core refuses, the slots snap back and the reason shows.
+
+## What developers get
+
+Client exports to open stashes, trunks, drops and shops from targets, jobs and housing. See [API](/ug-inventory/api).

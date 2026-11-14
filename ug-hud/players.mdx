@@ -1,0 +1,48 @@
+---
+title: "Player guide"
+description: "What players can change in the editor."
+icon: "wand-magic-sparkles"
+---
+
+Press `I` or type `/hud`. The cursor appears and every widget shows, with sample values where there is nothing yet. Nothing changes until **Save**. **Cancel** or `Escape` throws the changes away.
+
+## Layout
+
+- Drag any widget. With **Snap to grid** on, widgets snap to a fine grid and to the center of the screen, with a guide line.
+- A widget hangs from the screen edge it is closest to. A widget on the right grows to the left when it gets wider, so it never leaves the screen.
+- Click a widget, or its name in the list, to select it. Arrow keys nudge it, `Shift` for bigger steps.
+- The eye hides or shows a widget.
+- A selected widget has its own **Style**, **Size** and **Opacity**, and **Reset this widget**.
+- The arrows button moves the panel to the other side of the screen.
+
+| Widget | Styles |
+| --- | --- |
+| Status | Rings, Bars, Pills, Minimal |
+| Speedometer | Arc, Digital, Bar |
+| Compass | Tape, Heading |
+| Voice | Pill, Dots |
+| Money, Identity, Clock, Weapon | Card, Plain |
+
+## Voice
+
+With pma-voice, the voice widget shows the range as bars (one for whisper, two for normal, three for shouting) and the mode name. The mic lights up and ripples while you talk. On a radio, the channel shows next to it and glows green while you talk on it.
+
+## Look
+
+- **Presets** change every style and the accent at once. Positions stay.
+- **Accent color**: a swatch or any color.
+- **HUD size** scales everything.
+
+## Statuses
+
+Every status, with its own color and eye: health, armor, stamina, oxygen, needs and statuses other resources add.
+
+## Options
+
+Speed unit, minimap (always, in vehicle, never), 24-hour clock, cinematic mode, smart hide, effects, sounds and snap.
+
+## Share layout
+
+**Export** writes a code that starts with `UGHUD1:`. Copy it to a friend. They paste it and press **Import**, then **Save**. Codes are checked: a broken one is refused.
+
+The reset button at the bottom goes back to the server's defaults.

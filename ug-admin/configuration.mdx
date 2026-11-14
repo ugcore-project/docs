@@ -1,0 +1,72 @@
+---
+title: "Configuration"
+description: "Access per action, keys, noclip speeds, reports, jail and places."
+icon: "sliders"
+---
+
+On the first start, `server/config.default.lua` is copied to `config.lua`. Edit `config.lua` only. Updates never overwrite it, and a key you remove uses its default. Unknown keys and wrong values stop the resource with every problem listed.
+
+<Warning>
+Clients receive these values. Never put secrets in `config.lua`. The Discord webhook is the `ug-admin:Webhook` convar.
+</Warning>
+
+<Columns cols={2}>
+  <Card title="Look and feel" icon="palette" href="/ug-admin/configuration-look">
+    Panel theme and layout, tabs, noclip, spectate and shards.
+  </Card>
+</Columns>
+
+## Access
+
+`access` sets the lowest staff group (ug-core `config/permissions.lua`) allowed to use each action. Inheritance counts: with founder > admin > moderator, a founder MAY do everything a moderator may. Entries merge with the defaults, so list only what you change.
+
+```lua config.lua
+access = {
+    car = 'moderator',  -- moderators MAY spawn vehicles
+    kill = 'founder',   -- only founders MAY kill
+},
+```
+
+Set a group nobody has to turn an action off. Every action and its default group is on [Commands](/ug-admin/commands).
+
+## Options
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `keys` | `noclip = 'F2'`, `panel = 'F10'`, `vision = ''` | Default keys. Staff MAY rebind them. `''` leaves the action without a key. |
+| `noclipSpeeds` | `{ 1.5, 15, 200 }` | Noclip speeds in m/s. The slowest and fastest bound the wheel. Flights start at the second. |
+| `radarInterval` | `1500` | Ms between two vision updates. |
+| `maxDeleteRadius` | `50` | Largest `/dv` radius in meters. |
+| `replaceSpawnedVehicle` | `true` | `/car` deletes your previous spawn. |
+| `reportCooldown` | `60` | Seconds between two reports of one player. |
+| `maxReports` | `100` | Reports kept in memory. |
+| `startOnDuty` | `false` | Staff with `/duty` start on duty when their character loads. |
+| `banDurations` | `1h`, `1d`, `3d`, `7d`, `30d`, `perm` | Choices in the panel. `/ban` also takes any `30m`, `12h`, `7d` or `perm`. |
+| `invisibleAlpha` | `140` | How see-through invisible staff look to themselves, 0 to 255. |
+
+## Jail
+
+```lua config.lua
+jail = {
+    coords = vector3(1767.4, 2500.7, 45.7),   -- where prisoners go
+    radius = 150.0,                            -- meters before a prisoner is pulled back
+    release = vector3(1848.1, 2586.1, 45.7),  -- where they walk out
+},
+```
+
+The default is Bolingbroke Penitentiary. Time counts down while the player is online.
+
+## Locations
+
+`locations` lists the places `/sendto` and the panel offer, by name. The name `waypoint` is reserved: it sends to your own waypoint.
+
+```lua config.lua
+locations = {
+    hospital = { label = 'Pillbox Hospital', coords = vector3(298.6, -584.5, 43.3) },
+    legion = { label = 'Legion Square', coords = vector3(195.2, -933.8, 30.7) },
+},
+```
+
+## Languages
+
+Labels come from `locales/<code>.json`, picked by ug-lib's locale. English and Portuguese ship. Copy `en.json` to add a language: every file MUST have the same keys.

@@ -1,0 +1,91 @@
+---
+title: "UgCore.Needs"
+sidebarTitle: "Needs"
+description: "Hunger, thirst, stress and any need you define, ticked on the server."
+icon: "utensils"
+---
+
+import { ModuleInfo } from "/snippets/module-info.jsx";
+
+<Badge color="blue">Server</Badge> <Badge color="green">Client</Badge> Proxied to ug-core.
+
+<ModuleInfo name="needs" deps={["characters"]} server="Needs" client="Needs" clientFunctions="Get, GetAll" />
+
+Needs belong to the loaded character. Values go from 0 to 100. The server changes them every `interval` ms by `rate` per minute and saves them in `ug_needs` every 5 minutes, on unload and on stop.
+
+```lua config/needs.lua
+return {
+    needs = {
+        hunger = { label = 'Hunger', start = 100, rate = -0.6, damage = 5 },
+        thirst = { label = 'Thirst', start = 100, rate = -0.9, damage = 5 },
+        stress = { label = 'Stress', start = 0, rate = -0.5, damage = 0 },
+    },
+    interval = 10000,
+    pauseWhileDown = true,
+    resetOnRespawn = true,
+}
+```
+
+<ResponseField name="start" type="number">Value of a new character, and after a reset.</ResponseField>
+<ResponseField name="rate" type="number">Change per minute. Negative drains, positive fills.</ResponseField>
+<ResponseField name="damage" type="integer">Health lost on every tick while the need is at 0. `0` never hurts.</ResponseField>
+
+- `pauseWhileDown`: needs stop changing while the player is downed or dead.
+- `resetOnRespawn`: needs go back to `start` on respawn.
+
+## Server
+
+### Get / GetAll
+
+```lua
+UgCore.Needs.Get(source, name) -> number?
+UgCore.Needs.GetAll(source) -> table<string, number>?
+```
+
+`nil` when no character is loaded, or the need does not exist.
+
+### Set / Add / Remove
+
+```lua
+UgCore.Needs.Set(source, name, value) -> ok, value, errorCode
+UgCore.Needs.Add(source, name, amount) -> ok, value, errorCode
+UgCore.Needs.Remove(source, name, amount) -> ok, value, errorCode
+```
+
+`amount` goes from 0 to 100. Values are clamped to 0 to 100. Unknown needs return `not_found`, an unloaded player `not_loaded`, bad numbers `invalid_args`.
+
+```lua
+-- A burger: hunger up 35, from a usable item on the server.
+local ok, hunger = UgCore.Needs.Add(source, 'hunger', 35)
+```
+
+Every change emits `UgCore.Enums.Events.Needs.Changed` with `(source, name, value, previous)` on the server.
+
+### Reset
+
+```lua
+UgCore.Needs.Reset(source) -> ok, errorCode
+```
+
+Every need back to its `start`.
+
+## Client
+
+```lua
+UgCore.Needs.Get(name) -> number?
+UgCore.Needs.GetAll() -> table<string, number>
+```
+
+The client only reads. Changes arrive from the server and emit `UgCore.Enums.Events.Needs.Changed` with `(name, value, previous)`. `value` is nil once the character unloads.
+
+```lua
+UgCore.Events.On(UgCore.Enums.Events.Needs.Changed, function(name, value)
+    if name == 'thirst' and value < 10 then
+        -- Show a hint in your own UI resource.
+    end
+end)
+```
+
+## Console
+
+`ug needs <id>` prints the values of a player.

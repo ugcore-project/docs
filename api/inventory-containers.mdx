@@ -1,0 +1,160 @@
+---
+title: "Inventory: containers"
+sidebarTitle: "Containers"
+description: "Stashes, vehicle trunks and gloveboxes, ground drops, and opening them."
+icon: "box-archive"
+---
+
+<Badge color="blue">Server</Badge> Part of [Inventory](/api/inventory).
+
+## Stashes
+
+Owners define stashes in `config/inventory.lua`. Resources add their own at runtime.
+
+```lua config/inventory.lua
+return {
+    stashes = {
+        police_locker = {
+            label = 'Police locker',
+            slots = 50,
+            weight = 100000,
+            coords = vector3(461.7, -996.0, 30.7),
+            personal = true,
+            jobs = { police = 1 },
+        },
+        gang_safe = { label = 'Safe', slots = 20, weight = 50000, coords = vector3(0, 0, 0), gangs = { ballas = 2 } },
+        evidence = { label = 'Evidence', slots = 100, weight = 500000 },
+    },
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `label`, `slots`, `weight` | Required. Weight in grams. |
+| `coords` | Where players open it themselves. Without it, only [`Inventory.Open`](#open) opens it. |
+| `distance` | Meters from `coords`, 0.5 to 20. Defaults to 2. |
+| `personal` | One inventory per character, such as a locker. |
+| `jobs`, `gangs` | Name to minimum grade. Need the `jobs` or `gangs` module. |
+| `groups` | [Permission groups](/owners/permissions#groups). |
+
+Any listed job, gang or group gives access. A stash without any is open to everyone in range.
+
+### RegisterStash
+
+```lua
+UgCore.Inventory.RegisterStash(name, options)
+```
+
+Same fields as the config, plus `check`, a function `fun(source): boolean` that MUST also pass. Registered stashes are removed when your resource stops. Their items stay saved.
+
+```lua
+UgCore.Inventory.RegisterStash('house_42', {
+    label = 'House 42',
+    slots = 30,
+    weight = 80000,
+    coords = vector3(-174.3, 497.6, 137.6),
+    check = function(source)
+        return Houses.IsOwner(42, source)
+    end,
+})
+```
+
+Config names cannot be registered. A name registered by another resource raises.
+
+### GetStash / GetStashId
+
+```lua
+UgCore.Inventory.GetStash(name) -> definition?
+UgCore.Inventory.GetStashId(name, source?) -> id?
+```
+
+`GetStashId` needs the player for personal stashes, to know the character.
+
+## Vehicles
+
+Every vehicle has a trunk and a glovebox, keyed by its plate. Sizes come from `trunk` and `glovebox` in `config/inventory.lua`.
+
+- **Trunk:** the player stands within 4 meters and the doors are unlocked.
+- **Glovebox:** the player sits in the vehicle.
+- Both are checked on the server, from the vehicle entity and its plate.
+
+Vehicle inventories are temporary: they leave with the vehicle. A garage resource marks owned vehicles persistent, and their items are saved.
+
+### SetPersistent
+
+```lua
+UgCore.Inventory.SetPersistent(plate, persistent) -> ok, errorCode
+```
+
+**MUST run in a thread.** Starts or stops saving the trunk and glovebox of a plate. Stopping deletes the saved items. Plates are trimmed and upper case, with spaces as `_`: `' ab 123 '` is `trunk:AB_123`.
+
+## Drops
+
+Ground drops hold items at a position. They are never saved: a drop disappears when it is empty, or after `lifetime` minutes from `drops` in `config/inventory.lua`, with its items.
+
+- Players drop items with the client function [`Drop`](/api/inventory-client#client). A drop within 1.5 meters with room is reused.
+- Positions replicate to clients for drawing. Contents are only sent when a player opens a drop within 2.5 meters.
+
+### CreateDrop
+
+```lua
+UgCore.Inventory.CreateDrop(coords, items?, reason?) -> ok, id, errorCode
+```
+
+Every item MUST fit, or no drop is created.
+
+```lua
+local ok, id = UgCore.Inventory.CreateDrop(vector3(215.0, -810.0, 30.7), {
+    { name = 'bread', count = 3 },
+})
+```
+
+### GetDrops
+
+```lua
+UgCore.Inventory.GetDrops() -> table<string, vector3>
+```
+
+## Opening
+
+A player has their own inventory, `player`, and at most one more open, `other`. Opening another closes the previous one.
+
+Reach is checked when it opens, and again on **every** action: walking away, losing a job or a locked trunk closes it. The client gets `ug-core:InventoryClosed`.
+
+### Open
+
+```lua
+UgCore.Inventory.Open(source, inventoryId) -> ok, errorCode
+```
+
+**MUST run in a thread.** Opens any inventory for a player from server code, such as a house stash, a search or an evidence room. Loads it when needed. Reach is not checked: your code decided. `Inventory:BeforeOpen` MAY cancel.
+
+```lua
+-- A police search
+UgCore.Inventory.Open(officer, UgCore.Inventory.Get(suspect).id)
+```
+
+### Close / GetOpen
+
+```lua
+UgCore.Inventory.Close(source)
+UgCore.Inventory.GetOpen(source) -> id?
+```
+
+### Load
+
+```lua
+UgCore.Inventory.Load(id) -> ok, errorCode
+```
+
+**MUST run in a thread.** Loads a saved inventory by id for server code, such as an offline player's `player:12`. It unloads again when idle.
+
+```lua
+CreateThread(function()
+    local id = 'player:' .. characterId
+
+    if UgCore.Inventory.Load(id) then
+        UgCore.Inventory.AddItem(id, 'letter', 1, { from = 'City Hall' }, 'mail')
+    end
+end)
+```

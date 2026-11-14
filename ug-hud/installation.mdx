@@ -1,0 +1,57 @@
+---
+title: "Installation"
+description: "Requirements, start order and the first start."
+icon: "download"
+---
+
+## Requirements
+
+- OneSync.
+- `ug-core` 1.0.0 or newer, started and ready.
+- `ug-lib` 1.0.0 or newer.
+
+The `needs` and `accounts` modules of ug-core are optional. Without them, the status widget shows health, armor and stamina, and the money widget stays hidden.
+
+## Start order
+
+```bash server.cfg
+ensure oxmysql
+ensure ug-core
+ensure ug-lib
+ensure ug-hud
+```
+
+<Warning>
+Remove any other HUD resource. Two HUDs draw over each other and both hide the minimap.
+</Warning>
+
+## First start
+
+On the first start ug-hud copies `server/config.default.lua` to `config.lua`. Updates never overwrite it.
+
+The server console prints one line when it is ready:
+
+```text
+[ug-hud] v1.0.0 ready.
+```
+
+Each client prints one line in F8 once the keys are bound:
+
+```text
+[ug-hud] Ready: neon, /hud to customize.
+```
+
+## Try it
+
+1. Load a character. The HUD fades in.
+2. Press `I`, or type `/hud`. The editor opens with every widget, even ones that have nothing to show yet.
+3. Drag a widget, pick a preset in **Look**, then **Save**.
+4. Get in a car, press `B` for the seatbelt and `Y` for cruise control.
+
+## When something is wrong
+
+| Console | Meaning |
+| --- | --- |
+| `config.lua: preset: ...` then `Config invalid: N error(s). ug-hud stays hidden.` | Fix the listed keys in `config.lua` and restart. |
+| `[ug-hud] No config from the server. Check the server console.` (F8) | The server config failed to load. |
+| `[ug-hud] ug-core did not become ready.` (F8) | ug-core aborted its boot. Check its errors first. |

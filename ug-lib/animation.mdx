@@ -1,0 +1,40 @@
+---
+title: "UgLib.Animation"
+sidebarTitle: "Animation"
+description: "Animations, scenarios and props on peds."
+icon: "person-walking"
+---
+
+<Badge color="green">Client</Badge> Runs in your resource.
+
+```lua
+UgLib.Animation.Play(ped, dict, name, options?) -> ok
+UgLib.Animation.Scenario(ped, scenario)
+UgLib.Animation.Stop(ped, dict?, name?)
+UgLib.Animation.AttachProp(ped, options) -> prop
+UgLib.Animation.RemoveProp(prop) -> boolean
+UgLib.Animation.DetachProps(ped?) -> integer
+```
+
+- `Play` loads the dictionary and plays. MUST run in a thread. Options: `flag`, `blendIn`, `blendOut`, `duration`, `playbackRate`.
+- `Stop` stops one animation, or every task of the ped without `dict` and `name`.
+- `AttachProp(ped, { model, bone?, offset?, rotation?, networked? })` creates a prop on a bone (default: right hand) and returns its handle, or `nil` when the model does not load. MUST run in a thread.
+- Props are local unless `networked = true`. Servers with `sv_entityLockdown` block networked props created by clients.
+- Your resource's props are deleted when it stops.
+
+## Example
+
+```lua client.lua
+CreateThread(function()
+    local ped = UgLib.Cache.Ped
+    local burger = UgLib.Animation.AttachProp(ped, { model = 'prop_cs_burger_01', offset = vector3(0.1, 0.0, 0.0) })
+
+    UgLib.Animation.Play(ped, 'mp_player_inteat@burger', 'mp_player_int_eat_burger', { flag = 49 })
+    Wait(3000)
+    UgLib.Animation.Stop(ped, 'mp_player_inteat@burger', 'mp_player_int_eat_burger')
+
+    if burger then
+        UgLib.Animation.RemoveProp(burger)
+    end
+end)
+```

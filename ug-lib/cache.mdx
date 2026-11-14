@@ -1,0 +1,40 @@
+---
+title: "UgLib.Cache"
+sidebarTitle: "Cache"
+description: "The local player, read once for every resource."
+icon: "bolt"
+---
+
+<Badge color="green">Client</Badge> Runs in your resource.
+
+ug-lib reads the local player every `settings.cacheInterval` ms (default 100) and sends changes to every resource. Reading a value is a table lookup: never start your own polling loop for these.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `Cache.Ped` | integer | |
+| `Cache.PlayerId` | integer | |
+| `Cache.ServerId` | integer | |
+| `Cache.Vehicle` | integer or false | `false` on foot. |
+| `Cache.Seat` | integer or false | `-1` is the driver. |
+| `Cache.Weapon` | integer or false | Weapon hash, `false` when unarmed. |
+| `Cache.Coords` | vector3 | Read from the ped on access. No events. |
+| `Cache.Heading` | number | Read from the ped on access. No events. |
+
+```lua
+UgLib.Cache.Get(key) -> value
+UgLib.Cache.On(key, handler) -> id
+UgLib.Cache.Off(id) -> boolean
+```
+
+- `Get` takes a `UgLib.Enums.CacheKey`.
+- `On` calls `handler(value, oldValue)` when the key changes. It raises for `Coords` and `Heading`, which change every frame. A failing handler is logged and others still run.
+
+## Example
+
+```lua client.lua
+UgLib.Cache.On(UgLib.Enums.CacheKey.Vehicle, function(vehicle)
+    if vehicle then
+        print('Entered', GetDisplayNameFromVehicleModel(GetEntityModel(vehicle)))
+    end
+end)
+```

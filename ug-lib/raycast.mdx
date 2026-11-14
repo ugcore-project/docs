@@ -1,0 +1,45 @@
+---
+title: "UgLib.Raycast and Screen"
+sidebarTitle: "Raycast and Screen"
+description: "Line-of-sight tests and screen positions."
+icon: "crosshairs"
+---
+
+<Badge color="green">Client</Badge> Runs in your resource.
+
+## Raycast
+
+```lua
+UgLib.Raycast.FromCoords(from, to, options?) -> result
+UgLib.Raycast.FromCamera(distance?, options?) -> result
+```
+
+<ResponseField name="options.flags" type="integer" default="511">What the ray hits. 511 is everything.</ResponseField>
+<ResponseField name="options.ignore" type="integer">An entity to ignore. `FromCamera` ignores the local player by default.</ResponseField>
+<ResponseField name="result" type="table">
+  `{ hit, coords?, normal?, entity?, material? }`. `entity` is nil for the world.
+</ResponseField>
+
+Shape tests are asynchronous: both MUST run in a thread and wait at most 1 second. `FromCamera` casts `distance` meters (default 10) from the gameplay camera.
+
+## Screen
+
+```lua
+UgLib.Screen.WorldToScreen(coords) -> onScreen, x, y
+UgLib.Screen.GetResolution() -> width, height
+UgLib.Screen.GetAspectRatio() -> number
+```
+
+`x` and `y` go from 0 to 1.
+
+## Example
+
+```lua client.lua
+CreateThread(function()
+    local result = UgLib.Raycast.FromCamera(5.0)
+
+    if result.hit and result.entity and IsEntityAVehicle(result.entity) then
+        print('Looking at a vehicle')
+    end
+end)
+```

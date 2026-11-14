@@ -1,0 +1,43 @@
+---
+title: "Reports"
+description: "Player reports with a live chat, the staff desk and duty."
+icon: "life-ring"
+---
+
+## For players
+
+`/report` opens a help window. The player picks a category (question, player, bug, stuck, other), MAY name the player they report, and then chats with staff in the window. `/report message` sends a report straight away, and a second message joins the chat.
+
+- Staff answers pop up for the player even with the window closed.
+- A player waits `reportCooldown` seconds between two reports. Muted players cannot report.
+- When staff close the report, the player rates the help from 1 to 5.
+- A player who reports while nobody is on duty is told so.
+
+## Duty
+
+Only staff on `/duty` get report alerts and take reports. Going off duty puts their reports back in the queue. With `startOnDuty = true`, staff start on duty when their character loads.
+
+## The desk
+
+The **Reports** tab of the panel holds the queue, your own reports and recently closed ones, with unread markers and quick answers.
+
+- **Go to** and **Return**, **Bring** and **Send back**, spectate and heal, in one click.
+- Hand a report to someone on duty, from a staff list searchable by player or character name.
+- Ping another staff member in the chat with `@`. Only they are notified, of that line only, on duty or not.
+- Close with an optional last message.
+
+At most `maxReports` reports are kept in memory.
+
+## Commands
+
+`/reports id op [text]` does the same from chat or the console:
+
+| `op` | Does |
+| --- | --- |
+| `claim` | Take the report. |
+| `release` | Put it back in the queue. |
+| `reply` | Send `text` to the player. `@id` in the text pings that staff member. |
+| `goto`, `return` | Go to the player, then back where you were. |
+| `bring`, `sendback` | Bring the player, then send them back. |
+| `close` | Close it, with `text` as an optional last message. |
+| `assign` | Hand it to the staff member whose id is `text`. |

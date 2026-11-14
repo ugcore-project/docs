@@ -1,0 +1,41 @@
+---
+title: "UgCore.Hooks"
+sidebarTitle: "Hooks"
+description: "Cancel or change actions before they happen."
+icon: "anchor"
+---
+
+<Badge color="blue">Server</Badge> Proxied to ug-core. See the [Hooks guide](/developers/hooks) and the [Hooks reference](/reference/hooks).
+
+## Register
+
+```lua
+UgCore.Hooks.Register(name, handler, options?) -> id
+```
+
+<ResponseField name="name" type="UgHookName" required>A value of `UgCore.Enums.Hooks`, such as `'Accounts:BeforeRemove'`.</ResponseField>
+<ResponseField name="handler" type="fun(payload): boolean | table | nil" required>
+  Return `false` to cancel. Return a table to replace the payload for the next handlers. Return nothing to let it pass.
+</ResponseField>
+<ResponseField name="options.priority" type="integer">Lower runs first. Defaults to `0`.</ResponseField>
+<ResponseField name="id" type="integer">Pass to `Unregister`.</ResponseField>
+
+Hooks of a resource are removed when it stops. A failing handler is logged and skipped.
+
+## Unregister
+
+```lua
+UgCore.Hooks.Unregister(id) -> removed
+```
+
+## Example
+
+```lua
+UgCore.Hooks.Register(UgCore.Enums.Hooks.Accounts.BeforeRemove, function(payload)
+    if payload.account == 'bank' and payload.amount > 100000 then
+        return false
+    end
+end, { priority = 10 })
+```
+
+<Note>Your handler gets a copy of the payload. Return the changed table so ug-core sees your changes.</Note>

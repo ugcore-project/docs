@@ -1,0 +1,35 @@
+---
+title: "Introduction"
+description: "A player HUD that every player can make their own."
+icon: "gauge-high"
+---
+
+ug-hud draws the player's HUD: status, needs, money, job, voice, speedometer, compass, clock and weapon. Each player opens the editor in game and changes everything: where each widget sits, its style, size and opacity, the colors, the units and the effects.
+
+## What players get
+
+- **Eight widgets.** Status, money, identity, voice, speedometer, compass, clock and weapon. Each one can move, hide, change style, size and opacity.
+- **Presets.** Neon, Minimal, Classic and Sport change every style and the accent color at once, and keep where widgets sit.
+- **Any accent color.** Nine swatches and a color picker.
+- **Effects.** A red vignette and heartbeat at low health, warning pulses for low needs, money changes that float up, a blinking seatbelt light and chime.
+- **Cinematic mode.** Letterbox bars and only the essentials.
+- **Smart hide.** Full bars hide themselves until they change.
+- **Share codes.** Export a layout as a code and import a friend's.
+
+Layouts are saved on the player's PC, in client KVP. They survive reconnects and server restarts.
+
+## What server owners get
+
+- One `config.lua` with the defaults new players start from.
+- Seatbelt with crash ejection and cruise control.
+- Fuel from the native, a statebag or any fuel resource's export.
+- pma-voice modes and radio channel when it runs.
+- Money from the ug-core `accounts` module, needs from the `needs` module. Both optional.
+
+## What developers get
+
+Client exports to add custom statuses, such as drunk or nitro, and to hide the HUD during your own screens. See [API](/ug-hud/api).
+
+## Security
+
+The HUD only shows. Needs, money, jobs and death state stay on the server. Saved layouts and share codes are untrusted: the page keeps only known keys with bounded values.

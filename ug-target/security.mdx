@@ -1,0 +1,28 @@
+---
+title: "Security"
+description: "What the client decides, what the server checks."
+icon: "lock"
+---
+
+The client is untrusted. ug-target splits the work so a modified client gains nothing:
+
+| Part | Runs on | Trusts the client? |
+| --- | --- | --- |
+| Which options show, conditions, `canInteract` | Client | Yes. It is only a menu. |
+| `onSelect`, `event`, `command`, `export` | Client | Yes. Use them for client effects only. |
+| `serverAction` | Server | No. Entity, distance, conditions, hold and cooldown are checked on the server. |
+| `serverEvent` | Server | Yes. Legacy, for ox_target scripts. |
+
+## Server actions
+
+- The client sends the action name and a network id. Never coordinates, prices or results.
+- The server reads the entity's position and the player's ped position itself.
+- Wrong entities, out-of-range requests and skipped holds are flagged in ug-core's Guard, which warns, kicks or bans by its own thresholds.
+- Players are never their own target.
+- Every request goes through ug-core callbacks: schema, rate limit, global budget and concurrency cap.
+
+## The page
+
+- The page only shows what Lua sends. In cursor mode it posts the row index, checked against the menu Lua holds.
+- Page callbacks are limited to 30 per second.
+- The page loads nothing from the network: a strict Content Security Policy is added to the build.

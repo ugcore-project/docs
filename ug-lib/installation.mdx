@@ -1,0 +1,58 @@
+---
+title: "Installation"
+description: "Download ug-lib, start it before your resources and check the first start."
+icon: "download"
+---
+
+## Requirements
+
+- A FiveM server with a recent artifact. `lua54` is used by every script.
+- Nothing else. OneSync and `ug-core` are optional.
+
+## Download
+
+Download `ug-lib-vX.Y.Z.zip` from the [releases](https://github.com/ugcore-project/ug-lib/releases) and extract it into your resources folder, for example `resources/[ug]/ug-lib`.
+
+<Warning>
+  The resource MUST be named `ug-lib`. Other resources reach it as `@ug-lib/import.lua` and `exports['ug-lib']`.
+</Warning>
+
+<Accordion title="Building from source" icon="hammer">
+  The repository does not contain the built page. Build it once with Node.js 20.19 or newer:
+
+  ```bash
+  cd resources/[ug]/ug-lib/web
+  npm ci
+  npm run build
+  ```
+
+  The build goes to `web/dist`, which the manifest serves.
+</Accordion>
+
+## Start order
+
+Start `ug-lib` before every resource that imports it:
+
+```bash server.cfg
+ensure ug-lib
+ensure ug-core
+ensure my-shop
+```
+
+## First start
+
+The server console prints:
+
+```text
+[INFO] [ug-lib] Config: generated config/settings.lua.
+[INFO] [ug-lib] Config: generated config/theme.lua.
+[ug-lib] v1.0.0 · config loaded · 2 files
+```
+
+When a player joins, their F8 console prints:
+
+```text
+[ug-lib] v1.0.0 ready (dark, en).
+```
+
+Next, set up [Configuration](/ug-lib/configuration).

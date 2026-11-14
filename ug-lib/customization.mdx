@@ -1,0 +1,95 @@
+---
+title: "Customization"
+description: "Colors and positions per call, and settings each player chooses."
+icon: "palette"
+---
+
+The owner sets the look of every component in [Configuration](/ug-lib/configuration). Your resource MAY change the color and the position of one call. Players MAY then choose their own positions, styles and theme.
+
+## Colors
+
+`color` replaces the accent of one component: the header line, bars, keys, the selected row and its icon. `iconColor` changes one item's icon.
+
+A color is one of:
+
+- A theme token from `UgLib.Enums.Color`: `Primary`, `Success`, `Warning`, `Destructive`, `Muted`. It follows the owner's theme, light and dark.
+- A hex color, `#rrggbb`. Text on it turns dark or light to stay readable.
+
+```lua client.lua
+UgLib.Notify.Show({ message = 'Police alert', color = '#1d4ed8' })
+
+UgLib.Menu.Register({
+    id = 'garage',
+    title = 'Garage',
+    color = UgLib.Enums.Color.Success,
+    items = {
+        { label = 'Repair', icon = UgLib.Enums.Icon.Settings, iconColor = UgLib.Enums.Color.Warning },
+        { label = 'Sell', icon = UgLib.Enums.Icon.Trash, iconColor = '#ef4444' },
+    },
+})
+```
+
+| Option | Where |
+| --- | --- |
+| `color` | `Notify.Show`, `TextUI.Show`, `Progress.Start`, `SkillCheck.Start` (third argument), `Dialog.*`, `Context`, `Menu`, `Radial.Open` |
+| `iconColor` | Items of `Context`, `Menu` and `Radial` |
+| `colorScheme` | Context items: the progress bar |
+
+On a notification, `color` replaces the color of its `type`.
+
+<Note>
+  Raw CSS is never accepted. Any resource can call ug-lib, and a CSS value such as `url(...)` would load a remote file on every player's game. Anything other than a token or `#rrggbb` raises: `Notify.Show: color MUST be a UgLib.Enums.Color value or a #rrggbb hex`.
+</Note>
+
+## Positions
+
+`position` takes a `UgLib.Enums.Position`: `TopLeft`, `Top`, `TopRight`, `CenterLeft`, `Center`, `CenterRight`, `BottomLeft`, `Bottom`, `BottomRight`.
+
+| Component | Default |
+| --- | --- |
+| Notify | `settings.notifyPosition`, `Top` for banners |
+| TextUI | `settings.textUIPosition` |
+| Progress | `settings.progressPosition` |
+| Menu | `settings.menuPosition` |
+| Context | `settings.contextPosition` |
+| SkillCheck | `Center` |
+
+Dialogs and radials stay centered.
+
+## Player settings
+
+Players open `/uisettings`, a mouse screen with a preview of their screen, real samples and a color picker. Every change applies at once:
+
+| Setting | Values |
+| --- | --- |
+| Theme | Dark, Light |
+| Accent color | 10 presets or any custom color |
+| Size | 75% to 150% |
+| Notifications, prompts, progress bars | Position and style |
+| Menus, context menus | Position |
+
+Each one starts at "Server default". Changes are saved on the player's PC, so they need no database and follow the player across reconnects on this server.
+
+What wins, from lowest to highest:
+
+1. The owner's config.
+2. Your call: `position`, `style`.
+3. The player's choice.
+
+Pass `fixed = true` when a component MUST stay where you put it, such as a prompt that sits above your own HUD. The player's choice is then ignored for that call:
+
+```lua client.lua
+UgLib.TextUI.Show({ text = 'Press E to refuel', key = 'E', position = UgLib.Enums.Position.BottomLeft, fixed = true })
+```
+
+`fixed` works on `Notify.Show`, `TextUI.Show`, `Progress.Start`, `Menu.Register` and `Context`.
+
+The player's accent replaces the theme's primary color. A `color` you pass still wins: it carries meaning, such as red for danger.
+
+Open the settings from your own UI with `UgLib.Ui.OpenSettings()`.
+
+### For owners
+
+- `playerSettings = false` turns the feature off. The command then tells players it is off.
+- `lockedSettings` hides preferences players MUST NOT change, such as `{ 'accent', 'mode' }` for a branded server. Keys are the values of `UgLib.Enums.PreferenceKey`.
+- `settingsCommand` renames the command.

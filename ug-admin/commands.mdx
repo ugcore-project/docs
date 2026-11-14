@@ -1,0 +1,86 @@
+---
+title: "Commands"
+description: "Every staff command, its arguments and its default group."
+icon: "terminal"
+---
+
+`[id]` is optional and defaults to yourself. Each command is limited to its group in [`access`](/ug-admin/configuration#access). Commands also run from the server console, except the ones that need a ped.
+
+Commands marked **Rank** MUST target yourself or a player you outrank: a staff member with a lower group weight, or no group. The console outranks everyone.
+
+## Movement and modes
+
+| Command | Does | Default group |
+| --- | --- | --- |
+| `/admin` | Open the panel. | moderator |
+| `/noclip` | Drone noclip. | moderator |
+| `/vision` | Players on the map and name tags. | moderator |
+| `/god`, `/invisible` | Toggle the mode. | admin |
+| `/tpm` | Teleport to the waypoint. | moderator |
+| `/tp x y [z]` | Teleport to coordinates, ground height without `z`. | moderator |
+| `/back [id]` | Return to where you were before the last teleport. **Rank** | moderator |
+| `/duty` | Go on or off duty. On duty: report alerts and taking reports. Off duty releases your reports. | moderator |
+
+## Players
+
+| Command | Does | Default group |
+| --- | --- | --- |
+| `/goto id` | Teleport to a player. | moderator |
+| `/bring id` | Bring a player. **Rank** | moderator |
+| `/spectate [id]` | Watch a player. Without an id, stop. **Rank** | moderator |
+| `/revive [id]` | Bring back a downed or dead player with full health and needs. **Rank** | moderator |
+| `/heal [id]` | Restore health and needs, clear injuries. Revives when down. | moderator |
+| `/kill id` | Kill a player. **Rank** | admin |
+| `/freeze id` | Freeze or unfreeze. **Rank** | moderator |
+| `/warn id reason` | Big warning on their screen. **Rank** | moderator |
+| `/kick id [reason]` | Kick. **Rank** | moderator |
+| `/ban id duration reason` | Ban for `30m`, `12h`, `7d`, `2w` or `perm`. **Rank** | admin |
+| `/unban identifier` | Lift every ban of an identifier. | admin |
+| `/dm id text` | Private message on one player's screen. | moderator |
+| `/sendto id place` | Send to a place from `locations`, or `waypoint` for yours. **Rank** | moderator |
+| `/jail id minutes [reason]` | Jail. Time counts while online and survives reconnects. **Rank** | moderator |
+| `/unjail id` | Release from jail. | moderator |
+| `/mute id minutes [reason]` | Block chat and `/report`. **Rank** | moderator |
+| `/unmute id` | Lift a mute. | moderator |
+| `/note id text` | Private staff note, shown in the panel. | moderator |
+| `/delnote number` | Delete a note. | admin |
+
+## Characters
+
+| Command | Does | Default group |
+| --- | --- | --- |
+| `/setstats id [health] [armor]` | Health 101 to 200, armor 0 to 100. **Rank** | admin |
+| `/setneed id need value` | One need, 0 to 100. | admin |
+| `/setmoney id account amount` | Exact balance, written to the ledger. | admin |
+| `/givemoney id account amount` | Add money, or remove it with a negative amount. | admin |
+| `/setjob id job [grade]`, `/setgang id gang [grade]` | Set a job or gang. | admin |
+| `/giveitem id item [count]` | Give an item. | admin |
+| `/removeitem id slot [count]` | Remove some or all of one slot. **Rank** | admin |
+| `/clearinv id` | Empty a player's inventory. **Rank** | admin |
+| `/inventory id` | Open a player's inventory. **Rank** | admin |
+| `/setgroup id group`, `/removegroup id group` | Staff groups, below your own rank only. **Rank** | founder |
+
+## Everyone at once
+
+| Command | Does | Default group |
+| --- | --- | --- |
+| `/reviveall` | Revive every downed or dead player. | admin |
+| `/bringall [radius]` | Bring everyone you outrank, or those within radius. | admin |
+| `/freezeall` | Freeze everyone you outrank, or free them all. | admin |
+
+## World
+
+| Command | Does | Default group |
+| --- | --- | --- |
+| `/car model` | Spawn a vehicle and seat you in it, replacing your last one. | admin |
+| `/dv [radius]` | Delete your vehicle, or empty vehicles around you, up to `maxDeleteRadius`. | moderator |
+| `/fix [id]` | Repair a vehicle. | moderator |
+| `/delentity netId` | Delete an entity, never a player. | admin |
+| `/announce text` | Message to everyone. | admin |
+
+## Reports
+
+| Command | Does | Default group |
+| --- | --- | --- |
+| `/reports id op [text]` | Handle a report. See [Reports](/ug-admin/reports#commands). | moderator |
+| `/report [message]` | Ask staff for help. A second message joins the chat. Without one, opens the window. | everyone |

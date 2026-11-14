@@ -1,0 +1,85 @@
+---
+title: "Configuration"
+description: "Every option in config.lua."
+icon: "sliders"
+---
+
+`config.lua` returns a table. Values left out use the defaults. Unknown keys are errors, with a suggestion for typos.
+
+```lua config.lua
+return {
+    trigger = 'hold',
+    key = 'LMENU',
+    layout = 'anchored',
+    maxDistance = 7.0,
+    defaultDistance = 2.5,
+    showDisabled = true,
+    outline = true,
+    outlineColor = { 59, 130, 246, 255 },
+    sounds = true,
+    allowWhileDowned = false,
+    allowInVehicle = true,
+    actionMargin = 1.5,
+    debug = false,
+    cursor = true,
+    numberKeys = true,
+    soundEffects = { ... },
+    theme = {},
+    optionColors = { ... },
+    look = { ... },
+}
+```
+
+| Key | Type | Default | Purpose |
+| --- | --- | --- | --- |
+| `trigger` | `'hold'` or `'toggle'` | `'hold'` | Hold the key to aim, or press to open and press again to close. |
+| `key` | string | `'LMENU'` | Default key, a FiveM key name. Players MAY rebind it. |
+| `layout` | `'anchored'` or `'list'` | `'anchored'` | Options next to the target, or beside the crosshair. |
+| `maxDistance` | number, 1 to 20 | `7.0` | Meters the aim reaches. Caps every option's `distance`. |
+| `defaultDistance` | number, 0.5 to 20 | `2.5` | Meters for options without `distance`. At most `maxDistance`. |
+| `showDisabled` | boolean | `true` | Show options whose conditions fail, greyed out with the reason. |
+| `outline` | boolean | `true` | Outline the vehicle or object you aim at. Peds are never outlined: it can crash the game. |
+| `outlineColor` | 4 integers, 0 to 255 | `{ 59, 130, 246, 255 }` | Outline color. The page takes its colors from the ug-lib theme. |
+| `sounds` | boolean | `true` | Frontend sounds. `false` silences every entry of `soundEffects`. |
+| `allowWhileDowned` | boolean | `false` | Downed and dead players MAY aim. |
+| `allowInVehicle` | boolean | `true` | Players in a vehicle MAY aim. |
+| `actionMargin` | number, 0 to 10 | `1.5` | Meters the server adds to a server action's `distance`, for movement and latency. Server only. |
+| `debug` | boolean | `false` | Draw the aim point and nearby zones. |
+| `cursor` | boolean | `true` | Left click frees the cursor to pick with the mouse. `false`: keyboard, scroll and number keys only. |
+| `numberKeys` | boolean | `true` | Number keys 1 to 9 pick a row, and rows show their number. |
+
+## Sounds
+
+`soundEffects` maps each event to a frontend sound, `{ name, set }`. A sound you leave out is silent.
+
+```lua config.lua
+soundEffects = {
+    hover = { name = 'NAV_UP_DOWN', set = 'HUD_FRONTEND_DEFAULT_SOUNDSET' },
+    select = { name = 'SELECT', set = 'HUD_FRONTEND_DEFAULT_SOUNDSET' },
+    back = { name = 'BACK', set = 'HUD_FRONTEND_DEFAULT_SOUNDSET' },
+    error = { name = 'ERROR', set = 'HUD_FRONTEND_DEFAULT_SOUNDSET' },
+},
+```
+
+## Look
+
+The page uses the ug-lib theme, so colors, radius, font and scale follow the rest of your UgCore screens.
+
+`theme` overrides it for ug-target only, with the same fields as the [ug-lib theme](/ug-lib/configuration): `mode`, `colors`, `radius`, `font` and `scale`. `colors` takes HSL strings such as `'262 83% 58%'`, keyed by ug-lib token, plus two of ug-target's own: `brandTo` (where gradients end) and `reticle` (the idle crosshair).
+
+`optionColors` lists the row colors in hex, one per row in turn. Options MAY set their own. `{}` colors every row with the theme's primary.
+
+`look` shapes the options card. A field you leave out keeps its default.
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `cardWidth` | `288` | Card width in pixels, 200 to 480. |
+| `cardOpacity` | `0.7` | Background opacity, 0 to 1. |
+| `blur` | `true` | Frosted background. |
+| `side` | `'auto'` | `auto`, `left` or `right` of the anchor or crosshair. |
+| `connector` | `true` | The dashed line to what you aim at. |
+| `pulse` | `true` | The ring around the anchor. |
+| `reticle` | `'brackets'` | `brackets`, `dot` or `none`. |
+| `hints` | `true` | The bottom line with keys. |
+| `animations` | `true` | `false` keeps everything still. |
+| `resultDuration` | `1400` | Ms a done or failed mark stays. |

@@ -1,0 +1,32 @@
+---
+title: "UgLib.Async"
+sidebarTitle: "Async"
+description: "Wait for a condition, delay, debounce and throttle."
+icon: "hourglass-half"
+---
+
+<Badge color="purple">Shared</Badge> Runs in your resource.
+
+```lua
+UgLib.Async.WaitFor(check, timeout?, interval?) -> ok, value
+UgLib.Async.Timeout(ms, fn) -> cancel
+UgLib.Async.Debounce(fn, ms) -> function
+UgLib.Async.Throttle(fn, ms) -> function
+```
+
+- `WaitFor` calls `check` every `interval` ms (default 0, every frame) until it returns a truthy value, for at most `timeout` ms (default 5000). `ok` is false on timeout. MUST run in a thread.
+- `Timeout` runs `fn` after `ms` and returns a function that cancels it.
+- `Debounce` returns a function that runs `fn` once calls stop for `ms`, with the arguments of the last call.
+- `Throttle` returns a function that runs `fn` at most once per `ms`. The first call runs at once, calls in between are dropped.
+
+## Example
+
+```lua
+CreateThread(function()
+    local ok, vehicle = UgLib.Async.WaitFor(function()
+        local entity = NetworkGetEntityFromNetworkId(netId)
+
+        return DoesEntityExist(entity) and entity
+    end, 3000)
+end)
+```

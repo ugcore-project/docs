@@ -1,0 +1,38 @@
+---
+title: "UgLib.Locale"
+sidebarTitle: "Locale"
+description: "Translations from your resource's locale files."
+icon: "language"
+---
+
+<Badge color="purple">Shared</Badge> Runs in your resource.
+
+```lua
+UgLib.Locale.Create(options?) -> t
+UgLib.Locale.GetCode() -> string
+t(key, vars?) -> string
+```
+
+<ResponseField name="options.resource" type="string">Defaults to the calling resource.</ResponseField>
+<ResponseField name="options.fallback" type="string" default="en">Language used when a key is missing.</ResponseField>
+
+- The language is `settings.locale` of ug-lib (convar `ug-lib:Locale`), `en` until config arrives.
+- Texts come from `locales/<code>.json`. Keys are flat (`"shop.title"`) or nested objects.
+- Placeholders are `{name}`. A missing key falls back to the `fallback` language, then to the key itself, with one Debug log per key.
+- Locale files MUST be in your `files {}` to be read on clients.
+
+## Example
+
+```json locales/en.json
+{ "shop": { "title": "Shop of {owner}" } }
+```
+
+```lua fxmanifest.lua
+files { 'locales/*.json' }
+```
+
+```lua
+local t = UgLib.Locale.Create()
+
+print(t('shop.title', { owner = 'Bob' })) -- Shop of Bob
+```

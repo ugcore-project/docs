@@ -1,0 +1,112 @@
+---
+title: "UgCore.Sessions"
+sidebarTitle: "Sessions"
+description: "Isolated worlds on routing buckets."
+icon: "layer-group"
+---
+
+import { ModuleInfo } from "/snippets/module-info.jsx";
+
+<Badge color="blue">Server</Badge> Proxied to ug-core.
+
+<ModuleInfo name="sessions" deps={["players"]} server="Sessions" />
+
+A session is a routing bucket owned by ug-core: an instance for an apartment, a race or a heist. Buckets are allocated from 1000 up, so they never clash with buckets other resources use below that. Bucket 0 is the shared world. A player is in at most one session.
+
+<Warning>Do not move players between buckets with `SetPlayerRoutingBucket` while they are in a session. Use `Join` and `Leave`.</Warning>
+
+## Create
+
+```lua
+UgCore.Sessions.Create(options?) -> ok, sessionId, errorCode
+```
+
+<ResponseField name="name" type="string">Up to 64 characters.</ResponseField>
+<ResponseField name="lockdown" type="'strict' | 'relaxed' | 'inactive'" default="strict">Client entity creation in the bucket.</ResponseField>
+<ResponseField name="population" type="boolean" default="false">Ambient peds and vehicles.</ResponseField>
+<ResponseField name="persistent" type="boolean" default="false">Keeps the session when the last member leaves.</ResponseField>
+
+## Destroy
+
+```lua
+UgCore.Sessions.Destroy(sessionId) -> ok, errorCode
+```
+
+Moves every member back to the shared world.
+
+## Join / Leave
+
+```lua
+UgCore.Sessions.Join(source, sessionId) -> ok, errorCode
+UgCore.Sessions.Leave(source) -> ok, errorCode
+```
+
+`Join` leaves the current session first. `Leave` moves the player back to the shared world. An empty session that is not persistent is destroyed. Players also leave when they drop, and every session is destroyed when ug-core stops.
+
+## Get / GetMembers / GetSession
+
+```lua
+UgCore.Sessions.Get(sessionId) -> UgSession?
+UgCore.Sessions.GetMembers(sessionId) -> integer[]
+UgCore.Sessions.GetSession(source) -> integer?
+```
+
+<ResponseField name="UgSession" type="table">
+  <Expandable title="fields">
+    <ResponseField name="id" type="integer" />
+    <ResponseField name="name" type="string?" />
+    <ResponseField name="bucket" type="integer" />
+    <ResponseField name="lockdown" type="string" />
+    <ResponseField name="population" type="boolean" />
+    <ResponseField name="persistent" type="boolean" />
+    <ResponseField name="members" type="integer[]" />
+  </Expandable>
+</ResponseField>
+
+`GetMembers` returns an empty list for unknown sessions.
+
+## Errors
+
+| Function | Code | When |
+| --- | --- | --- |
+| `Destroy`, `Join` | `not_found` | The session does not exist. |
+| `Join` | `not_loaded` | The player is not connected. |
+| `Join` | `no_permission` | `Sessions:BeforeJoin` cancelled. |
+| `Leave` | `not_found` | The player is in no session. |
+
+Invalid options raise.
+
+## Events
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Sessions:Created` | `(sessionId)` |
+| `ug-core:Sessions:Destroyed` | `(sessionId)` |
+| `ug-core:Sessions:Joined` | `(source, sessionId)` |
+| `ug-core:Sessions:Left` | `(source, sessionId)` |
+
+## Hooks
+
+| Hook | Payload |
+| --- | --- |
+| `Sessions:BeforeJoin` | `{ source, sessionId }` |
+
+It allows or cancels. Changes to the payload are ignored.
+
+## Statebags
+
+Index them with `UgCore.Enums.StateBags`. See [Statebags](/reference/statebags).
+
+| Enum key | Key | Value |
+| --- | --- | --- |
+| `Session` | `ug-core:Session` | Session id, or `nil` in the shared world |
+
+## Example
+
+```lua
+local ok, sessionId = UgCore.Sessions.Create({ name = 'apartment:' .. characterId })
+
+if ok then
+    UgCore.Sessions.Join(source, sessionId)
+end
+```

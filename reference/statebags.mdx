@@ -1,0 +1,39 @@
+---
+title: "Statebags"
+description: "Every statebag ug-core writes."
+icon: "layer-group"
+---
+
+All statebags are set by the server only. See the [Statebags guide](/developers/statebags) to read them. Index them with the enum, never with the string: `LocalPlayer.state[UgCore.Enums.StateBags.Job]`.
+
+## Player
+
+On `Player(source).state` and `LocalPlayer.state`. Enum: `UgCore.Enums.StateBags`.
+
+| Enum key | Key | Value | Module |
+| --- | --- | --- | --- |
+| `Loaded` | `ug-core:Loaded` | `true` once a character is loaded, or at join without the characters module | players |
+| `Player` | `ug-core:Player` | `{ name, characterId? }` | players |
+| `Metadata` | `ug-core:Metadata` | Metadata set with `replicate = true` | players |
+| `DeathState` | `ug-core:DeathState` | `'Alive'`, `'Downed'` or `'Dead'` | players |
+| `Injuries` | `ug-core:Injuries` | `UgInjury[]` | players |
+| `Job` | `ug-core:Job` | `{ name, label, grade, gradeName, gradeLabel, salary, boss, onDuty }` | jobs |
+| `Gang` | `ug-core:Gang` | `{ name, label, grade, gradeName, gradeLabel, salary, boss }` | gangs |
+| `Session` | `ug-core:Session` | Session id, or `nil` in the shared world | sessions |
+| `Groups` | `ug-core:Groups` | Groups managed by UgCore, highest weight first | permissions |
+
+## Global
+
+On `GlobalState`. Enum: `UgCore.Enums.GlobalState`.
+
+| Enum key | Key | Value |
+| --- | --- | --- |
+| `Config` | `ug-core:Config` | `{ [name] = { kind, values } }` with client and shared values only. Written once every config loaded. |
+| `Modules` | `ug-core:Modules` | Enabled modules in load order, with their files and namespaces. |
+| `Items` | `ug-core:Items` | Item definitions, without metadata rules. Needs `items`. |
+| `Drops` | `ug-core:Drops` | Ground drop positions by id, as `{ x, y, z }`. Contents are never replicated. Needs `inventory`. |
+| `Shops` | `ug-core:Shops` | Shop labels and positions by name. Prices and stock are never replicated. Needs `shops`. |
+| `Exports` | `ug-core:Exports` | Export catalog for server proxies. Not replicated. |
+| `BannerShown` | `ug-core:BannerShown` | Internal. Keeps the boot banner from repeating on restart. Not replicated. |
+
+<Warning>Player statebags replicate to every client. They never hold secrets.</Warning>

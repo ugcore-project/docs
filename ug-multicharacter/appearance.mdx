@@ -1,0 +1,34 @@
+---
+title: "Appearance contract"
+description: "How ug-appearance plugs into the lineup and creation."
+icon: "shirt"
+---
+
+Appearance is not built into `ug-multicharacter`. Without another resource, creation offers the bodies in `appearance.models`, saved as the character's model. With [`ug-appearance`](/ug-appearance/introduction) started, characters get faces, hair, clothes and tattoos through this contract.
+
+## With ug-appearance
+
+Nothing to configure. When `ug-appearance` is started:
+
+- **Lineup.** Each character stands in its saved look, in the model of that look.
+- **Creation.** After the form, the appearance creator opens over the new character. The body chosen in the form is where the creator starts. The model chosen in the creator is the one saved.
+- **Cancel.** Leaving the creator returns to the form with every value kept. Nothing is created.
+- **Refusal.** When the server refuses the form, such as the character limit reached, the look is kept. Fixing the form and creating again does not reopen the creator. Choosing another body in the form forgets the look.
+- **Playing.** The player gets the character's look before the fade in.
+
+Keep `appearance.models` here and `models` in ug-appearance's config the same. A model that is only in one list is refused when the character is created.
+
+## Contract
+
+Client exports of `ug-appearance`:
+
+| Export | Purpose |
+| --- | --- |
+| `OpenCreator(ped, options) -> appearance?` | Waits while the player edits a look over the creation ped. Returns the appearance, or `nil` when cancelled. |
+| `Apply(ped, appearance)` | Dresses a lineup ped or the player. |
+| `Fetch(characterIds) -> table` | The saved appearances of the player's own characters, by id. |
+
+- `ug-multicharacter` calls them only when `ug-appearance` is started. A failing call falls back to the model.
+- `ug-appearance` keeps the creator's look on its server side and saves it for the character when ug-core creates it.
+- `ug-multicharacter` never stores appearance data itself.
+- The contract changes only with a major version of both resources.

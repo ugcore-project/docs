@@ -1,0 +1,110 @@
+---
+title: "UgCore.Permissions"
+sidebarTitle: "Permissions"
+description: "Staff groups, ranks and persistent ACE grants."
+icon: "key"
+---
+
+import { ModuleInfo } from "/snippets/module-info.jsx";
+
+<Badge color="blue">Server</Badge> Proxied to ug-core. See [Permissions and groups](/owners/permissions) for the owner side.
+
+<ModuleInfo name="permissions" required deps={["identity"]} server="Permissions" />
+
+Permissions are FiveM ACEs, groups are ACE principals `group.<name>`. Both are stored in the database and applied again on every boot, so every ACE check agrees, including `IsPlayerAceAllowed` and the `permission` option of callbacks, net events and commands.
+
+`target` is a player source or an identifier such as `license:abc`. Identifiers work for offline players. Permission names are letters, digits, dots, dashes and underscores, such as `my-garage.admin`.
+
+<Columns cols={1}>
+  <Card title="Groups" icon="users-gear" href="/api/permissions-groups">
+    Staff groups with weights, inheritance and targeting.
+  </Card>
+</Columns>
+
+## Single permissions
+
+### Has
+
+```lua
+UgCore.Permissions.Has(source, permission) -> boolean
+```
+
+A plain ACE check: groups, grants and `server.cfg` all count.
+
+### Grant
+
+```lua
+UgCore.Permissions.Grant(target, permission, by?) -> ok, errorCode
+```
+
+**MUST run in a thread.** Applies the ACE right away.
+
+### Revoke
+
+```lua
+UgCore.Permissions.Revoke(target, permission) -> ok, removed, errorCode
+```
+
+**MUST run in a thread.** `removed` is `false` when it was not granted. ACEs from `server.cfg` and groups stay.
+
+### GetAll
+
+```lua
+UgCore.Permissions.GetAll(target) -> string[]
+```
+
+Permissions granted with `Grant`, sorted. Group permissions and ACEs from `server.cfg` are not listed.
+
+## Errors
+
+| Function | Code | When |
+| --- | --- | --- |
+| `AddGroup`, `RemoveGroup`, `Grant`, `Revoke` | `not_found` | The source has no primary identifier, such as a player who already dropped. |
+| `AddGroup` | `invalid_args` | The group is not in `config/permissions.lua`. |
+| `AddGroup` | `no_permission` | `Permissions:BeforeGroupAdd` cancelled. |
+| `RemoveGroup` | `no_permission` | `Permissions:BeforeGroupRemove` cancelled. |
+| `AddGroup`, `RemoveGroup`, `Grant`, `Revoke` | `internal_error` | The database failed. |
+
+Malformed targets, group names and permission names raise.
+
+## Events
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Permissions:GroupAdded` | `(identifier, group, by)` |
+| `ug-core:Permissions:GroupRemoved` | `(identifier, group)` |
+
+They carry the identifier, since the target MAY be offline.
+
+## Hooks
+
+| Hook | Payload |
+| --- | --- |
+| `Permissions:BeforeGroupAdd` | `{ identifier, group, by }` |
+| `Permissions:BeforeGroupRemove` | `{ identifier, group }` |
+
+They allow or cancel. Changes to the payload are ignored.
+
+## Statebags
+
+Index them with `UgCore.Enums.StateBags`. See [Statebags](/reference/statebags).
+
+| Enum key | Key | Value |
+| --- | --- | --- |
+| `Groups` | `ug-core:Groups` | The player's groups, highest weight first, such as `{ 'admin' }`. Set on join and on every change. |
+
+Clients read it to show a staff badge:
+
+```lua client.lua
+local groups = LocalPlayer.state[UgCore.Enums.StateBags.Groups] or {}
+```
+
+<Warning>Never trust a client's view of its own groups. Check permissions on the server.</Warning>
+
+## Player object
+
+Every function above has a [player object](/api/player#permissions) shortcut: `player:AddGroup('admin')`, `player:IsInGroup('moderator')`, `player:CanTarget(other)`.
+
+## Requirements
+
+`add_ace resource.ug-core command allow` in `server.cfg`. ug-core reports it at boot when it is missing.

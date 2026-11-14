@@ -1,0 +1,701 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "maple",
+  "name": "UgCore",
+  "description": "A server-authoritative, headless and modular FiveM framework.",
+  "colors": {
+    "primary": "#7C5CFF",
+    "light": "#9F8BFF",
+    "dark": "#6342F5"
+  },
+  "favicon": "/favicon.svg",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg",
+    "href": "/"
+  },
+  "appearance": {
+    "default": "dark"
+  },
+  "background": {
+    "decoration": "gradient",
+    "color": {
+      "light": "#FBFAFF",
+      "dark": "#0A0814"
+    }
+  },
+  "fonts": {
+    "heading": {
+      "family": "Space Grotesk",
+      "weight": 600
+    },
+    "body": {
+      "family": "Inter"
+    }
+  },
+  "icons": {
+    "library": "fontawesome"
+  },
+  "styling": {
+    "eyebrows": "breadcrumbs",
+    "codeblocks": "dark"
+  },
+  "banner": {
+    "content": "UgCore is in **early access**. APIs can still change before the first public release. Follow progress on [GitHub](https://github.com/ugcore-project).",
+    "dismissible": true
+  },
+  "search": {
+    "prompt": "Search UgCore docs..."
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "ug-core API",
+        "href": "/api/overview"
+      },
+      {
+        "label": "ug-lib",
+        "href": "/ug-lib/introduction"
+      }
+    ],
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/ugcore-project/ug-core"
+    }
+  },
+  "navigation": {
+    "products": [
+      {
+        "product": "ug-core",
+        "description": "The framework: server-authoritative, headless, modular.",
+        "icon": "cube",
+        "tabs": [
+          {
+            "tab": "Guides",
+            "icon": "book-open",
+            "groups": [
+              {
+                "group": "Getting started",
+                "pages": [
+                  "index",
+                  "introduction",
+                  "installation",
+                  "quickstart",
+                  "architecture"
+                ]
+              },
+              {
+                "group": "Server owners",
+                "pages": [
+                  "owners/configuration",
+                  "owners/modules",
+                  "owners/database",
+                  "owners/permissions",
+                  "owners/guard",
+                  "owners/console",
+                  "owners/troubleshooting"
+                ]
+              },
+              {
+                "group": "Resource developers",
+                "pages": [
+                  "developers/importing",
+                  "developers/modules",
+                  {
+                    "group": "Networking",
+                    "pages": [
+                      "developers/callbacks",
+                      "developers/net-events",
+                      "developers/schemas"
+                    ]
+                  },
+                  {
+                    "group": "Events and state",
+                    "pages": [
+                      "developers/events",
+                      "developers/hooks",
+                      "developers/lifecycle",
+                      "developers/statebags"
+                    ]
+                  },
+                  "developers/versioning"
+                ]
+              },
+              {
+                "group": "Concepts",
+                "pages": [
+                  "concepts/security",
+                  "concepts/death-system"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API",
+            "icon": "code",
+            "groups": [
+              {
+                "group": "Overview",
+                "pages": [
+                  "api/overview"
+                ]
+              },
+              {
+                "group": "Core",
+                "pages": [
+                  "api/enums",
+                  "api/events",
+                  "api/lifecycle",
+                  "api/config",
+                  "api/logger",
+                  "api/version",
+                  "api/modules"
+                ]
+              },
+              {
+                "group": "Networking and security",
+                "pages": [
+                  "api/schema",
+                  "api/ratelimit",
+                  "api/callback",
+                  "api/network",
+                  "api/guard",
+                  "api/hooks"
+                ]
+              },
+              {
+                "group": "Players and characters",
+                "pages": [
+                  "api/identity",
+                  {
+                    "group": "Players",
+                    "pages": [
+                      "api/players-death"
+                    ],
+                    "root": "api/players"
+                  },
+                  "api/player",
+                  "api/localplayer",
+                  "api/characters",
+                  {
+                    "group": "Permissions",
+                    "pages": [
+                      "api/permissions-groups"
+                    ],
+                    "root": "api/permissions"
+                  }
+                ]
+              },
+              {
+                "group": "Economy and items",
+                "pages": [
+                  "api/accounts",
+                  "api/needs",
+                  "api/items",
+                  {
+                    "group": "Inventory",
+                    "pages": [
+                      "api/inventory-containers",
+                      "api/inventory-client"
+                    ],
+                    "root": "api/inventory"
+                  },
+                  {
+                    "group": "Weapons",
+                    "pages": [
+                      "api/weapons-client"
+                    ],
+                    "root": "api/weapons"
+                  },
+                  {
+                    "group": "Shops",
+                    "pages": [
+                      "api/shops-client"
+                    ],
+                    "root": "api/shops"
+                  }
+                ]
+              },
+              {
+                "group": "Roles and world",
+                "pages": [
+                  "api/jobs",
+                  "api/gangs",
+                  "api/sessions"
+                ]
+              },
+              {
+                "group": "Tools",
+                "pages": [
+                  "api/commands",
+                  "api/locale"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Reference",
+            "icon": "table-list",
+            "groups": [
+              {
+                "group": "Reference",
+                "pages": [
+                  "reference/error-codes",
+                  "reference/events",
+                  "reference/hooks",
+                  "reference/statebags",
+                  "reference/convars",
+                  "reference/config-files"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "product": "ug-lib",
+        "description": "UI components and utilities, with or without ug-core.",
+        "icon": "wand-magic-sparkles",
+        "tabs": [
+          {
+            "tab": "Guides",
+            "icon": "book-open",
+            "groups": [
+              {
+                "group": "Getting started",
+                "pages": [
+                  "ug-lib/introduction",
+                  "ug-lib/installation",
+                  "ug-lib/importing"
+                ]
+              },
+              {
+                "group": "Server owners",
+                "pages": [
+                  "ug-lib/configuration",
+                  "ug-lib/customization"
+                ]
+              },
+              {
+                "group": "Resource developers",
+                "pages": [
+                  "ug-lib/with-ugcore",
+                  "ug-lib/security"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API",
+            "icon": "code",
+            "groups": [
+              {
+                "group": "UI",
+                "pages": [
+                  {
+                    "group": "Feedback",
+                    "pages": [
+                      "ug-lib/notify",
+                      "ug-lib/textui",
+                      "ug-lib/progress",
+                      "ug-lib/skillcheck"
+                    ]
+                  },
+                  {
+                    "group": "Input",
+                    "pages": [
+                      "ug-lib/dialog",
+                      "ug-lib/context",
+                      "ug-lib/menu",
+                      "ug-lib/radial"
+                    ]
+                  },
+                  "ug-lib/clipboard"
+                ]
+              },
+              {
+                "group": "Client utilities",
+                "pages": [
+                  {
+                    "group": "World",
+                    "pages": [
+                      "ug-lib/cache",
+                      "ug-lib/entity",
+                      "ug-lib/raycast",
+                      "ug-lib/draw"
+                    ]
+                  },
+                  {
+                    "group": "Assets and animation",
+                    "pages": [
+                      "ug-lib/streaming",
+                      "ug-lib/animation"
+                    ]
+                  },
+                  {
+                    "group": "Areas and keys",
+                    "pages": [
+                      "ug-lib/zone",
+                      "ug-lib/npc",
+                      "ug-lib/keybind"
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "Shared utilities",
+                "pages": [
+                  "ug-lib/enums",
+                  {
+                    "group": "Data",
+                    "pages": [
+                      "ug-lib/math",
+                      "ug-lib/table",
+                      "ug-lib/string",
+                      "ug-lib/format"
+                    ]
+                  },
+                  "ug-lib/async",
+                  "ug-lib/locale",
+                  "ug-lib/version"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "product": "ug-multicharacter",
+        "description": "Cinematic character selection, creation and spawning.",
+        "icon": "users-viewfinder",
+        "tabs": [
+          {
+            "tab": "Guides",
+            "icon": "book-open",
+            "groups": [
+              {
+                "group": "Getting started",
+                "pages": [
+                  "ug-multicharacter/introduction",
+                  "ug-multicharacter/installation"
+                ]
+              },
+              {
+                "group": "Server owners",
+                "pages": [
+                  "ug-multicharacter/configuration",
+                  "ug-multicharacter/cinematic",
+                  "ug-multicharacter/spawning"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Reference",
+            "icon": "table-list",
+            "groups": [
+              {
+                "group": "Reference",
+                "pages": [
+                  "ug-multicharacter/security",
+                  "ug-multicharacter/console",
+                  "ug-multicharacter/appearance"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "product": "ug-appearance",
+        "description": "Character creator, stores, outfits and uniforms.",
+        "icon": "shirt",
+        "tabs": [
+          {
+            "tab": "Guides",
+            "icon": "book-open",
+            "groups": [
+              {
+                "group": "Getting started",
+                "pages": [
+                  "ug-appearance/introduction",
+                  "ug-appearance/installation"
+                ]
+              },
+              {
+                "group": "Server owners",
+                "pages": [
+                  {
+                    "group": "Configuration",
+                    "pages": [
+                      "ug-appearance/configuration-look"
+                    ],
+                    "root": "ug-appearance/configuration"
+                  },
+                  "ug-appearance/stores"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Reference",
+            "icon": "table-list",
+            "groups": [
+              {
+                "group": "Reference",
+                "pages": [
+                  "ug-appearance/security",
+                  "ug-appearance/console",
+                  "ug-appearance/integration"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "product": "ug-target",
+        "description": "Third-eye targeting with server-checked actions.",
+        "icon": "crosshairs",
+        "tabs": [
+          {
+            "tab": "Guides",
+            "icon": "book-open",
+            "groups": [
+              {
+                "group": "Getting started",
+                "pages": [
+                  "ug-target/introduction",
+                  "ug-target/installation"
+                ]
+              },
+              {
+                "group": "Server owners",
+                "pages": [
+                  "ug-target/configuration"
+                ]
+              },
+              {
+                "group": "Developers",
+                "pages": [
+                  "ug-target/api",
+                  "ug-target/server-actions",
+                  "ug-target/ox-target"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Reference",
+            "icon": "table-list",
+            "groups": [
+              {
+                "group": "Reference",
+                "pages": [
+                  "ug-target/security",
+                  "ug-target/console"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "product": "ug-hud",
+        "description": "A player HUD every player customizes in game.",
+        "icon": "gauge-high",
+        "tabs": [
+          {
+            "tab": "Guides",
+            "icon": "book-open",
+            "groups": [
+              {
+                "group": "Getting started",
+                "pages": [
+                  "ug-hud/introduction",
+                  "ug-hud/installation"
+                ]
+              },
+              {
+                "group": "Server owners",
+                "pages": [
+                  "ug-hud/configuration"
+                ]
+              },
+              {
+                "group": "Players",
+                "pages": [
+                  "ug-hud/players"
+                ]
+              },
+              {
+                "group": "Developers",
+                "pages": [
+                  "ug-hud/api"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "product": "ug-inventory",
+        "description": "The inventory screen, with your character on stage.",
+        "icon": "boxes-stacked",
+        "tabs": [
+          {
+            "tab": "Guides",
+            "icon": "book-open",
+            "groups": [
+              {
+                "group": "Getting started",
+                "pages": [
+                  "ug-inventory/introduction",
+                  "ug-inventory/installation"
+                ]
+              },
+              {
+                "group": "Server owners",
+                "pages": [
+                  {
+                    "group": "Configuration",
+                    "pages": [
+                      "ug-inventory/configuration-look"
+                    ],
+                    "root": "ug-inventory/configuration"
+                  },
+                  "ug-inventory/clothing"
+                ]
+              },
+              {
+                "group": "Developers",
+                "pages": [
+                  "ug-inventory/api"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "product": "ug-admin",
+        "description": "Staff commands, drone noclip, spectate, reports and a live panel.",
+        "icon": "user-shield",
+        "tabs": [
+          {
+            "tab": "Guides",
+            "icon": "book-open",
+            "groups": [
+              {
+                "group": "Getting started",
+                "pages": [
+                  "ug-admin/introduction",
+                  "ug-admin/installation"
+                ]
+              },
+              {
+                "group": "Staff",
+                "pages": [
+                  "ug-admin/commands",
+                  "ug-admin/noclip",
+                  "ug-admin/reports"
+                ]
+              },
+              {
+                "group": "Server owners",
+                "pages": [
+                  {
+                    "group": "Configuration",
+                    "pages": [
+                      "ug-admin/configuration-look"
+                    ],
+                    "root": "ug-admin/configuration"
+                  }
+                ]
+              },
+              {
+                "group": "Developers",
+                "pages": [
+                  "ug-admin/api"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "product": "Contributing",
+        "description": "Workflow, conventions and tests for both repositories.",
+        "icon": "code-pull-request",
+        "tabs": [
+          {
+            "tab": "Contributing",
+            "icon": "code-pull-request",
+            "groups": [
+              {
+                "group": "Contributing",
+                "pages": [
+                  "contributing/overview",
+                  "contributing/conventions",
+                  "contributing/testing"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "cursor",
+      "vscode"
+    ]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/ugcore-project"
+    },
+    "links": [
+      {
+        "header": "Docs",
+        "items": [
+          {
+            "label": "Quickstart",
+            "href": "/quickstart"
+          },
+          {
+            "label": "API reference",
+            "href": "/api/overview"
+          },
+          {
+            "label": "ug-lib",
+            "href": "/ug-lib/introduction"
+          }
+        ]
+      },
+      {
+        "header": "Project",
+        "items": [
+          {
+            "label": "ug-core on GitHub",
+            "href": "https://github.com/ugcore-project/ug-core"
+          },
+          {
+            "label": "ug-lib on GitHub",
+            "href": "https://github.com/ugcore-project/ug-lib"
+          },
+          {
+            "label": "Contributing",
+            "href": "/contributing/overview"
+          }
+        ]
+      }
+    ]
+  }
+}

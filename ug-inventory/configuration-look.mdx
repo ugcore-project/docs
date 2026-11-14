@@ -1,0 +1,73 @@
+---
+title: "Configuration: look and sounds"
+sidebarTitle: "Look and sounds"
+description: "Theme, layout, sounds and animations."
+icon: "palette"
+---
+
+Part of [Configuration](/ug-inventory/configuration). Every key on this page lives in `config.lua`.
+
+## Theme
+
+Every UgCore screen follows ug-lib's theme. `theme` changes this screen only, with the same fields as the [ug-lib theme](/ug-lib/configuration). Any field MAY be left out.
+
+- `mode`: `'dark'` or `'light'`.
+- `colors`: HSL triplets such as `'258 90% 66%'`, keyed by ug-lib token (`primary`, `accent`, `background`, `destructive`, `success`, ...) or by one of this screen's own: `weapon`, `ammo`, `attachment`, `consumable`, `clothing` and `item` color the item categories, `overlay` darkens the sides around the character.
+- `radius`: `'0.75rem'`, `'12px'`.
+- `font`: `'Inter'`.
+- `scale`: 0.75 to 1.5.
+
+```lua config.lua
+theme = { colors = { primary = '200 90% 55%', weapon = '0 85% 70%' }, radius = '4px' },
+layout = { pockets = 'right', columns = 6, slotSize = 4.5, hints = false, toasts = 'top-left' },
+```
+
+## Layout
+
+`layout` sets where things are and what shows. A field you leave out keeps its default.
+
+| Field | Default | Purpose |
+| --- | --- | --- |
+| `pockets` | `'left'` | Side of the player's pockets: `'left'` or `'right'`. The other inventory takes the other side. |
+| `columns` | `5` | Slots per row, 3 to 10. |
+| `slotSize` | `5.1` | Slot size in rem, 3.5 to 8. Panels grow with columns and slot size. |
+| `vignette` | `true` | Darkens the sides so panels read over any scene. |
+| `hints` | `true` | Mouse hints under the character. |
+| `quantityBar` | `true` | The quantity picker under the character. |
+| `quantityPresets` | `{ 1, 5, 10, 50 }` | Quantity buttons, at most 6. "All" is always there. |
+| `closeButton` | `true` | The X in the corner. |
+| `hotbar` | `'bottom'` | `'bottom'` or `'top'`. |
+| `toasts` | `'bottom-right'` | `'bottom-right'`, `'bottom-left'`, `'top-right'` or `'top-left'`. |
+| `animations` | `true` | `false`: panels appear without motion. |
+
+## Sounds
+
+`soundEffects` maps each sound to `{ name, set }` of `PlaySoundFrontend`. A sound you leave out is muted. The defaults cover `open`, `close`, `hover`, `pick`, `menu`, `move`, `use`, `give`, `drop`, `buy`, `attach`, `detach`, `reload` and `error`.
+
+```lua config.lua
+soundEffects = {
+    open = { name = 'SELECT', set = 'HUD_FRONTEND_DEFAULT_SOUNDSET' },
+    buy = { name = 'PURCHASE', set = 'HUD_LIQUOR_STORE_SOUNDSET' },
+    -- ...
+},
+```
+
+## Animations
+
+`previewAnimations` sets what the character preview plays: `idle` while open, and `give`, `buy` and `drop` after one went through. `duration` is how long, in ms, a reaction plays before the idle comes back. A line you leave out plays nothing.
+
+```lua config.lua
+previewAnimations = {
+    idle = { dict = 'anim@heists@heist_corona@single_team', name = 'single_team_loop_boss' },
+    give = { dict = 'mp_common', name = 'givetake1_a', duration = 1600 },
+},
+```
+
+`clothingAnimations` sets what the player plays while a clothing piece comes off or goes on, one entry per piece. The piece changes halfway through `duration`. `upperBody = false` plays it on the whole body, so the player stops moving. A line you leave out plays nothing.
+
+```lua config.lua
+clothingAnimations = {
+    hat = { dict = 'mp_masks@standard_car@ds@', name = 'put_on_mask', duration = 600 },
+    shoes = { dict = 'random@domestic', name = 'pickup_low', duration = 1200, upperBody = false },
+},
+```

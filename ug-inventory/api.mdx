@@ -1,0 +1,45 @@
+---
+title: "API"
+description: "Client exports and events to open the inventory from other resources."
+icon: "code"
+---
+
+<Badge color="green">Client</Badge>
+
+Client exports, for targets, jobs and housing. ug-core still checks reach and access on the server.
+
+```lua
+exports['ug-inventory']:Open()                 -- the pockets alone
+exports['ug-inventory']:OpenStash('police')    -- a stash by name
+exports['ug-inventory']:OpenTrunk(vehicle)     -- a trunk by vehicle entity
+exports['ug-inventory']:OpenGlovebox(vehicle)  -- a glovebox by vehicle entity
+exports['ug-inventory']:OpenDrop(dropId)       -- a ground drop
+exports['ug-inventory']:OpenShop('247_legion') -- a shop by name
+exports['ug-inventory']:Close()
+local open = exports['ug-inventory']:IsOpen()
+```
+
+## Open from the server
+
+<Badge color="blue">Server</Badge>
+
+Server code MAY open any inventory for a player with ug-core's [`UgCore.Inventory.Open`](/api/inventory-containers#open), such as another player's pockets for a search. The screen opens with it next to the pockets, or shows it in place of the other side when the screen is already open.
+
+```lua
+UgCore.Inventory.Open(officer, UgCore.Inventory.Get(suspect).id)
+```
+
+## Events
+
+<Badge color="green">Client</Badge>
+
+Subscribe with `UgCore.Events.On`.
+
+| Event | Arguments |
+| --- | --- |
+| `ug-inventory:Opened` | `(kind)`: what opened next to the pockets, nil for none. |
+| `ug-inventory:Closed` | none. |
+
+## Security
+
+The page is untrusted: any script in CEF can post to its callbacks. Every body is checked with a `UgCore.Schema` rule, and the page has a budget of 40 posts a second. The page sends intent only, slots and counts. ug-core's callbacks check the rest again on the server, with their own rate limits, `requireAlive`, distances and Guard flags.

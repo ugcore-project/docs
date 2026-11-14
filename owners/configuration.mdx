@@ -1,0 +1,124 @@
+---
+title: "Configuration"
+description: "One config folder, generated on first boot, validated on every boot."
+icon: "sliders"
+---
+
+Everything you configure lives in `ug-core/config/`. ug-core generates each file on first boot from the defaults in code, and never edits it again.
+
+## How values resolve
+
+Each option resolves from three sources. Later sources win:
+
+```mermaid
+flowchart LR
+    A[Default in code] --> B["config/&lt;name&gt;.lua"] --> C[Convar in server.cfg]
+```
+
+`ug config <name>` shows the resolved value of every option and where it came from:
+
+```text
+> ug config core
+config/core.lua
+  locale = 'en' (default)
+  debug = true (convar ug-core:Debug)
+```
+
+## Config files
+
+A generated file documents every option:
+
+```lua config/core.lua
+-- ug-core config: core
+-- Generated on first boot. ug-core never edits this file. Delete it to restore the defaults.
+-- Missing options use their default. Convars override values set here.
+
+return {
+    -- Language of core messages and logs.
+    -- Type: string. Min length: 2. Max length: 10.
+    -- Convar: ug-core:Locale.
+    locale = 'en',
+
+    -- Prints debug logs on the server and in client F8.
+    -- Type: boolean.
+    -- Convar: ug-core:Debug.
+    debug = false,
+}
+```
+
+You can delete options you don't change. Missing options use their default.
+
+<Tip>
+  When an update adds an option, ug-core tells you once: `accounts.maxLoans is new. Using default 3. Add it to config/accounts.lua to change it.` Your file stays untouched.
+</Tip>
+
+### Two kinds of config
+
+<Tabs>
+  <Tab title="Settings">
+    Most configs are settings: a table of named options. Your file merges per key, so you only write what you change.
+
+    ```lua config/characters.lua
+    return {
+        maxCharacters = 2,
+    }
+    ```
+  </Tab>
+  <Tab title="Data">
+    Some configs are content, such as jobs and gangs. Your file replaces the defaults entirely, so it MUST contain every entry you want.
+
+    ```lua config/jobs.lua
+    return {
+        unemployed = {
+            label = 'Unemployed',
+            grades = { { name = 'unemployed', label = 'Unemployed', salary = 0 } },
+        },
+        mechanic = {
+            label = 'Mechanic',
+            grades = {
+                { name = 'apprentice', label = 'Apprentice', salary = 80 },
+                { name = 'owner', label = 'Owner', salary = 250, boss = true },
+            },
+        },
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Convars
+
+Every setting has a convar. Use them for values that differ per environment:
+
+```bash server.cfg
+set ug-core:Debug true
+set ug-core:Characters:MaxCharacters 3
+set ug-core:Locale pt
+```
+
+Names follow `ug-core:<Key>` for `config/core.lua` and `ug-core:<Config>:<Key>` for every other file. Booleans accept `true`, `false`, `1` and `0`. Tables and vectors cannot be set by convar. See the full list in [Convars](/reference/convars).
+
+## What config files can use
+
+Config files run in a sandbox. They can use `vector2`, `vector3`, `vector4` (and the `vec` aliases), `math`, `string`, `table`, `json`, `tonumber`, `tostring`, `type`, `pairs` and `ipairs`. Nothing else: no `os`, no `io`, no natives.
+
+## Validation
+
+ug-core validates every file on every boot:
+
+| You write | You get |
+| --- | --- |
+| A wrong type | `config/core.lua: debug MUST be a boolean, got "yes"` |
+| A value out of range | `config/characters.lua: maxCharacters MUST be at most 32, got 50` |
+| A typo in a key | `config/core.lua: unknown option "Debug" is ignored. Did you mean "debug"?` |
+| A syntax error | `config/core.lua:4: '}' expected near ...` |
+| A bad convar | `convar ug-core:Debug: MUST be true, false, 1 or 0, got "yes"` |
+
+Unknown keys only warn. Everything else is collected, printed together, and stops boot with `Boot aborted: N error(s).`
+
+## Client values
+
+Options marked `shared` or `client` replicate to clients. Clients never see server-only values, and `config/` itself is never sent to clients.
+
+<Card title="Every config file" icon="file-code" href="/reference/config-files" horizontal>
+  The full reference of every option in every file.
+</Card>

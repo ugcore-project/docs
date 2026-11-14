@@ -1,0 +1,77 @@
+---
+title: "Server actions"
+description: "Effects that run on the server, after the server checks them."
+icon: "shield-halved"
+---
+
+A server action is an option whose effect runs on the server. The client only says which action and which entity it aims at. The server finds the entity itself and checks everything again before your handler runs.
+
+```lua server.lua
+exports['ug-target']:RegisterAction('Lockpick', {
+    distance = 2.0,
+    kinds = { 'vehicle' },
+    conditions = { items = 'lockpick' },
+    hold = 4000,
+    cooldown = 10000,
+}, function(source, context)
+    SetVehicleDoorsLocked(context.entity, 1)
+
+    return true
+end)
+```
+
+```lua client.lua
+exports['ug-target']:AddGlobalVehicle({
+    label = 'Lockpick',
+    icon = 'key',
+    hold = 4000,
+    serverAction = 'my-resource:Lockpick',
+    conditions = { items = 'lockpick' },
+    onResult = function(ok, value, errorCode)
+        -- ok is true when the handler ran
+    end,
+})
+```
+
+The name is prefixed with your resource: `Lockpick` in `my-resource` is `my-resource:Lockpick`.
+
+## Options
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `distance` | number, required | Meters from the player's ped, read on the server. `actionMargin` is added. |
+| `kinds` | list | `ped`, `vehicle`, `object`, `player`. |
+| `models` | list | Model names or hashes. |
+| `coords` | `vector3` or list | For places: the action MAY run near one of these points. |
+| `conditions` | table | Same fields as client conditions. |
+| `hold` | integer, ms | The client MUST have held this long. Set the same value on the option. |
+| `cooldown` | integer, ms | Per player. |
+| `allowDowned` | boolean | Downed and dead players MAY run it. |
+
+Set `kinds` or `models` for entity actions, or `coords` for places. Not both.
+
+## The handler
+
+`handler(source, context)` returns one value, passed to the option's `onResult`. `context` holds:
+
+- `action`, `kind`, `coords` (read on the server).
+- `entity`, `netId`, `model` for entities.
+- `player`, the server id, when the target is another player.
+
+A handler that throws answers `internal_error` and logs the error on the server.
+
+## What the server checks
+
+In order:
+
+1. The action exists.
+2. The entity exists, by network id, and matches `kinds` and `models`. A mismatch flags `InvalidPayload` in ug-core's Guard.
+3. The player's ped is within `distance + actionMargin`. Otherwise `OutOfRange` is flagged.
+4. The player is alive, unless `allowDowned`.
+5. The conditions, from ug-core jobs, gangs and inventory.
+6. The cooldown.
+7. For `hold`: a `Begin` for the same action and entity at least `hold` ms before. Skipping it flags `InvalidPayload`.
+
+Both callbacks have a schema and a rate limit of 10 per 5 seconds through ug-core, and require a loaded player.
+
+`RemoveAction(name)` removes an action. Actions are removed when their resource stops.

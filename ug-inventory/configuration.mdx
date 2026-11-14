@@ -1,0 +1,75 @@
+---
+title: "Configuration"
+description: "Keys, distances, features, clothing and drops."
+icon: "sliders"
+---
+
+On the first start, `server/config.default.lua` is copied to `config.lua`. Edit `config.lua` only. Updates never overwrite it, and a key you remove uses its default. Unknown keys and wrong values stop the resource with every problem listed.
+
+Slots, weights, items, stashes, trunks, drops, weapons and shops are ug-core config: see [config files](/reference/config-files). `config.lua` here sets how the screen behaves.
+
+<Columns cols={2}>
+  <Card title="Look and sounds" icon="palette" href="/ug-inventory/configuration-look">
+    Theme, layout, sounds and animations.
+  </Card>
+  <Card title="Clothing" icon="shirt" href="/ug-inventory/clothing">
+    Clothing slots in toggle or items mode.
+  </Card>
+</Columns>
+
+## Keys and slots
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `openKey` | `'TAB'` | Opens the inventory with what is in reach. Players MAY rebind it. |
+| `wheelKey` | `'Z'` | Held to show the quick-use wheel. Players MAY rebind it. |
+| `hotbarSlots` | `5` | Slots 1 to N are the hotbar, used with keys 1 to N. At most 9. |
+| `wheelSlots` | `8` | Slots 1 to N are on the wheel. At most 10, `0` turns it off. |
+| `disableWeaponWheel` | `true` | Hides the GTA weapon wheel and its keys: weapons come from the inventory. |
+
+## Distances
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `trunkDistance` | `1.5` | Meters to a trunk for the open key. |
+| `dropDistance` | `2.0` | Meters to a ground drop. |
+| `stashDistance` | `2.0` | Meters to a stash with `coords` in ug-core's config. |
+| `shopDistance` | `2.5` | Meters to a shop. |
+| `giveDistance` | `3.0` | Meters to a player offered as a give target. |
+| `respectLocks` | `true` | The open key skips the trunks of locked vehicles. |
+
+Distances only choose what the open key asks for. ug-core checks every distance again on the server.
+
+## Features
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `giving` | `true` | Give items to players nearby. `false` hides it and the screen refuses it. |
+| `dropping` | `true` | Drop items on the ground. `false` shows an empty place instead of the ground. |
+| `workbench` | `true` | Inspect a weapon and change its attachments. |
+| `pedPreview` | `true` | Shows the character in the middle, the way the pause menu shows it. |
+| `toasts` | `true` | Shows items gained and lost, even with the inventory closed. |
+| `toastDuration` | `3500` | Ms a toast stays, 1000 to 15000. |
+| `sounds` | `true` | Game sounds. `false` mutes every entry of `soundEffects`. |
+
+ug-core still decides every action.
+
+## Clothing
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `clothing` | `true` | Shows clothing slots next to the character. |
+| `clothingMode` | `'toggle'` | `'toggle'` or `'items'`. See [Clothing](/ug-inventory/clothing). |
+| `clothingPieces` | all 14 | Slots shown, in order: the first half on the left, the rest on the right. |
+| `clothingNaked` | `{}` | Drawable a model wears without a piece, by model, for ped components. |
+
+## Drops
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `dropModel` | `'prop_paper_bag_small'` | Prop shown at ground drops. |
+| `dropRenderDistance` | `40.0` | Meters at which drop props show. |
+
+## Languages
+
+Labels come from `locales/<code>.json`, picked by ug-lib's locale. English and Portuguese ship. Copy `en.json` to add a language: every file MUST have the same keys.

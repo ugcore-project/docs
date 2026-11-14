@@ -1,0 +1,92 @@
+---
+title: "Schemas"
+description: "Bounded validators for everything a client sends."
+icon: "filter"
+---
+
+Every callback and net event declares a schema. A schema describes each argument, with limits. Validated input always has a known maximum size.
+
+```lua
+local S = UgCore.Schema
+
+local schema = S.Define({
+    S.String({ min = 1, max = 32, pattern = '^[%w_]+$' }),
+    S.Integer({ min = 1, max = 1000000 }),
+    S.Optional(S.Boolean()),
+})
+```
+
+## Rules
+
+<Columns cols={2}>
+  <Card title="Strings" icon="font">
+    `String({ max })`. `max` is required and counts UTF-8 characters. Invalid UTF-8 and control characters are rejected. `multiline = true` allows tab and line breaks only.
+  </Card>
+  <Card title="Numbers" icon="hashtag">
+    `Number()` and `Integer()` reject NaN and infinity. `Integer` turns `5.0` into `5`. `min` and `max` are optional.
+  </Card>
+  <Card title="Booleans and enums" icon="toggle-on">
+    `Boolean()`. `Enum({ 'cash', 'bank' })` accepts listed strings, numbers or booleans only.
+  </Card>
+  <Card title="Vectors" icon="location-crosshairs">
+    `Vector2/3/4({ maxComponent? })` check the native type and finite components. Never trust them as positions.
+  </Card>
+  <Card title="Arrays and maps" icon="list">
+    `Array(item, { max })` and `Map(key, value, { max })`. `max` is required. Oversized tables are rejected before scanning the rest.
+  </Card>
+  <Card title="Objects" icon="cube">
+    `Object({ field = rule })` rejects unknown keys by default. `{ strict = false }` drops them instead. Wrap optional fields in `Optional`.
+  </Card>
+</Columns>
+
+<Note>
+  A missing `max` on `String`, `Array` or `Map` is an error in your editor and raises when the rule is built. Unbounded input cannot be accepted by accident.
+</Note>
+
+## Validate yourself
+
+Callbacks and net events validate for you. For other input, use `Validate` or `Check`:
+
+```lua
+local ok, args, detail = S.Validate(schema, 'player_1', 500)
+-- ok = true, args = { n = 3, 'player_1', 500 }
+
+local ok, value, detail = S.Check(S.Integer({ min = 0 }), 5.0)
+-- ok = true, value = 5
+```
+
+`args.n` is the number of declared arguments, so `table.unpack(args, 1, args.n)` keeps trailing optional arguments.
+
+## Failure details
+
+Details name the exact path that failed, for your server logs:
+
+```text
+arg 1.items[2].name: MUST be a string, got 1
+arg 1: MUST be at most 32 characters, got a string of 1048576 bytes
+```
+
+Details never echo large input back. Clients only ever get `invalid_args`.
+
+## Custom checks
+
+Every rule accepts a `validate` function that runs after the built-in checks, on the normalized value:
+
+```lua
+local even = S.Integer({
+    validate = function(value)
+        return value % 2 == 0, 'MUST be even'
+    end,
+})
+```
+
+Return `true`, or `false` with a message. A crashing `validate` fails with `failed custom validation`, without a stack.
+
+## Behavior to know
+
+- `Validate` tolerates trailing `nil` values and rejects extra ones. More than 8 extra arguments are rejected before unpacking.
+- Optional arguments MUST be trailing in `Define`.
+- Validated tables are fresh copies. Metatables and unknown keys never pass through.
+- Array items and map keys or values cannot be `Optional`.
+
+See every builder and option in the [Schema reference](/api/schema).

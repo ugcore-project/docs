@@ -1,0 +1,152 @@
+---
+title: "Config files"
+description: "Every option of every config file."
+icon: "file-code"
+---
+
+Files live in `ug-core/config/` and are generated on first boot. A disabled module has no config file. See [Configuration](/owners/configuration) for how values resolve.
+
+The **Side** column says who can read the value: `server` only, or `shared` with clients through `GlobalState[UgCore.Enums.GlobalState.Config]`.
+
+## core
+
+| Option | Type | Default | Side | Notes |
+| --- | --- | --- | --- | --- |
+| `locale` | string | `'en'` | shared | 2 to 10 characters. A file in `locales/`. |
+| `debug` | boolean | `false` | shared | Debug logs on the server and in F8. |
+
+## guard
+
+| Option | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `decayPerMinute` | number | `1` | Score removed per minute. |
+| `warnScore` | integer | `10` | Logs a warning with recent flags. `0` disables. |
+| `kickScore` | integer | `25` | Kicks. `0` disables. |
+| `banScore` | integer | `0` | Bans. Needs `identity`. `0` disables. |
+| `budgetMax` | integer | `40` | Net events and callbacks per player, across every resource. |
+| `budgetPer` | integer | `1000` | Ms to refill the budget. At least 100. |
+
+## modules
+
+One boolean per optional module, all `true` by default: `characters`, `accounts`, `jobs`, `gangs`, `sessions`, `commands`, `locale`, `items`, `inventory`, `weapons`, `shops`. Required modules are not listed.
+
+## identity
+
+| Option | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `primaryIdentifier` | string | `'license'` | `license`, `license2`, `steam`, `discord` or `fivem`. Players without it cannot connect. |
+
+## permissions
+
+| Option | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `groups` | table | `moderator` 10, `admin` 50, `founder` 100 | Up to 64 groups. Each is `{ label, weight, inherits?, permissions }`. |
+
+`admin` inherits `moderator` and has `ug.admin`. `founder` inherits `admin`. See [Permissions and groups](/owners/permissions#groups).
+
+## players
+
+| Option | Type | Default | Side |
+| --- | --- | --- | --- |
+| `downed` | table | see below | shared |
+| `dead` | table | `{ animation = { dict = 'dead', name = 'dead_a' } }` | shared |
+| `instantDeath` | table | `{ headshot = true, categories = { 'Explosion' } }` | server |
+| `respawn` | table | `{ auto = false, delay = 5000, coords = vector4(298.5, -584.6, 43.3, 70.0) }` | server |
+| `persistDeathState` | boolean | `true` | server |
+
+```lua config/players.lua
+return {
+    downed = {
+        enabled = true,          -- downed state before death
+        duration = 300000,       -- bleedout in ms
+        killOnDamage = true,     -- damage while downed kills
+        animation = { dict = 'combat@damage@writhe', name = 'writhe_loop' }, -- or false
+    },
+    respawn = {
+        auto = false,
+        delay = 5000,
+        coords = vector4(298.5, -584.6, 43.3, 70.0),
+    },
+}
+```
+
+<Tip>PVP and racing servers set `downed.enabled = false` and `respawn.auto = true`.</Tip>
+
+## characters
+
+| Option | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `maxCharacters` | integer | `4` | 1 to 32. Deleted characters do not count. |
+| `persistPosition` | boolean | `true` | Saves the last position, read from the ped on the server. |
+| `positionInterval` | integer | `300000` | Ms between saves while playing. `0`, or at least `30000`. `0` saves on unload, disconnect and stop only. |
+
+## items
+
+Data config. Your file replaces the defaults: `water`, `bread`, `bandage`, and the weapon items of the default `config/weapons.lua`. See [Items](/api/items#config).
+
+```lua
+name = { label, weight, stack?, maxStack?, description?, keepOnRespawn? }
+```
+
+## inventory
+
+| Option | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `playerSlots` | integer | `50` | 1 to 200. |
+| `playerWeight` | integer | `30000` | Grams, 1 to 10,000,000. |
+| `giveDistance` | number | `3.0` | Meters, 0.5 to 20. |
+| `clearOnRespawn` | boolean | `false` | Empties player inventories on respawn, except `keepOnRespawn` items. |
+| `stashes` | table | `police_locker` | Up to 256 stashes. See [Stashes](/api/inventory-containers#stashes). |
+| `trunk` | table | `{ slots = 20, weight = 50000 }` | Size of every trunk. |
+| `glovebox` | table | `{ slots = 5, weight = 5000 }` | Size of every glovebox. |
+| `drops` | table | `{ slots = 20, weight = 100000, lifetime = 15 }` | Size of ground drops, and minutes before they expire. |
+
+## weapons
+
+| Option | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `weapons` | table | `weapon_pistol` | Up to 256 weapons by item name: `{ hash, ammo?, capacity?, wear?, components? }`. |
+| `tints` | table | `{ weapon_tint_gold = 2 }` | Tint items to a tint index from 0 to 31. |
+| `enforce` | boolean | `true` | Takes away and flags weapons not equipped from the inventory. |
+| `allowed` | table | `{}` | Weapon names players MAY hold without an item. |
+
+See [Weapons](/api/weapons#config).
+
+## shops
+
+| Option | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `shops` | table | `general_store`, `ammunation` | Up to 256 shops: `{ label, coords, distance?, account, items, jobs?, gangs?, groups? }`. |
+
+Each item is `{ name, price, stock?, restock?, metadata? }`. See [Shops](/api/shops#config).
+
+## accounts
+
+| Option | Type | Default | Side |
+| --- | --- | --- | --- |
+| `accounts` | table | `cash` 500, `bank` 5000 | shared |
+
+Each account is `{ label, startingBalance, allowNegative }`, keyed by a camelCase name. 1 to 32 accounts.
+
+## jobs
+
+Data config. Your file replaces the defaults. `unemployed` MUST exist. See [Jobs](/api/jobs).
+
+```lua
+name = { label, defaultDuty?, grades = { { name, label, salary, boss? }, ... } }
+```
+
+## gangs
+
+Data config. `none` MUST exist. Same shape as jobs, without `defaultDuty`. See [Gangs](/api/gangs).
+
+## needs
+
+| Option | Type | Default | Side |
+| --- | --- | --- | --- |
+| `needs` | table | `hunger`, `thirst`, `stress` | shared |
+| `interval` | integer | `10000` | server |
+| `pauseWhileDown` | boolean | `true` | server |
+| `resetOnRespawn` | boolean | `true` | server |
+
+Each need is `{ label, start, rate, damage }`, keyed by a camelCase name. 1 to 16 needs. `start` goes from 0 to 100, `rate` is the change per minute (negative drains), `damage` is the health lost per tick at 0. `interval` goes from 1000 to 300000 ms. See [Needs](/api/needs).

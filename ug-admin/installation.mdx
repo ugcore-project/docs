@@ -1,0 +1,58 @@
+---
+title: "Installation"
+description: "Requirements, start order, the first founder and the Discord log."
+icon: "download"
+---
+
+## Requirements
+
+- OneSync.
+- `ug-core` 1.0.0 or newer, with the `commands` module for chat commands. `accounts`, `jobs`, `gangs`, `items` and `inventory` enable their actions when present.
+- `ug-lib` 1.0.0 or newer.
+- `oxmysql`, for `ug_admin_log`, `ug_admin_notes` and `ug_admin_sanctions`, created on start. Without a database, the log keeps this session in memory, notes are off, and jail and mute end on reconnect.
+
+## Start order
+
+```bash server.cfg
+ensure oxmysql
+ensure ug-core
+ensure ug-lib
+ensure ug-admin
+
+# Optional: post every staff action to Discord.
+set ug-admin:Webhook "https://discord.com/api/webhooks/..."
+```
+
+<Warning>
+Keep the webhook in the `ug-admin:Webhook` convar, never in `config.lua`. `config.lua` replicates to clients.
+</Warning>
+
+## First founder
+
+Staff are ug-core permission groups (see [Permissions](/owners/permissions)). Make yourself founder from the server console, then promote others with `/setgroup` in game:
+
+```text
+setgroup 1 founder
+```
+
+## First start
+
+On the first start ug-admin copies `server/config.default.lua` to `config.lua`. Updates never overwrite it.
+
+The server console prints one line when it is ready:
+
+```text
+[ug-admin] v1.0.0 ready. 49 command(s), 0 staff online.
+```
+
+Staff see one line in F8, with the number of actions they MAY use:
+
+```text
+[ug-admin] Staff: 34 action(s).
+```
+
+## Try it
+
+1. Press `F2` to fly the drone noclip. Left click lands at the crosshair.
+2. Press `F10` or type `/admin` to open the panel.
+3. Type `/report I am stuck` as a player, then `/duty` as staff to get the alert.

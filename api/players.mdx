@@ -1,0 +1,110 @@
+---
+title: "UgCore.Players"
+sidebarTitle: "Players"
+description: "Connected players, metadata and death state."
+icon: "users"
+---
+
+import { ModuleInfo } from "/snippets/module-info.jsx";
+
+<Badge color="blue">Server</Badge> Proxied to ug-core. On clients, use [`UgCore.LocalPlayer`](/api/localplayer).
+
+<ModuleInfo name="players" required deps={["identity"]} server="Players" client="LocalPlayer" />
+
+<Columns cols={1}>
+  <Card title="Death state" icon="heart-pulse" href="/api/players-death">
+    Downed and dead states, injuries, revive and respawn.
+  </Card>
+</Columns>
+
+## Lookup
+
+```lua
+UgCore.Players.Get(source) -> UgPlayer?
+UgCore.Players.GetAll() -> UgPlayer[]
+UgCore.Players.GetByIdentifier(identifier) -> UgPlayer?
+UgCore.Players.GetByCharacterId(characterId) -> UgPlayer?
+```
+
+<ResponseField name="UgPlayer" type="table">
+  <Expandable title="fields" defaultOpen>
+    <ResponseField name="source" type="integer" />
+    <ResponseField name="name" type="string" />
+    <ResponseField name="identifier" type="string">Primary identifier.</ResponseField>
+    <ResponseField name="characterId" type="integer?">The loaded character when the object was created.</ResponseField>
+    <ResponseField name="joinedAt" type="integer">Unix seconds.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+`GetAll` is sorted by source.
+
+Each result is a [player object](/api/player) with methods for money, job, gang, permissions, death state and more:
+
+```lua
+local player = UgCore.Players.Get(source)
+
+if player then
+    player:AddMoney('cash', 100, 'Reward')
+    player:SetJob('police', 2)
+end
+```
+
+## Metadata
+
+Session metadata. It lives while the player is connected.
+
+```lua
+UgCore.Players.SetMetadata(source, key, value, replicate?) -> ok, errorCode
+UgCore.Players.GetMetadata(source, key?) -> any
+```
+
+<ResponseField name="key" type="string" required>camelCase.</ResponseField>
+<ResponseField name="value" type="any">Data only: booleans, finite numbers, strings and bounded tables. `nil` deletes the key.</ResponseField>
+<ResponseField name="replicate" type="boolean">Copies the key to the `ug-core:Metadata` statebag. Every client can read it, so it MUST NOT hold secrets.</ResponseField>
+
+`GetMetadata` without a key returns every key.
+
+## Kick
+
+```lua
+UgCore.Players.Kick(source, reason?) -> ok, errorCode
+```
+
+<ResponseField name="reason" type="string">Shown to the player. A generic message when nil.</ResponseField>
+
+## Errors
+
+| Function | Code | When |
+| --- | --- | --- |
+| `SetMetadata`, `Kick`, `ClearInjuries` | `not_found` | The player is not connected. |
+| `Down`, `Kill`, `Revive`, `Respawn` | `not_found` | The player is not connected. |
+| `Down`, `Kill`, `Revive`, `Respawn` | `invalid_args` | The player is not in a state the transition starts from. |
+| `Down`, `Revive`, `Respawn` | `no_permission` | A hook cancelled. |
+
+Invalid keys, values, regions, options and coordinates raise.
+
+## Events
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Players:Loaded` | `(source)` |
+| `ug-core:Players:Injured` | `(source, injury)` |
+| `ug-core:Players:Downed` | `(source, cause)` |
+| `ug-core:Players:Died` | `(source, cause)` |
+| `ug-core:Players:Revived` | `(source, by, reason)` |
+| `ug-core:Players:Respawned` | `(source, coords)` |
+| `ug-core:Players:DeathStateChanged` | `(source, newState, oldState, cause)` |
+
+`Loaded` fires when a character is loaded, or at join without the `characters` module.
+
+## Statebags
+
+Index them with `UgCore.Enums.StateBags`. See [Statebags](/reference/statebags).
+
+| Enum key | Key | Value |
+| --- | --- | --- |
+| `Loaded` | `ug-core:Loaded` | `true` once the player is loaded |
+| `Player` | `ug-core:Player` | `{ name, characterId? }` |
+| `Metadata` | `ug-core:Metadata` | Metadata set with `replicate = true` |
+| `DeathState` | `ug-core:DeathState` | `'Alive'`, `'Downed'` or `'Dead'` |
+| `Injuries` | `ug-core:Injuries` | `UgInjury[]` |

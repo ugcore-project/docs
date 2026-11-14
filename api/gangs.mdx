@@ -1,0 +1,81 @@
+---
+title: "UgCore.Gangs"
+sidebarTitle: "Gangs"
+description: "Gangs and grades."
+icon: "people-group"
+---
+
+import { ModuleInfo } from "/snippets/module-info.jsx";
+
+<Badge color="blue">Server</Badge> <Badge color="green">Client</Badge> Proxied to ug-core.
+
+<ModuleInfo name="gangs" deps={["characters"]} server="Gangs" client="Gangs" clientFunctions="Get" />
+
+Gangs work like [jobs](/api/jobs) without duty. They are defined in `config/gangs.lua`, which only has `none` by default. `none` MUST exist: new characters start in it.
+
+```lua config/gangs.lua
+return {
+    none = {
+        label = 'None',
+        grades = { { name = 'none', label = 'None', salary = 0 } },
+    },
+    ballas = {
+        label = 'Ballas',
+        grades = {
+            { name = 'member', label = 'Member', salary = 0 },
+            { name = 'leader', label = 'Leader', salary = 0, boss = true },
+        },
+    },
+}
+```
+
+## Server
+
+```lua
+UgCore.Gangs.Get(source) -> UgAssignment?
+UgCore.Gangs.Set(source, name, grade?) -> ok, errorCode
+UgCore.Gangs.SetGrade(source, grade) -> ok, errorCode
+UgCore.Gangs.Exists(name, grade?) -> boolean
+UgCore.Gangs.GetDefinition(name) -> { label, grades }?
+```
+
+`Set` and `SetGrade` **MUST run in a thread**. `UgAssignment` has the same fields as for [jobs](/api/jobs#get), without `onDuty`.
+
+## Client
+
+```lua
+UgCore.Gangs.Get() -> UgAssignment?
+```
+
+Read from the `ug-core:Gang` statebag of the local player.
+
+## Errors
+
+| Function | Code | When |
+| --- | --- | --- |
+| `Set`, `SetGrade` | `invalid_args` | The gang or grade does not exist. |
+| `Set`, `SetGrade` | `not_loaded` | No character is loaded. |
+| `Set`, `SetGrade` | `no_permission` | `Gangs:BeforeSet` cancelled. |
+| `Set`, `SetGrade` | `internal_error` | The database failed. |
+
+## Events
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Gangs:Changed` | `(source, gang, previous)`, both `UgAssignment` |
+
+## Hooks
+
+| Hook | Payload |
+| --- | --- |
+| `Gangs:BeforeSet` | `{ source, name, grade }` |
+
+It allows or cancels. Changes to the payload are ignored.
+
+## Statebags
+
+Index them with `UgCore.Enums.StateBags`. See [Statebags](/reference/statebags).
+
+| Enum key | Key | Value |
+| --- | --- | --- |
+| `Gang` | `ug-core:Gang` | `UgAssignment` |

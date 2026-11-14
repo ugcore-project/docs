@@ -1,0 +1,103 @@
+---
+title: "UgCore.Callback"
+sidebarTitle: "Callback"
+description: "Request and response between client and server."
+icon: "arrows-rotate"
+---
+
+<Badge color="purple">Shared</Badge> Runs in your resource. No export hop per call. See the [Callbacks guide](/developers/callbacks).
+
+## Server
+
+### Register
+
+```lua
+UgCore.Callback.Register(name, options, handler)
+```
+
+<ResponseField name="name" type="string" required>Letters, digits and underscores. Registered as `<resource>:<name>`.</ResponseField>
+<ResponseField name="options" type="UgNetworkOptions" required>
+  <Expandable title="fields">
+    <ResponseField name="schema" type="UgSchema" required>From `UgCore.Schema.Define`.</ResponseField>
+    <ResponseField name="rate" type="{ max, per }" required>Per player, in ms.</ResponseField>
+    <ResponseField name="requirePlayer" type="boolean">Rejects players whose `ug-core:Loaded` statebag is not true.</ResponseField>
+    <ResponseField name="requireAlive" type="boolean">Rejects downed and dead players with `no_permission`.</ResponseField>
+    <ResponseField name="permission" type="string">ACE the player MUST have.</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="handler" type="fun(source, ...): any" required>Gets validated arguments. Returns one value.</ResponseField>
+
+Pipeline, in order: exists, concurrency cap (4 in flight per player), global budget and rate limit, `requirePlayer`, `requireAlive`, `permission`, schema, handler, reply. A handler error replies `internal_error` and logs on the server.
+
+### Unregister
+
+```lua
+UgCore.Callback.Unregister(name) -> removed
+```
+
+### Await
+
+```lua
+UgCore.Callback.Await(source, fullName, { schema, timeout? }, ...) -> ok, value, errorCode
+```
+
+Asks a client. **MUST run in a thread.** The reply is untrusted, so it is validated with `schema`, a single rule from `UgCore.Schema`. `timeout` defaults to 10000 ms.
+
+### Trigger
+
+```lua
+UgCore.Callback.Trigger(source, fullName, options, cb, ...)
+```
+
+Callback form of `Await`. `cb` gets `(ok, value, errorCode)`.
+
+## Client
+
+### Await
+
+```lua
+UgCore.Callback.Await(fullName, ...) -> ok, value, errorCode
+```
+
+**MUST run in a thread.** Times out after 10 seconds with `timeout`. Late responses are ignored.
+
+### Trigger
+
+```lua
+UgCore.Callback.Trigger(fullName, cb, ...)
+```
+
+### Register / Unregister
+
+```lua
+UgCore.Callback.Register(name, handler)
+UgCore.Callback.Unregister(name) -> removed
+```
+
+Answers server requests to `<resource>:<name>`. The handler returns one value.
+
+## Example
+
+<CodeGroup>
+```lua server.lua
+local S = UgCore.Schema
+
+UgCore.Callback.Register('GetPrice', {
+    schema = S.Define({ S.String({ max = 32 }) }),
+    rate = { max = 5, per = 1000 },
+    requirePlayer = true,
+}, function(source, item)
+    return PRICES[item]
+end)
+```
+
+```lua client.lua
+CreateThread(function()
+    local ok, price, err = UgCore.Callback.Await('my-shop:GetPrice', 'water')
+
+    if ok then
+        print(('Water costs $%d'):format(price))
+    end
+end)
+```
+</CodeGroup>

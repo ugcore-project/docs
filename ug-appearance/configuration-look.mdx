@@ -1,0 +1,96 @@
+---
+title: "Configuration: look and tools"
+sidebarTitle: "Look and tools"
+description: "Colors, editor layout, tools, controls, lights and sounds."
+icon: "palette"
+---
+
+Part of [Configuration](/ug-appearance/configuration). Every key on this page lives in `config.lua`.
+
+## Theme
+
+`theme` overrides ug-lib's theme for ug-appearance only. It takes the same fields as the [ug-lib theme](/ug-lib/configuration): `mode`, `colors`, `radius`, `font` and `scale`.
+
+`colors` takes HSL triplets keyed by ug-lib token, plus one color per editor tab and the two ends of the heritage mix bar:
+
+- Tabs: `model`, `heritage`, `features`, `eyes`, `skin`, `hair`, `facialHair`, `makeup`, `clothing`, `accessories`, `tattoos`, `outfits`.
+- Mix bar: `mixFirst`, `mixSecond`.
+
+```lua config.lua
+theme = { colors = { clothing = '200 80% 55%' } },
+```
+
+## Layout
+
+`layout` shapes the editor screen. A key you leave out keeps its default.
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `side` | `'left'` | `left` or `right`: where the panel sits. |
+| `width` | `22` | Panel width in rem. |
+| `opacity` | `0.7` | Panel background opacity, 0 to 1. |
+| `blur` | `true` | Frosted panel background. |
+| `toolbar` | `'top'` | `top` or `bottom`. |
+| `hint` | `true` | The controls line at the bottom. |
+| `animations` | `true` | `false` keeps everything still. |
+| `resultDuration` | `3500` | Ms the saved or error message stays. |
+
+## Tools
+
+`features` turns editor tools on and off. A tool set to `false` is hidden. Rotate, zoom, compare and poses are refused by the game too, so no script can use them.
+
+| Key | Default | Tool |
+| --- | --- | --- |
+| `undo` | `true` | Undo and redo. |
+| `randomize` | `true` | Random look for the current tab. |
+| `compare` | `true` | Hold to see the look before your changes. |
+| `favorites` | `true` | Starred drawables. |
+| `search` | `true` | Search in the drawable grid. |
+| `cameras` | `true` | Camera presets on the toolbar. |
+| `rotate` | `true` | Turning the ped by drag, keys and buttons. |
+| `zoom` | `true` | Mouse wheel zoom. |
+| `poses` | `true` | The pose picker. |
+
+## Controls
+
+```lua config.lua
+controls = { dragSpeed = 0.4, zoomSpeed = 0.002, keyRotate = 15, rotateStep = 45 },
+```
+
+- `dragSpeed`: degrees the ped turns per dragged pixel.
+- `zoomSpeed`: meters per mouse wheel unit.
+- `keyRotate`: degrees per Q or E press. `0` turns the keys off.
+- `rotateStep`: degrees per toolbar turn button.
+
+`camera.zoomDuration` (default `150`) is how many ms the camera glides on each wheel step. See [Camera](/ug-appearance/configuration#camera).
+
+## Lights
+
+`lights` lists the light presets on the toolbar, in order: `natural`, `studio`, `day`, `night`. The first one is on when the editor opens. Leave one out to remove it.
+
+`studio` sets the clock for `day` and `night`, and the lamps of the `studio` preset:
+
+```lua config.lua
+studio = {
+    dayHour = 12,
+    nightHour = 23,
+    lights = {
+        { angle = 35, distance = 1.6, height = 0.9, color = { 255, 244, 229 }, range = 4.0, intensity = 2.2 },
+        { angle = -50, distance = 1.8, height = 0.4, color = { 205, 220, 255 }, range = 4.0, intensity = 1.2 },
+        { angle = 180, distance = 1.4, height = 1.1, color = { 255, 255, 255 }, range = 3.0, intensity = 1.6 },
+    },
+},
+```
+
+Each lamp sets its angle from the camera side, its distance and height from the ped, its color `{ r, g, b }`, its range and its intensity.
+
+## Sounds
+
+`soundEffects` maps each event to a game sound, `{ name, set }`. A sound you leave out is silent.
+
+```lua config.lua
+soundEffects = {
+    save = { name = 'PURCHASE', set = 'HUD_LIQUOR_STORE_SOUNDSET' }, -- paid and saved
+    error = { name = 'ERROR', set = 'HUD_FRONTEND_DEFAULT_SOUNDSET' }, -- refused
+},
+```

@@ -1,0 +1,53 @@
+---
+title: "Installation"
+description: "Requirements, start order, item images and the first start."
+icon: "download"
+---
+
+## Requirements
+
+- OneSync.
+- `ug-core` 1.0.0 or newer, with the `items` and `inventory` modules. `weapons`, `shops` and `accounts` add the workbench, shops and balances when enabled.
+- `ug-lib` 1.0.0 or newer.
+
+## Start order
+
+```bash server.cfg
+ensure oxmysql
+ensure ug-core
+ensure ug-lib
+ensure ug-appearance   # only for clothingMode = 'items'
+ensure ug-inventory
+```
+
+## First start
+
+On the first start ug-inventory copies `server/config.default.lua` to `config.lua`. Updates never overwrite it.
+
+The server console prints one line when it is ready:
+
+```text
+[ug-inventory] v1.0.0 ready. 2 stash point(s), weapons on, shops on, clothing toggle.
+```
+
+Each client prints one line in F8:
+
+```text
+[ug-inventory] Ready: hotbar 5, wheel 8.
+```
+
+## Item images
+
+Put one image per item in `images/`, named after the item: `water.png`, `weapon_pistol.png`. PNG or WebP, square, 128x128 or larger, transparent background. Items without an image show an icon in the color of their category.
+
+## Item details
+
+The tooltip shows the item's `description` from ug-core's `config/items.lua` and every plain metadata field of the stack: text, numbers and booleans, at most 12. Name a field in the locale under `page.metadata.<key>`, or it shows as words from the key: `plateNumber` becomes "Plate number".
+
+## When something is wrong
+
+| Console | Meaning |
+| --- | --- |
+| `Config invalid: N error(s). ug-inventory stays off.` | Fix the listed keys in `config.lua` and restart. |
+| `ug-inventory needs the items module. Enable it in ug-core config/modules.lua.` | Enable the module in ug-core. |
+| `ug-core did not become ready. ug-inventory stays off.` | ug-core aborted its boot. Check its errors first. |

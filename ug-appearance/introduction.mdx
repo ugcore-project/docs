@@ -1,0 +1,53 @@
+---
+title: "ug-appearance"
+description: "Character creator, clothing stores, barbers, tattoo parlors, surgeons, outfits and uniforms for UgCore."
+icon: "shirt"
+---
+
+`ug-appearance` is where players shape how their characters look. It runs the character creator, the clothing stores, barbers, tattoo parlors and the plastic surgeon. It also keeps saved outfits and job and gang uniforms.
+
+It is built on `ug-core` (characters, accounts, jobs, gangs, security), `ug-lib` (points, prompts, key bindings, the shared theme) and `oxmysql`.
+
+## The studio
+
+Every store opens the same editor around the player's ped:
+
+- **The camera follows the edit.** Picking hair frames the face, picking shoes frames the feet. Drag to turn the ped, scroll to zoom, or use `Q` and `E`.
+- **Every change shows at once.** Hovering a style, color or tattoo shows it on the ped before you click.
+- **Grids, not lists.** Styles and variants are numbered cards with search, favorites and a "none" card for accessories.
+- **Poses and lights.** Raise the hands to see how a top falls. Switch between natural, studio, day and night light.
+- **Compare and history.** Hold the eye button to see the saved look. Undo and redo up to 50 steps. Randomize a category for ideas.
+- **The bill is always visible.** Every changed piece is listed with its price, and the total is on the pay button.
+
+<Columns cols={2}>
+  <Card title="Installation" icon="download" href="/ug-appearance/installation">
+    Requirements, start order and the first start.
+  </Card>
+  <Card title="Configuration" icon="sliders" href="/ug-appearance/configuration">
+    Models, prices, payment, poses and the camera.
+  </Card>
+  <Card title="Stores and uniforms" icon="store" href="/ug-appearance/stores">
+    Store points, job stores, outfits and uniforms.
+  </Card>
+  <Card title="Integration" icon="plug" href="/ug-appearance/integration">
+    Exports for housing, jobs and character selection.
+  </Card>
+</Columns>
+
+## Store kinds
+
+| Kind | Edits | Pays |
+| --- | --- | --- |
+| Clothing store | Clothes and accessories. Saved outfits and uniforms. | Per changed piece. |
+| Barber shop | Hair, facial hair and makeup. | Hair once, each other piece. |
+| Tattoo parlor | Tattoos by body zone. | Per added and per removed tattoo. |
+| Plastic surgeon | Heritage, face, eyes and skin. | Once per changed category. |
+| Wardrobe | Saved outfits and uniforms only. | Free. |
+| Creator | Everything, while creating a character. | Free. |
+| Admin editor | Everything, opened with a command. | Free. |
+
+## Principles
+
+- **The server decides.** What a store may change, what it costs and what is saved are decided on the server, from its own copy of the appearance. The page only shows and asks. See [Security](/ug-appearance/security).
+- **Headless core, rich page.** ug-core stays headless. All UI lives in this resource's page and in ug-lib.
+- **Optional economy.** With ug-core's accounts module, changes cost money. Without it, everything is free.

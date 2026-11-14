@@ -1,0 +1,55 @@
+---
+title: "Weapons: client and security"
+sidebarTitle: "Client and security"
+description: "Client functions and what the server enforces."
+icon: "display"
+---
+
+<Badge color="green">Client</Badge> Part of [Weapons](/api/weapons).
+
+## Client
+
+```lua
+UgCore.Weapons.GetEquipped() -> { hash, ammo, tint? }?
+```
+
+Actions ask the server. They **MUST run in a thread** and return `ok, errorCode`:
+
+```lua
+UgCore.Weapons.Equip(slot)
+UgCore.Weapons.Unequip()
+UgCore.Weapons.Reload()
+UgCore.Weapons.Unload()
+UgCore.Weapons.Attach(weaponSlot, itemSlot)
+UgCore.Weapons.Detach(weaponSlot, item)
+```
+
+Client events `ug-core:Weapons:Equipped` with `(hash, ammo)` and `ug-core:Weapons:Unequipped` let a HUD show the weapon.
+
+```lua client.lua
+RegisterCommand('reload', function()
+    CreateThread(function()
+        UgCore.Weapons.Reload()
+    end)
+end, false)
+
+RegisterKeyMapping('reload', 'Reload', 'keyboard', 'R')
+```
+
+## Security
+
+| Attack | What happens |
+| --- | --- |
+| Spawning a weapon with a mod menu | Every 2 seconds, the server reads the weapon in each player's hands. Anything not equipped from the inventory, and not in `allowed`, is removed and flagged `WeaponMismatch`. |
+| Infinite ammo | The server keeps the loaded count. A client reporting more rounds than it has is flagged `WeaponMismatch` and reset to the server's count. |
+| Not reporting shots | The weapon stays usable, but its ammo never refills: reloading takes ammo items, counted by the server. |
+| Equipping someone else's weapon | Equipping reads the slot of the player's own inventory on the server. |
+
+| Callback | Rate |
+| --- | --- |
+| `ug-core:WeaponEquip`, `WeaponUnequip`, `WeaponReload`, `WeaponUnload`, `WeaponAttach`, `WeaponDetach` | 3 per second each. Loaded and alive. |
+| Net event `ug-core:WeaponAmmo` | 20 per second. Loaded. |
+
+<Warning>
+  The server reads the weapon in hand and gives weapons through OneSync natives. Test them on your artifact before going live, and keep `enforce` on.
+</Warning>

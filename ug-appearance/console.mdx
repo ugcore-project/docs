@@ -1,0 +1,43 @@
+---
+title: "Commands"
+description: "The admin editor and the ugap console command."
+icon: "terminal"
+---
+
+## Admin editor
+
+`adminCommand` (default `appearance`) opens the full editor: every category, the model choice, free. Players need the `ug-appearance.admin` ACE.
+
+```bash server.cfg
+add_ace group.admin ug-appearance.admin allow
+```
+
+| Command | Does |
+| --- | --- |
+| `/appearance` | Opens the editor for yourself. |
+| `/appearance <id>` | Opens the editor for player `<id>`. They see it and can save or cancel. |
+| `appearance <id>` | The same from the server console. |
+
+The target MUST have a loaded character. From the console, a failure prints the reason:
+
+```text
+> appearance 12
+Could not open the editor for 12: not_loaded
+```
+
+Set `adminCommand = false` to turn it off.
+
+## `ugap`
+
+Server console only. Players cannot run it.
+
+| Command | Does |
+| --- | --- |
+| `ugap status` | Open editor sessions with the player, the store and for how long. |
+
+```text
+> ugap status
+ug-appearance: 2 open session(s).
+  3  clothing clothing4  42s
+  7  admin  5s
+```

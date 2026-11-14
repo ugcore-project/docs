@@ -1,0 +1,72 @@
+---
+title: "Configuration: look and feel"
+sidebarTitle: "Look and feel"
+description: "Panel theme and layout, tabs, noclip, spectate and shards."
+icon: "palette"
+---
+
+Part of [Configuration](/ug-admin/configuration). Every key on this page lives in `config.lua`. `layout`, `noclip` and `spectate` merge field by field: set one field and keep the rest.
+
+## Theme
+
+`theme` overrides ug-lib's theme for the panel only, with the same fields as the [ug-lib theme](/ug-lib/configuration): `mode`, `colors`, `radius`, `font` and `scale`. `colors` takes HSL strings such as `'262 83% 58%'`, keyed by ug-lib token or by section tone: `violet`, `indigo`, `blue`, `sky`, `teal`, `emerald`, `amber`, `rose`, `fuchsia`. A tone sets its lighter shades too.
+
+## Layout
+
+| Field | Default | Purpose |
+| --- | --- | --- |
+| `width`, `height` | `84`, `50` | Panel size in rem. The window never passes 96% of the screen. |
+| `rail` | `'left'` | `left` or `right`: the side of the tab rail. |
+| `backdrop` | `0.5` | How dark the game gets behind the panel, 0 to 1. |
+| `glow` | `true` | The ambient light. |
+| `logo` | `true` | The logo and title on the rail. |
+| `quickBar` | `true` | The row of quick actions. |
+| `toasts` | `'bottom'` | `top` or `bottom`. |
+| `toastDuration` | `2600` | Ms a toast stays. |
+| `animations` | `true` | `false` keeps everything still. |
+| `refreshInterval` | `5000` | Ms between two player list refreshes. |
+| `noclipHud` | `true` | Crosshair, target card and keys while flying. |
+
+## Tabs
+
+`tabs` lists the panel tabs in order: `players`, `reports`, `logs`, `settings`. Leave one out to hide it. Reports also need the `reports` access.
+
+## Noclip
+
+| Field | Default | Purpose |
+| --- | --- | --- |
+| `fov` | `60.0` | Field of view in degrees. |
+| `fovKick` | `8.0` | Extra field of view at speed. |
+| `lookSpeed` | `7.5` | Mouse sensitivity. |
+| `smoothing` | `10.0` | How quickly the drone reaches its speed. Higher is snappier. |
+| `boost`, `slow` | `2.0`, `0.5` | Speed multipliers with `Shift` and `Alt`. |
+| `liftDuration`, `diveDuration` | `350`, `400` | Ms of the take-off and landing flights. `0` cuts. |
+| `inspect` | `true` | Aim at things to land, board, delete or freeze them. |
+| `outline` | `true` | Outline the aimed entity. |
+| `outlineColor` | `{ 124, 92, 255, 255 }` | `{ red, green, blue, alpha }`. |
+| `marker` | `true` | The ground marker where you would land. |
+
+## Spectate
+
+| Field | Default | Purpose |
+| --- | --- | --- |
+| `swoop` | `true` | The camera dives from the sky to the player. |
+| `swoopHeight` | `90.0` | Meters the swoop starts from. |
+| `swoopDuration` | `1400` | Ms of the swoop. |
+| `fade` | `350` | Ms of the fade. |
+
+## Shards
+
+`shards` sets the full-screen messages of `/announce`, `/warn` and `/dm`, by kind: `announce`, `warn`, `message`. A kind you leave out shows as a notification instead.
+
+```lua config.lua
+shards = {
+    announce = { duration = 9000, color = 'purple', sound = { name = 'CHECKPOINT_PERFECT', set = 'HUD_MINI_GAME_SOUNDSET' } },
+    warn = { duration = 7000, color = 'red', sound = { name = 'CHECKPOINT_MISSED', set = 'HUD_MINI_GAME_SOUNDSET' } },
+    message = { duration = 9000, color = 'blue' }, -- no sound
+},
+```
+
+- `duration` in ms.
+- `color`: `purple`, `red`, `blue`, `green`, `yellow`, `orange`, `white` or `grey`.
+- `sound`: `{ name, set }` from the game's frontend sounds, or left out.

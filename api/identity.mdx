@@ -1,0 +1,94 @@
+---
+title: "UgCore.Identity"
+sidebarTitle: "Identity"
+description: "Identifiers and bans."
+icon: "fingerprint"
+---
+
+import { ModuleInfo } from "/snippets/module-info.jsx";
+
+<Badge color="blue">Server</Badge> Proxied to ug-core.
+
+<ModuleInfo name="identity" required server="Identity" />
+
+The primary identifier type comes from `primaryIdentifier` in `config/identity.lua`. It defaults to `license`. Players without it cannot connect, and players with an active ban are refused with a generic message.
+
+## GetIdentifiers
+
+```lua
+UgCore.Identity.GetIdentifiers(source) -> identifiers
+```
+
+<ResponseField name="identifiers" type="string[]">Every identifier, such as `license:abc` and `discord:123`.</ResponseField>
+
+Works for connected and connecting players.
+
+## GetPrimary
+
+```lua
+UgCore.Identity.GetPrimary(source) -> identifier?
+```
+
+The identifier of the primary type, such as `license:abc`.
+
+## IsBanned
+
+```lua
+UgCore.Identity.IsBanned(target) -> banned, ban, errorCode
+```
+
+**MUST run in a thread.**
+
+<ResponseField name="target" type="integer | string | string[]" required>A source, an identifier, or a list of identifiers.</ResponseField>
+<ResponseField name="ban" type="UgBan?">
+  The active ban that lasts longest.
+  <Expandable title="fields">
+    <ResponseField name="id" type="integer" />
+    <ResponseField name="reason" type="string?" />
+    <ResponseField name="expiresAt" type="integer?">Unix seconds. `nil` for permanent bans.</ResponseField>
+    <ResponseField name="createdAt" type="integer">Unix seconds.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Ban
+
+```lua
+UgCore.Identity.Ban(target, options?) -> ok, banId, errorCode
+```
+
+**MUST run in a thread.** Bans every identifier of the target, except `ip:`. When the player already dropped, pass identifiers instead of a source.
+
+<ResponseField name="options.reason" type="string">Up to 255 characters. Stored in `ug_bans` and server logs, never shown to the player.</ResponseField>
+<ResponseField name="options.duration" type="integer">Seconds. Permanent when nil.</ResponseField>
+<ResponseField name="options.by" type="string">Who banned. Up to 64 characters.</ResponseField>
+<ResponseField name="options.kick" type="boolean" default="true">Drops an online target.</ResponseField>
+
+## Unban
+
+```lua
+UgCore.Identity.Unban(target) -> ok, count, errorCode
+```
+
+**MUST run in a thread.** Lifts every active ban covering the target. `count` is the number of lifted bans.
+
+## Errors
+
+| Function | Code | When |
+| --- | --- | --- |
+| `IsBanned` | `internal_error` | The database failed. |
+| `Ban` | `not_found` | The target has no identifiers, such as a source that already dropped. |
+| `Ban`, `Unban` | `internal_error` | The database failed. |
+
+Invalid options and malformed targets raise.
+
+## Example
+
+```lua
+CreateThread(function()
+    local ok, banId, err = UgCore.Identity.Ban(source, {
+        reason = 'Exploiting the bank robbery',
+        duration = 7 * 24 * 3600,
+        by = 'admin:jane',
+    })
+end)
+```

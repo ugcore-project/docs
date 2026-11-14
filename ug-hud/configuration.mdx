@@ -1,0 +1,134 @@
+---
+title: "Configuration"
+description: "Defaults for new players, the look, the editor limits, fuel, voice, seatbelt and cruise."
+icon: "sliders"
+---
+
+`config.lua` holds the defaults new players start from. Players change the layout, styles, colors and units in game. A key you remove uses its default. Unknown keys and bad values stop ug-hud with every error listed.
+
+```lua config.lua
+return {
+    editorKey = 'I',
+    editorCommand = 'hud',
+    preset = 'neon',
+    speedUnit = 'kmh',
+    minimap = 'vehicle',
+    minimapLift = 0.09,
+    accounts = { 'cash', 'bank' },
+    hideGameHud = true,
+    voice = 'auto',
+    fuel = { source = 'native' },
+    seatbelt = { enabled = true, key = 'B', ejectSpeed = 60, ejectDrop = 25 },
+    cruise = { enabled = true, key = 'Y' },
+    theme = {},
+    defaults = { ... },
+    widgets = { ... },
+    cinematicWidgets = { 'status', 'speedometer' },
+    statusColors = { ... },
+    alerts = { ... },
+    editor = { ... },
+}
+```
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `editorKey` | `'I'` | Key that opens the editor. Players MAY rebind it in the game's key bindings. |
+| `editorCommand` | `'hud'` | Command that opens the editor. |
+| `preset` | `'neon'` | `neon`, `minimal`, `classic` or `sport`. |
+| `speedUnit` | `'kmh'` | `kmh` or `mph`. |
+| `minimap` | `'vehicle'` | `always`, `vehicle` or `never`. |
+| `minimapLift` | `0.09` | How far the minimap rises from the bottom, as a share of the screen height. `0` keeps the game position. |
+| `accounts` | `{ 'cash', 'bank' }` | ug-core accounts the money widget shows, in order. At most 8. |
+| `hideGameHud` | `true` | Hides the game's cash, vehicle name, street name and weapon icon. |
+| `voice` | `'auto'` | `auto` shows talking, and pma-voice modes and radio when it runs. `none` hides voice. |
+| `fuel` | `{ source = 'native' }` | See below. |
+| `seatbelt` | see above | `enabled`, `key`, `ejectSpeed` (km/h), `ejectDrop` (km/h). |
+| `cruise` | see above | `enabled`, `key`. |
+
+Changes to `preset`, `speedUnit` and `minimap` reach players who never saved a layout. Players who saved keep their choice.
+
+## Look
+
+`theme` overrides ug-lib's theme for ug-hud only. It takes the same fields as the [ug-lib theme](/ug-lib/configuration): `mode`, `colors` (HSL strings such as `'262 83% 58%'`, keyed by ug-lib token), `radius`, `font` and `scale`. Left out, ug-lib's theme applies.
+
+`defaults` is the look new players start with, and the one "Reset" goes back to:
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `accent` | `''` | Hex color, or `''` for the preset's. |
+| `scale` | `1.0` | HUD size, 0.6 to 1.6. |
+| `clock24` | `true` | 24-hour clock. |
+| `cinematic` | `false` | Letterbox bars, and only `cinematicWidgets` stay. |
+| `smartHide` | `false` | Full bars hide until they change. |
+| `effects` | `true` | Low health vignette and warning pulses. |
+| `sounds` | `true` | Heartbeat, seatbelt chimes and cruise beep. |
+| `snap` | `true` | The editor snaps widgets to edges and centers. |
+
+## Widgets
+
+`widgets` holds one entry per widget: `status`, `money`, `identity`, `voice`, `speedometer`, `compass`, `clock` and `weapon`.
+
+```lua config.lua
+widgets = {
+    status = { enabled = true, visible = true, x = 0.012, y = 0.975, scale = 1.0, opacity = 1.0, style = '' },
+    -- ...
+},
+```
+
+- `enabled = false` removes the widget for everyone. The other fields are where new players start.
+- `x` and `y` are the edge the widget hangs from, as a share of the screen. On the left half it hangs from its left edge, on the right half from its right edge, and at `0.5` it is centered.
+- `scale` goes from 0.5 to 2, `opacity` from 0.2 to 1.
+- `style` is `''` for the preset's, or a style the widget offers: status `rings`, `bars`, `pills`, `minimal`. Money, identity and clock `card`, `plain`. Voice `pill`, `dots`. Speedometer `arc`, `digital`, `bar`. Compass `tape`, `heading`.
+
+`cinematicWidgets` lists the widgets that stay on screen in cinematic mode. Default `{ 'status', 'speedometer' }`.
+
+`statusColors` sets the bar colors (hex) before players pick their own: `health`, `armor`, `stamina`, `oxygen`, `hunger`, `thirst`, `stress`. Statuses from other resources MAY be added by name.
+
+## Alerts
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `lowHealth` | `30` | Health at or below this shows the vignette and plays the heartbeat. |
+| `lowStatus` | `20` | Bars pulse at or below this. |
+| `highStatus` | `80` | Inverted bars pulse at or above this. |
+| `inverted` | `{ 'stress' }` | Statuses where more is worse. |
+| `heartbeatInterval` | `1100` | Ms between two heartbeats. |
+| `chimeInterval` | `2000` | Ms between two seatbelt chimes. |
+| `chimeSpeed` | `18` | Unbuckled players above this km/h hear the chime. |
+
+## Editor
+
+`editor` sets what players MAY change.
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `enabled` | `true` | `false` removes the editor, its key and its command. Everyone keeps the defaults. |
+| `presets` | all four | Presets offered. `preset` MUST be one of them. |
+| `accents` | nine colors | Accent colors offered, in hex. |
+| `move` | `true` | Position, size and opacity. |
+| `styles` | `true` | Presets and widget styles. |
+| `colors` | `true` | Accent and bar colors. |
+| `codes` | `true` | Share and import layouts. |
+
+The limits apply to saved layouts and imported codes too: a field players cannot change falls back to the default.
+
+## Fuel
+
+| Source | Example | Reads |
+| --- | --- | --- |
+| `native` | `{ source = 'native' }` | `GetVehicleFuelLevel`. Most fuel resources keep it in sync. |
+| `statebag` | `{ source = 'statebag', key = 'fuel' }` | An entity statebag, such as ox_fuel's `fuel`. |
+| `export` | `{ source = 'export', resource = 'LegacyFuel', fn = 'GetFuel' }` | A client export that takes the vehicle. |
+| `none` | `{ source = 'none' }` | Nothing. The fuel gauge hides. |
+
+## Seatbelt and cruise
+
+- The seatbelt works in cars only, not on bikes, boats or aircraft. Buckled players cannot leave the vehicle.
+- An unbuckled player flies through the windscreen when the speed drops by more than `ejectDrop` km/h at once from above `ejectSpeed` km/h.
+- Cruise control holds the speed the driver had when they pressed the key. Braking, leaving the seat or changing vehicle turns it off.
+
+PVP servers often set `seatbelt = { enabled = false, key = 'B', ejectSpeed = 60, ejectDrop = 25 }`.
+
+## Locales
+
+Labels come from `locales/<code>.json`, picked by ug-lib's locale. English and Portuguese ship. Copy `en.json` to add a language: every file MUST have the same keys.

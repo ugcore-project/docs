@@ -1,0 +1,82 @@
+---
+title: "Installation"
+description: "Requirements, start order and the first start."
+icon: "download"
+---
+
+## Requirements
+
+- OneSync.
+- [`ug-core`](/introduction) with the **characters** module enabled. The **accounts**, **jobs** and **gangs** modules are optional: without accounts everything is free, without jobs and gangs there are no job stores or uniforms.
+- [`ug-lib`](/ug-lib/introduction), for store points, prompts, key bindings and the shared theme.
+- `oxmysql`. The resource creates its tables, `ug_appearances` and `ug_outfits`, on the first start.
+
+## Download
+
+Download `ug-appearance-vX.Y.Z.zip` from the [releases](https://github.com/ugcore-project/ug-appearance/releases) and extract it into your resources folder, for example `resources/[ug]/ug-appearance`.
+
+<Accordion title="Building from source" icon="hammer">
+  The repository does not contain the built page. Build it once with Node.js 20.19 or newer:
+
+  ```bash
+  cd resources/[ug]/ug-appearance/web
+  npm ci
+  npm run build
+  ```
+
+  The build goes to `web/dist`, which the manifest serves.
+</Accordion>
+
+## Start order
+
+```bash server.cfg
+ensure oxmysql
+ensure ug-lib
+ensure ug-core
+ensure ug-appearance
+ensure ug-multicharacter
+```
+
+Start `ug-appearance` before `ug-multicharacter`. Character selection then uses the creator and shows every character in its own look. See [Character selection](/ug-appearance/integration#character-selection).
+
+To let staff open the full editor on any player, grant the ACE:
+
+```bash server.cfg
+add_ace group.admin ug-appearance.admin allow
+```
+
+<Warning>
+  Run only one appearance resource. Others that set ped components, open clothing menus or save skins conflict with this one.
+</Warning>
+
+## First start
+
+The server console prints:
+
+```text
+[INFO] Generated config.lua.
+[ug-appearance] v1.0.0 ready: 28 stores, 2 models.
+```
+
+When a player opens a store or saves, their F8 console prints:
+
+```text
+[ug-appearance] Editor opened: clothing.
+[ug-appearance] Saved clothing for 160.
+```
+
+When something is wrong, the resource logs every problem and stays idle instead of half working:
+
+```text
+[ERROR] config.lua: unknown key "maxOutfit". Did you mean "maxOutfits"?
+[ERROR] Config invalid: 1 error(s). ug-appearance stays idle.
+```
+
+```text
+[ERROR] ug-core's characters module is disabled. Enable it in ug-core's config/modules.lua.
+[ERROR] ug-appearance stays idle.
+```
+
+<Note>
+  The default store coordinates are the game's shop doors. Check each one on your server and move the ones your map changes. See [Stores and uniforms](/ug-appearance/stores).
+</Note>

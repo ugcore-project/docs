@@ -1,0 +1,33 @@
+---
+title: "Introduction"
+description: "Staff tools for UgCore: commands, a drone noclip, spectate, vision, reports, an audit log and a live panel."
+icon: "user-shield"
+---
+
+ug-admin gives your staff every tool they need. Every staff action runs through one server pipeline, whether it comes from chat, the console or the panel: access by ug-core group, a rank check so nobody acts on a higher rank, validated arguments, an audit row and a Discord log.
+
+## What staff get
+
+- **Drone noclip.** The camera rises off the gameplay camera and flies with smoothed acceleration. The crosshair targets what it points at: land there, delete it, freeze a player, board a vehicle or copy a `vector4`. See [Noclip and spectate](/ug-admin/noclip).
+- **Spectate.** A satellite swoop onto the target, then an orbit camera with a live card. Arrows switch players.
+- **Vision.** Every player on the map with a heading blip, plus name tags over heads.
+- **Modes.** God mode, invisible and frozen players, owned by the server through statebags.
+- **Big messages.** Announcements, warnings and private messages show as GTA shards.
+- **Reports with a live chat.** Players ask for help, staff answer from a desk in the panel. See [Reports](/ug-admin/reports).
+- **Jail and mute.** Time counts while the player is online, survives reconnects and ends on its own.
+- **History and notes.** Every staff action taken on a player, and private staff notes.
+- **Live control.** Health, armor, needs, exact balances, and items removed slot by slot.
+- **Everyone at once.** Revive every downed player, bring everyone around you, freeze everyone you outrank.
+- **Panel.** `F10` or `/admin`: a searchable player list, details, every action, reports and the audit log.
+
+All commands are on [Commands](/ug-admin/commands).
+
+## What server owners get
+
+- Access per action, by ug-core staff group: [Configuration](/ug-admin/configuration).
+- An audit log in `ug_admin_log`, searchable from the panel and posted to Discord when a webhook is set.
+- The panel's look, noclip, spectate and shards: [Look and feel](/ug-admin/configuration-look).
+
+## What developers get
+
+Server events for every staff action, every report and every rating. See [API](/ug-admin/api).

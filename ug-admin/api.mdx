@@ -1,0 +1,36 @@
+---
+title: "API"
+description: "Server events for staff actions, reports and ratings."
+icon: "code"
+---
+
+<Badge color="blue">Server</Badge> Subscribe with `UgCore.Events.On`.
+
+```lua
+-- Every staff action, after it ran.
+-- entry: { actor, actorName, action, target?, targetName?, detail, at }, identifiers and Unix seconds.
+UgCore.Events.On('ug-admin:Action', function(entry) end)
+
+-- A player asked for help.
+-- report: { id, source, name, message, category, accused?, status, at, messages }.
+UgCore.Events.On('ug-admin:Reported', function(report) end)
+
+-- A player rated the help on a closed report, 1 to 5. report.closedBy is the staff name.
+UgCore.Events.On('ug-admin:ReportRated', function(report, rating) end)
+```
+
+| Event | Arguments |
+| --- | --- |
+| `ug-admin:Action` | `(entry)` |
+| `ug-admin:Reported` | `(report)` |
+| `ug-admin:ReportRated` | `(report, rating)` |
+
+## Opening inventories
+
+`/inventory id` opens a player's pockets through ug-core's [`UgCore.Inventory.Open`](/api/inventory-containers#open). [ug-inventory](/ug-inventory/introduction) shows it next to the staff member's own pockets.
+
+## Security
+
+- Every action runs through one server pipeline: access by group, the rank check, validated arguments, then the audit row.
+- The panel is untrusted. It sends intent only, and the server checks every action again.
+- The actions a staff member sees come from their `ug-admin:Access` statebag, written by the server. Hiding a button is never the check.

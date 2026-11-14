@@ -1,0 +1,41 @@
+---
+title: "UgLib.Table"
+sidebarTitle: "Table"
+description: "Copy, merge, search and freeze tables."
+icon: "table"
+---
+
+<Badge color="purple">Shared</Badge> Runs in your resource.
+
+```lua
+UgLib.Table.DeepCopy(value) -> copy
+UgLib.Table.Merge(base, override) -> table
+UgLib.Table.Count(tbl) -> integer
+UgLib.Table.Contains(tbl, value) -> boolean
+UgLib.Table.Keys(tbl) -> any[]
+UgLib.Table.Values(tbl) -> any[]
+UgLib.Table.Map(tbl, fn) -> table
+UgLib.Table.Filter(array, fn) -> any[]
+UgLib.Table.Find(tbl, fn) -> value, key
+UgLib.Table.Equals(a, b) -> boolean
+UgLib.Table.Freeze(tbl) -> table
+```
+
+- `DeepCopy` keeps cycles and shared references. Metatables are not copied.
+- `Merge` returns a new table and changes neither argument. Maps merge deeply, arrays from `override` replace arrays in `base`.
+- `Count` counts every key, not only the array part.
+- `Keys` and `Values` have no defined order for maps. `Values` keeps the order of arrays.
+- `Map(tbl, fn(value, key))` keeps the keys. `Filter(array, fn(value, index))` keeps the order.
+- `Find(tbl, fn(value, key))` searches arrays in order first, then other keys.
+- `Equals` compares deeply and ignores metatables.
+- `Freeze` returns a read-only view, nested tables included. Writes raise. `ipairs`, `pairs` and `#` work.
+
+## Example
+
+```lua
+local defaults = { price = 10, tags = { 'food' } }
+local item = UgLib.Table.Merge(defaults, { price = 12 })
+
+local config = UgLib.Table.Freeze(item)
+config.price = 0 -- raises: Table.Freeze: cannot set "price" on a frozen table
+```

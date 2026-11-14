@@ -1,0 +1,45 @@
+---
+title: "Clothing"
+description: "Clothing slots around the character, in toggle or items mode."
+icon: "shirt"
+---
+
+Fourteen clothing slots sit around the character: `hat`, `glasses`, `ears`, `mask`, `chain`, `top`, `undershirt`, `gloves`, `vest`, `bag`, `watch`, `bracelet`, `legs` and `shoes`. `clothingPieces` picks which ones show and their order: the first half on the left, the rest on the right.
+
+The slots read the player's ped, so they match whatever dressed it.
+
+## Toggle mode
+
+`clothingMode = 'toggle'`, the default. A click takes a piece off with an animation, and a second click puts it back on.
+
+- The ped changes on the client. Each piece is remembered to put it back.
+- Nothing becomes an item, so nothing can be duplicated.
+- Pieces taken off go back on when the resource stops.
+
+## Items mode
+
+`clothingMode = 'items'`. A piece comes off as an item that MAY be stored, given or dropped, and is worn again by using it or dragging it onto its slot.
+
+- Needs [ug-appearance](/ug-appearance/introduction) started before ug-inventory. It saves what is worn.
+- ug-inventory registers one item per piece (`clothing_hat`, `clothing_top`, ...) with the model, drawable and texture as metadata.
+- Taking a piece off adds the item first, then saves the appearance without it. Wearing an item swaps it with the piece worn.
+- Every step is undone when the next one fails, and a player runs one change at a time.
+- Clothes made for another model do not fit.
+
+<Warning>
+ug-appearance outfits and uniforms still dress for free. Give clothing items no resale value in shops.
+</Warning>
+
+## Add-on peds
+
+Pieces taken off use the base game's drawables of the freemode models. Add-on peds show their props only, until `clothingNaked` lists their components:
+
+```lua config.lua
+clothingNaked = { my_addon_ped = { top = 15, legs = 21 } },
+```
+
+The bare legs, feet and undershirt values of the freemode models SHOULD be checked on a live server.
+
+## Animations
+
+Each piece plays an animation from `clothingAnimations` while it changes. See [Look and sounds](/ug-inventory/configuration-look#animations).

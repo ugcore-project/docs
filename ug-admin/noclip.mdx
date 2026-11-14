@@ -1,0 +1,49 @@
+---
+title: "Noclip and spectate"
+description: "The drone noclip, spectate and vision, with their keys."
+icon: "helicopter"
+---
+
+## Noclip
+
+`/noclip` or `F2`. The camera rises off the gameplay camera, still looking where you looked, and flies with smoothed acceleration and a FOV kick at speed. The crosshair targets what it points at and shows a card: model, network id, plate, owner. A key legend lights up the keys that apply. Leaving dives the camera back onto the ped.
+
+| Key | Does |
+| --- | --- |
+| `WASD`, mouse | Fly, look. |
+| `Space` or `Q`, `Ctrl` or `E` | Up, down. |
+| Wheel | Speed, 20% per notch, between the slowest and fastest of `noclipSpeeds`. |
+| `Shift`, `Alt` | Boost, slow. |
+| Left click | Land at the crosshair. |
+| `Delete` | Delete the targeted entity, never a player. |
+| `G` | Freeze or unfreeze the targeted player. |
+| `F` | Board the targeted vehicle on landing. |
+| `C` | Copy the coordinates as a `vector4`. |
+| `H` | Hide or show the key legend. |
+
+<Note>
+Map props are not networked. `Delete` hides them for everyone until the server restarts.
+</Note>
+
+Speeds, sensitivity, the take-off and landing flights, the outline and the marker are in [`noclip`](/ug-admin/configuration-look#noclip).
+
+## Spectate
+
+`/spectate id`. A fade and a satellite swoop onto the target, then an orbit camera with zoom and a live card with health and armor. Spectate joins the target's routing bucket and brings you back where you were.
+
+| Key | Does |
+| --- | --- |
+| Mouse | Orbit. |
+| Wheel | Zoom. |
+| `←`, `→` | Previous, next player. Players you cannot watch are skipped. |
+| `Backspace` | Stop watching. |
+
+The swoop and fade are in [`spectate`](/ug-admin/configuration-look#spectate).
+
+## Vision
+
+`/vision`. Every player on the map with a heading blip, plus name tags over heads. The server sends positions every `radarInterval` ms, only to staff with vision on.
+
+## Modes
+
+`/god` and `/invisible` toggle the mode, `/freeze` freezes a player. The server owns each mode through a statebag and the client enforces it every frame. Invisible staff see themselves at `invisibleAlpha`. Everyone else sees nothing.

@@ -1,0 +1,48 @@
+---
+title: "UgCore.LocalPlayer"
+sidebarTitle: "LocalPlayer"
+description: "The local player, from statebags."
+icon: "user"
+---
+
+import { ModuleInfo } from "/snippets/module-info.jsx";
+
+<Badge color="green">Client</Badge> Reads statebags only. No network call.
+
+<ModuleInfo name="players" required deps={["identity"]} server="Players" client="LocalPlayer" />
+
+`UgCore.LocalPlayer` is the client side of the [`players`](/api/players) module. On the server it raises `UgCore.LocalPlayer exists on clients only.`
+
+```lua
+UgCore.LocalPlayer.GetData() -> { name, characterId? }?
+UgCore.LocalPlayer.IsLoaded() -> boolean
+UgCore.LocalPlayer.GetMetadata(key?) -> any
+UgCore.LocalPlayer.GetDeathState() -> 'Alive' | 'Downed' | 'Dead'
+UgCore.LocalPlayer.IsDead() -> boolean
+UgCore.LocalPlayer.IsDowned() -> boolean
+UgCore.LocalPlayer.GetInjuries() -> UgInjury[]
+```
+
+| Function | Statebag |
+| --- | --- |
+| `GetData` | `ug-core:Player` |
+| `IsLoaded` | `ug-core:Loaded` |
+| `GetMetadata` | `ug-core:Metadata`. Replicated keys only. Every key when `key` is nil. |
+| `GetDeathState`, `IsDead`, `IsDowned` | `ug-core:DeathState` |
+| `GetInjuries` | `ug-core:Injuries`. Same shape as on the [server](/api/players-death#read). |
+
+## React to changes
+
+Watch the statebag instead of polling:
+
+```lua client.lua
+local bag = ('player:%d'):format(GetPlayerServerId(PlayerId()))
+
+AddStateBagChangeHandler(UgCore.Enums.StateBags.DeathState, bag, function(_, _, state)
+    if state == UgCore.Enums.DeathState.Downed then
+        -- show your own downed UI
+    end
+end)
+```
+
+<Note>Clients never change their own state. Revive, respawn and every other change happen on the server.</Note>

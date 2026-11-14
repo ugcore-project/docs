@@ -1,0 +1,190 @@
+---
+title: "The ug console"
+description: "Inspect the framework from the server console."
+icon: "terminal"
+---
+
+`ug` is a server console command for looking inside UgCore. It works from the server console, and in game for players with the `ug.admin` ACE. Output always goes to the server console.
+
+```bash server.cfg
+add_ace group.admin ug.admin allow
+```
+
+## Subcommands
+
+<AccordionGroup>
+  <Accordion title="ug modules" icon="puzzle-piece" defaultOpen>
+    Every installed module, whether it is enabled, and why.
+
+    ```text
+    > ug modules
+      accounts       enabled   enabled in config/modules.lua
+      gangs          disabled  disabled in config/modules.lua
+      identity       enabled   required
+    ```
+  </Accordion>
+
+  <Accordion title="ug config <name>" icon="sliders">
+    Resolved values of a config and where each came from: `default`, `file` or the convar.
+
+    ```text
+    > ug config core
+    config/core.lua
+      locale = 'pt' (file)
+      debug = true (convar ug-core:Debug)
+    ```
+
+    Without a name, it lists every config.
+  </Accordion>
+
+  <Accordion title="ug lifecycle" icon="timeline">
+    Every lifecycle state with the time spent in the previous one.
+
+    ```text
+    > ug lifecycle
+      Booting      +0 ms
+      Configured   +14 ms
+      Initializing +1 ms
+      Starting     +38 ms
+      Ready        +2 ms
+    ```
+  </Accordion>
+
+  <Accordion title="ug database" icon="database">
+    Database server version, applied migrations per module, and cache usage.
+
+    ```text
+    > ug database
+      server   MariaDB 10.11.6
+      accounts 1.0.0
+      core     no migrations
+    ```
+  </Accordion>
+
+  <Accordion title="ug guard <id>" icon="shield-halved">
+    A player's Guard score and recent flags with their details.
+
+    ```text
+    > ug guard 7
+      player 7 score 12
+         41s ago  InvalidPayload       ug-banking:Deposit arg 1: MUST be an integer, got "lots"
+    ```
+  </Accordion>
+
+  <Accordion title="ug groups" icon="users">
+    Every group from `config/permissions.lua`, highest weight first, with its member count.
+
+    ```text
+    > ug groups
+      founder          Founder              weight 100     1   member(s) inherits admin
+      admin            Admin                weight 50      2   member(s) inherits moderator
+      moderator        Moderator            weight 10      4   member(s)
+    ```
+  </Accordion>
+
+  <Accordion title="ug inventory <id>" icon="boxes-stacked">
+    A loaded inventory by player id or inventory id: weight, slots and every item.
+
+    ```text
+    > ug inventory 3
+    player:12: 1250/30000 g, 50 slots
+        1  water                    x2
+        2  id_card                  x1      {"name":"Jane Doe"}
+    ```
+  </Accordion>
+
+  <Accordion title="ug items [name]" icon="box">
+    Every item definition, or the details of one.
+
+    ```text
+    > ug items water
+    water: Water, 500 g, stacks to 10, not usable
+    ```
+  </Accordion>
+
+  <Accordion title="ug shops [name]" icon="store">
+    Every shop, or the prices and stock of one.
+
+    ```text
+    > ug shops general_store
+    general_store (24/7), pays with cash:
+        1  water                             5  unlimited
+        2  bread                             8  unlimited
+        3  bandage                          50  18/20 in stock
+    ```
+  </Accordion>
+
+  <Accordion title="ug weapon <id>" icon="gun">
+    The weapon a player has equipped, with its serial, ammo and durability.
+
+    ```text
+    > ug weapon 3
+    Player 3: weapon_pistol, serial K7QH2M9XPA, 42 rounds, 97.5% durability
+    ```
+  </Accordion>
+
+  <Accordion title="ug needs <id>" icon="utensils">
+    The needs of a player with a loaded character. Without an id, the number of players with needs.
+
+    ```text
+    > ug needs 3
+      hunger            72.40
+      stress             0.00
+      thirst            58.10
+    ```
+  </Accordion>
+
+  <Accordion title="ug hooks" icon="anchor">
+    Every registered hook, with the resource that registered it and its priority.
+
+    ```text
+    > ug hooks
+      Guard:BeforeAction       my-anticheat         priority 0
+    ```
+  </Accordion>
+
+  <Accordion title="ug version" icon="code-compare">
+    Checks GitHub again for the latest ug-core release. The answer prints when it arrives, within 3 seconds.
+
+    ```text
+    > ug version
+    ug-core v1.0.0. Update available: v1.0.0 -> v1.1.0. https://github.com/ugcore-project/ug-core/releases/tag/v1.1.0
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Version check
+
+On server start, ug-core asks GitHub for its latest release and shows the result next to its version in the boot banner:
+
+```text
+ug-core v1.0.0 · Update available: v1.0.0 -> v1.1.0. https://github.com/ugcore-project/ug-core/releases/tag/v1.1.0
+```
+
+The banner also welcomes your server by `sv_projectName` (or `sv_hostname`), and shows the FXServer build, your slots and the enforced game build, which help when you ask for support.
+
+| Line | Meaning |
+| --- | --- |
+| `Up to date.` | You run the latest release. |
+| `Update available: vX -> vY.` | A newer release exists. Read its notes before you update: MAJOR versions have breaking changes. |
+| `Ahead of the latest release vY.` | You run a version that is not released yet. A `dev-build` shows `Up to date.`: its version is the release it builds on, plus `+dev`. |
+| `Version check unavailable.` | GitHub did not answer within 3 seconds, or there is no release yet. Boot continues normally. |
+| `Version check disabled.` | The check is turned off. |
+
+The check runs once per server start, not on `restart ug-core`. Pre-releases are ignored. Boot waits for it at most 3 seconds.
+
+It runs before config loads, so you turn it off with a convar only, for example on servers without internet access:
+
+```bash server.cfg
+set ug-core:VersionCheck false
+```
+
+## Debug output
+
+Turn on debug logs in `config/core.lua` or with a convar:
+
+```bash server.cfg
+set ug-core:Debug true
+```
+
+Debug lines show rejected requests, dropped spoofed events and other details. They also appear in client F8.

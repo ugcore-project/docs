@@ -1,0 +1,35 @@
+---
+title: "Security"
+description: "What the server checks, and why the page cannot be trusted."
+icon: "shield-halved"
+---
+
+The page runs in the player's game, and injected scripts can post anything to it. `ug-appearance` checks every request at three levels: the page bridge in Lua, the ug-core callback, and the server rule.
+
+## What is checked
+
+| Action | Checks |
+| --- | --- |
+| Opening a store | The player MUST be loaded and alive, within the store radius (read on the server), and in the store's job or gang. Opening from too far flags the player in ug-core's Guard. |
+| Editing | The page bridge checks every edit with the full appearance schema: known keys only, bounded numbers, at most `maxTattoos` tattoos. Changes outside the store's categories are dropped before they reach the ped. |
+| Saving | The server needs an open session of the right kind. Every category the store does not sell MUST equal the saved appearance, or the save is refused and the player is flagged. The model MUST be in `models`. |
+| Paying | The server computes the price from its own saved copy and the store's prices. A failed write after payment refunds the amount. |
+| Outfits | Saved from the paid appearance, never the preview. Wearing and deleting check that the outfit belongs to the character. |
+| Uniforms | Filtered by job or gang and grade on the server. The page only sends the uniform's position in the list it was given. |
+| Creation | The creator's appearance is accepted only from a player without a loaded character, and saved only when ug-core creates their character. It expires after 10 minutes. |
+| Lineup | A player can read only the appearances of their own characters, at most 32 at a time. |
+
+Every callback has a schema and a rate limit through ug-core. The page bridge also refuses more than 30 page events per second.
+
+## What the page gets
+
+- The store kind, its categories, the saved appearance and what the game offers for the ped.
+- The bill as lines and a total, computed by Lua with the same code the server charges with.
+- Never prices, store coordinates or other players' data.
+
+## What it never does
+
+- Trust a price, a total, a category or a store from the page.
+- Save an appearance without an open session on the server.
+- Let a store change the model. Only the creator and the admin editor do.
+- Leave cameras, lights, clock changes or a frozen player behind when the editor closes, the resource stops or an error happens.

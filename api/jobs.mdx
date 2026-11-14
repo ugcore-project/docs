@@ -1,0 +1,143 @@
+---
+title: "UgCore.Jobs"
+sidebarTitle: "Jobs"
+description: "Jobs, grades and duty."
+icon: "briefcase"
+---
+
+import { ModuleInfo } from "/snippets/module-info.jsx";
+
+<Badge color="blue">Server</Badge> <Badge color="green">Client</Badge> Proxied to ug-core.
+
+<ModuleInfo name="jobs" deps={["characters"]} server="Jobs" client="Jobs" clientFunctions="Get, IsOnDuty" />
+
+Jobs are defined in `config/jobs.lua`, a data config. Every character has exactly one job. New characters start as `unemployed`, which MUST exist.
+
+```lua config/jobs.lua
+return {
+    unemployed = {
+        label = 'Unemployed',
+        grades = { { name = 'unemployed', label = 'Unemployed', salary = 0 } },
+    },
+    police = {
+        label = 'Police',
+        defaultDuty = false,
+        grades = {
+            { name = 'recruit', label = 'Recruit', salary = 100 },
+            { name = 'officer', label = 'Officer', salary = 150 },
+            { name = 'sergeant', label = 'Sergeant', salary = 200 },
+            { name = 'chief', label = 'Chief', salary = 300, boss = true },
+        },
+    },
+}
+```
+
+Grades are 1-based indexes into `grades`. Read every definition with `UgCore.Config.Get('jobs')`, on the server or the client.
+
+## Server
+
+### Get
+
+```lua
+UgCore.Jobs.Get(source) -> UgAssignment?
+```
+
+<ResponseField name="UgAssignment" type="table">
+  `nil` without a loaded character.
+  <Expandable title="fields" defaultOpen>
+    <ResponseField name="name" type="string" />
+    <ResponseField name="label" type="string" />
+    <ResponseField name="grade" type="integer" />
+    <ResponseField name="gradeName" type="string" />
+    <ResponseField name="gradeLabel" type="string" />
+    <ResponseField name="salary" type="integer" />
+    <ResponseField name="boss" type="boolean" />
+    <ResponseField name="onDuty" type="boolean" />
+  </Expandable>
+</ResponseField>
+
+### Set / SetGrade
+
+```lua
+UgCore.Jobs.Set(source, name, grade?) -> ok, errorCode
+UgCore.Jobs.SetGrade(source, grade) -> ok, errorCode
+```
+
+**MUST run in a thread.** `grade` defaults to 1. The job is saved with the character.
+
+<Note>A new grade in the same job keeps duty. A different job starts at its `defaultDuty`.</Note>
+
+### SetDuty / IsOnDuty
+
+```lua
+UgCore.Jobs.SetDuty(source, onDuty) -> ok, errorCode
+UgCore.Jobs.IsOnDuty(source) -> boolean
+```
+
+Duty is session state. It starts at the job's `defaultDuty` when the character loads and is never saved.
+
+### Exists / GetDefinition
+
+```lua
+UgCore.Jobs.Exists(name, grade?) -> boolean
+UgCore.Jobs.GetDefinition(name) -> { label, grades, defaultDuty? }?
+```
+
+## Client
+
+```lua
+UgCore.Jobs.Get() -> UgAssignment?
+UgCore.Jobs.IsOnDuty() -> boolean
+```
+
+Read from the `ug-core:Job` statebag of the local player.
+
+## Errors
+
+| Function | Code | When |
+| --- | --- | --- |
+| `Set`, `SetGrade` | `invalid_args` | The job or grade does not exist. |
+| `Set`, `SetGrade`, `SetDuty` | `not_loaded` | No character is loaded. |
+| `Set`, `SetGrade` | `no_permission` | `Jobs:BeforeSet` cancelled. |
+| `Set`, `SetGrade` | `internal_error` | The database failed. |
+
+`SetDuty` raises when `onDuty` is not a boolean.
+
+## Events
+
+| Event | Arguments |
+| --- | --- |
+| `ug-core:Jobs:Changed` | `(source, job, previous)`, both `UgAssignment` |
+| `ug-core:Jobs:DutyChanged` | `(source, onDuty)` |
+
+## Hooks
+
+| Hook | Payload |
+| --- | --- |
+| `Jobs:BeforeSet` | `{ source, name, grade }` |
+
+Runs for `Set` and `SetGrade`. It allows or cancels. Changes to the payload are ignored.
+
+## Statebags
+
+Index them with `UgCore.Enums.StateBags`. See [Statebags](/reference/statebags).
+
+| Enum key | Key | Value |
+| --- | --- | --- |
+| `Job` | `ug-core:Job` | `UgAssignment` with `onDuty` |
+
+```lua client.lua
+AddStateBagChangeHandler(UgCore.Enums.StateBags.Job, ('player:%d'):format(GetPlayerServerId(PlayerId())), function(_, _, job)
+    -- update your HUD
+end)
+```
+
+## Example
+
+```lua
+local job = UgCore.Jobs.Get(source)
+
+if not job or job.name ~= 'police' or not job.onDuty then
+    return false, UgCore.Enums.Errors.NoPermission
+end
+```

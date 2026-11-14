@@ -1,0 +1,80 @@
+---
+title: "UgCore.Network"
+sidebarTitle: "Network"
+description: "Validated, rate limited net events."
+icon: "tower-broadcast"
+---
+
+<Badge color="purple">Shared</Badge> Runs in your resource. See the [Net events guide](/developers/net-events).
+
+## Server
+
+### Register
+
+```lua
+UgCore.Network.Register(name, options, handler)
+```
+
+<ResponseField name="name" type="string" required>Letters, digits and underscores. Registered as `<resource>:<name>`.</ResponseField>
+<ResponseField name="options" type="UgNetworkOptions" required>Same options as [`Callback.Register`](/api/callback#register): `schema`, `rate`, `requirePlayer`, `requireAlive`, `permission`.</ResponseField>
+<ResponseField name="handler" type="fun(source, ...)" required>Gets validated arguments.</ResponseField>
+
+Events before ug-core is `Ready` are dropped. Rejections are flagged in Guard, except `requireAlive`. Invalid payloads flag `InvalidPayload`.
+
+### TriggerClient
+
+```lua
+UgCore.Network.TriggerClient(source, fullName, ...)
+```
+
+<ResponseField name="source" type="integer" required>Player source, or `-1` for every player.</ResponseField>
+
+### TriggerClients
+
+```lua
+UgCore.Network.TriggerClients(fullName, ...)
+```
+
+Sends to every player.
+
+## Client
+
+### Register
+
+```lua
+UgCore.Network.Register(name, handler)
+```
+
+Listens to `<resource>:<name>` from the server. Handler errors are logged.
+
+### TriggerServer
+
+```lua
+UgCore.Network.TriggerServer(fullName, ...)
+```
+
+## Example
+
+<CodeGroup>
+```lua server.lua
+local S = UgCore.Schema
+
+UgCore.Network.Register('Sit', {
+    schema = S.Define({ S.Integer({ min = 1, max = 64 }) }),
+    rate = { max = 2, per = 1000 },
+    requireAlive = true,
+}, function(source, seat)
+    UgCore.Network.TriggerClients('my-chairs:Seated', source, seat)
+end)
+```
+
+```lua client.lua
+UgCore.Network.Register('Seated', function(playerId, seat)
+    -- play the animation
+end)
+
+UgCore.Network.TriggerServer('my-chairs:Sit', 3)
+```
+</CodeGroup>
+
+<Warning>Never use `RegisterNetEvent` directly. Unvalidated events bypass every protection layer.</Warning>

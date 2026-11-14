@@ -1,0 +1,43 @@
+---
+title: "API"
+description: "Custom statuses and hiding the HUD from your resources."
+icon: "code"
+---
+
+<Badge color="green">Client</Badge> All exports run on the client.
+
+## Custom statuses
+
+Show your own bar in the status widget, such as drunk, nitro or radiation. Players can hide it and change its color like any other status.
+
+```lua
+exports['ug-hud']:AddStatus('drunk', { label = 'Drunk', icon = 'beer', color = '#facc15', value = 0 })
+exports['ug-hud']:SetStatus('drunk', 40)
+exports['ug-hud']:RemoveStatus('drunk')
+```
+
+<ResponseField name="name" type="string" required>1 to 32 letters, digits, dashes or underscores.</ResponseField>
+<ResponseField name="label" type="string" required>1 to 32 characters.</ResponseField>
+<ResponseField name="icon" type="string">An icon name. Known: `beer`, `brain`, `droplet`, `droplets`, `flame`, `footprints`, `heart`, `pill`, `radiation`, `shield`, `skull`, `snowflake`, `sparkles`, `thermometer`, `utensils`, `waves`, `wind`, `zap`. Others show a dot.</ResponseField>
+<ResponseField name="color" type="string">A hex color such as `#ff8800`.</ResponseField>
+<ResponseField name="value" type="number">0 to 100, clamped.</ResponseField>
+
+- `AddStatus` raises on bad input. Calling it again with the same name updates the status.
+- A status belongs to the resource that added it. Other resources cannot change or remove it: `SetStatus` and `RemoveStatus` return `false`.
+- At most 16 custom statuses exist at once.
+- Statuses are removed when their resource stops.
+- A status is display only. Keep the real value in your resource, on the server when it matters.
+
+## Hiding the HUD
+
+```lua
+exports['ug-hud']:SetHidden(true)  -- during your menu, cutscene or character screen
+exports['ug-hud']:SetHidden(false)
+exports['ug-hud']:IsVisible() -> boolean
+```
+
+Each resource hides for itself. The HUD shows again once every resource that hid it called `SetHidden(false)` or stopped. It also hides on its own in the pause menu, on faded screens and before a character is loaded.
+
+## Needs and money
+
+ug-hud reads needs and balances from ug-core. Change them with [`UgCore.Needs`](/api/needs) and [`UgCore.Accounts`](/api/accounts) on the server, and the HUD follows.

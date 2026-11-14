@@ -1,0 +1,58 @@
+---
+title: "UgCore.Events"
+sidebarTitle: "Events"
+description: "Local event bus with spoofing protection for ug-core events."
+icon: "bell"
+---
+
+<Badge color="purple">Shared</Badge> Runs in your resource.
+
+## On
+
+```lua
+UgCore.Events.On(name, handler) -> id
+```
+
+<ResponseField name="name" type="string" required>Event name. Use `UgCore.Enums.Events` values for core events.</ResponseField>
+<ResponseField name="handler" type="fun(...)" required>Called with the event arguments.</ResponseField>
+<ResponseField name="id" type="integer">Pass to `Off` to remove the handler.</ResponseField>
+
+`ug-core:*` events are dropped unless ug-core triggered them. Dropped events log at Debug.
+
+## Once
+
+```lua
+UgCore.Events.Once(name, handler) -> id
+```
+
+Like `On`, but the handler runs at most once. A dropped spoofed event does not use it up.
+
+## Off
+
+```lua
+UgCore.Events.Off(id) -> removed
+```
+
+<ResponseField name="removed" type="boolean">`false` for unknown or already removed ids.</ResponseField>
+
+## Emit
+
+```lua
+UgCore.Events.Emit(name, ...)
+```
+
+<ResponseField name="name" type="string" required>MUST start with your resource name, such as `my-shop:Purchased`. Raises otherwise.</ResponseField>
+
+Uses a local event: every resource on the same side receives it.
+
+## Example
+
+```lua
+local id = UgCore.Events.On(UgCore.Enums.Events.Lifecycle.Changed, function(newState, oldState)
+    UgCore.Logger.Info('ug-core: %s -> %s', oldState, newState)
+end)
+
+UgCore.Events.Emit('my-shop:Opened', source)
+```
+
+See every core event in the [Events reference](/reference/events).
