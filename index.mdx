@@ -23,11 +23,11 @@ import { BootConsole } from "/snippets/boot-console.jsx";
           UgCore is a FiveM framework built server-first. Clients send intent, the server decides. Every net event is validated, rate limited and scored. Owners enable only the modules they need, and developers get a typed API.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <a href="/quickstart" className="rounded-xl px-5 py-3 text-sm font-semibold text-white no-underline" style={{ background: "linear-gradient(100deg, #7C5CFF, #22D3EE)" }}>
-            Build your first resource
-          </a>
-          <a href="/installation" className="rounded-xl border border-zinc-300 px-5 py-3 text-sm font-semibold text-zinc-800 no-underline dark:border-zinc-700 dark:text-zinc-100">
+          <a href="/installation" className="rounded-xl px-5 py-3 text-sm font-semibold text-white no-underline" style={{ background: "linear-gradient(100deg, #7C5CFF, #22D3EE)" }}>
             Install UgCore
+          </a>
+          <a href="/quickstart" className="rounded-xl border border-zinc-300 px-5 py-3 text-sm font-semibold text-zinc-800 no-underline dark:border-zinc-700 dark:text-zinc-100">
+            Build your first resource
           </a>
           <a href="/api/overview" className="rounded-xl px-5 py-3 text-sm font-semibold text-zinc-700 no-underline dark:text-zinc-300">
             API reference →
@@ -35,7 +35,7 @@ import { BootConsole } from "/snippets/boot-console.jsx";
         </div>
         <div className="mt-10 grid max-w-md grid-cols-3 gap-6">
           <div>
-            <div className="text-2xl font-bold text-zinc-950 dark:text-white">10</div>
+            <div className="text-2xl font-bold text-zinc-950 dark:text-white">15</div>
             <div className="text-xs text-zinc-500">modules, enable what you need</div>
           </div>
           <div>
@@ -76,7 +76,7 @@ import { BootConsole } from "/snippets/boot-console.jsx";
         The core draws nothing. It returns result codes and emits events, so any UI resource can sit on top.
       </Card>
       <Card title="Modular" icon="puzzle-piece" href="/owners/modules">
-        Fourteen modules, from accounts and jobs to inventories, weapons and shops. Disabled modules leave no tables, no events and no namespace behind.
+        Fifteen modules, from accounts and jobs to inventories, weapons and shops. Disabled modules leave no tables, no events and no namespace behind.
       </Card>
       <Card title="Owner-friendly config" icon="sliders" href="/owners/configuration">
         One `config/` folder, generated on first boot and never overwritten. Typos get suggestions, bad values stop boot with every error listed.
