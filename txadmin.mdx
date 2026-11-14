@@ -1,0 +1,134 @@
+---
+title: "Deploy with txAdmin"
+sidebarTitle: "txAdmin recipe"
+description: "Set up a complete UgCore server in a few minutes with the official txAdmin recipe."
+icon: "wand-magic-sparkles"
+---
+
+The UgCore recipe builds a ready server from txAdmin's Server Deployer: every UgCore resource from its latest release, the database, and a `server.cfg` split into files that each do one job. It is the fastest way to start. To add UgCore to a server you already run, follow [Installation](/installation) instead.
+
+## Requirements
+
+- txAdmin, which ships with every FXServer.
+- MySQL 8.0 or MariaDB 10.6+, running. txAdmin creates the database when it does not exist.
+- A license key from the [Cfx Portal](https://portal.cfx.re).
+
+## Deploy
+
+<Steps>
+  <Step title="Open the deployer">
+    In txAdmin's server setup, pick **Remote URL Template** as the deployment type. Deploy into a new, empty folder.
+  </Step>
+
+  <Step title="Paste the recipe URL">
+    ```text
+    https://raw.githubusercontent.com/ugcore-project/txAdminRecipe/main/ugcore.yaml
+    ```
+  </Step>
+
+  <Step title="Review the recipe">
+    txAdmin shows the recipe before it runs it. You MAY change `gameBuild` at the top, or delete the block of a resource you do not want. Every block is commented.
+  </Step>
+
+  <Step title="Enter the license key and database">
+    The deployer asks for the license key and the database host, user, password and name. It writes them to `secrets.cfg` and adds your txAdmin account to `group.admin`.
+  </Step>
+
+  <Step title="Start the server">
+    ug-core prints its banner, creates its tables and generates its config files. The server is ready when the console shows:
+
+    ```text Server console
+    [INFO] ug-core v1.0.0 ready in 61 ms. 15 modules enabled.
+    ```
+
+    Run `ug status` and `ug modules` in the console to check it.
+  </Step>
+</Steps>
+
+## What you get
+
+```text
+server.cfg          network, slots and game build, then runs the files below in order
+secrets.cfg         license key, database and the ug-admin webhook. Never share or commit it
+convars.cfg         FXServer protection, Steam, oxmysql, pma-voice, ug-core and ug-lib settings
+permissions.cfg     ug-core's ACEs and your staff
+resources.cfg       the resources that start, in order
+.gitignore          keeps secrets.cfg and runtime files out of git
+resources/
+├── [cfx]/          mapmanager, spawnmanager
+├── [standalone]/   oxmysql, pma-voice
+├── [ug]/           ug-lib, ug-core, ug-multicharacter, ug-appearance, ug-hud, ug-target, ug-inventory, ug-admin
+└── [local]/        your own resources
+```
+
+<AccordionGroup>
+  <Accordion title="Settings as convars" icon="sliders">
+    `convars.cfg` lists every ug-core and ug-lib option that is not a table, set to its default: module switches, Guard thresholds, character slots, inventory size, UI positions and theme. A convar wins over the same option in `config/`. See [Convars](/reference/convars).
+  </Accordion>
+  <Accordion title="Hardened by default" icon="shield-halved">
+    `sv_entityLockdown relaxed`, `sv_filterRequestControl 1`, no networked sounds, no Script Hook, private endpoints and `sv_pureLevel 1`. Each line says what it does and when to change it.
+  </Accordion>
+  <Accordion title="Least privilege for ug-core" icon="key">
+    ug-core gets the four ACE commands it runs, `add_ace`, `remove_ace`, `add_principal` and `remove_principal`, instead of every command.
+  </Accordion>
+  <Accordion title="No basic-gamemode" icon="person-running">
+    It turns spawnmanager auto-spawn back on. ug-core owns spawning, and ug-multicharacter places players.
+  </Accordion>
+  <Accordion title="Categories" icon="folder-tree">
+    `ensure [ug]` starts every UgCore resource after `ug-lib` and `ug-core`. Removing one never breaks the start.
+  </Accordion>
+</AccordionGroup>
+
+## After the first start
+
+<Steps>
+  <Step title="Set your server listing">
+    Name, description, tags, locale, banners and icon are set in the [Cfx Portal](https://portal.cfx.re/servers), not in cfg files.
+  </Step>
+
+  <Step title="Make yourself founder">
+    The recipe makes your txAdmin account an admin. Join the server, then promote yourself from the server console with your server ID:
+
+    ```text
+    setgroup 1 founder
+    ```
+
+    See [ug-admin installation](/ug-admin/installation) and [Permissions](/owners/permissions).
+  </Step>
+
+  <Step title="Add the Discord audit log">
+    Paste a Discord webhook URL into `set ug-admin:Webhook ""` in `secrets.cfg`. Every staff action and report is posted there.
+  </Step>
+
+  <Step title="Tune your settings">
+    Change values in `convars.cfg`. Jobs, gangs, accounts, items, shops and other tables live in `resources/[ug]/ug-core/config/`. Each feature resource reads `config.lua` in its own folder.
+  </Step>
+</Steps>
+
+## Adding your resources
+
+Put your own resources in `resources/[local]` and uncomment `ensure [local]` at the end of `resources.cfg`. Start from [ug-template](https://github.com/ugcore-project/ug-template) for a resource that follows UgCore's conventions.
+
+## Updating
+
+Download the new release of a resource and extract it over its folder in `resources/[ug]`. Each archive ships `config/` empty, so your config stays. Restart the server: ug-core runs new migrations on start. See [Installation](/installation#updating).
+
+<Warning>
+  Never delete a resource folder before extracting the update: that deletes its config too.
+</Warning>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="The deployer fails to download a ug resource" icon="cloud-arrow-down">
+    The recipe downloads `releases/latest/download/<name>.zip`. Check that GitHub is reachable from the machine, then run the deployer again in an empty folder.
+  </Accordion>
+  <Accordion title="Players with Steam cannot be told apart" icon="user-check">
+    `steam_webApiKey` no longer works. Players link Steam to their Cfx account instead. Uncomment `sv_enforceSteamAuth true` in `convars.cfg` to require it. It needs server build 38004 or newer. ug-core identifies players by license, so Steam stays optional.
+  </Accordion>
+  <Accordion title="Voice range does not show in the HUD" icon="microphone">
+    `sv_stateBagStrictMode` MUST stay off with pma-voice: pma-voice writes the voice range from the client.
+  </Accordion>
+</AccordionGroup>
+
+See [Troubleshooting](/owners/troubleshooting) for ug-core boot errors.

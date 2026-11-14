@@ -4,6 +4,12 @@ description: "Install ug-core on an FXServer with OneSync and oxmysql."
 icon: "download"
 ---
 
+<Card title="New server? Use the txAdmin recipe" icon="wand-magic-sparkles" href="/txadmin" horizontal>
+  One URL in txAdmin installs every UgCore resource, creates the database and writes a hardened, organized `server.cfg`.
+</Card>
+
+This page installs ug-core by hand, for example on a server you already run.
+
 ## Requirements
 
 <Columns cols={2}>
@@ -43,15 +49,17 @@ icon: "download"
     ensure oxmysql
     ensure ug-core
 
-    # Lets the permissions module apply grants as ACEs.
-    add_ace resource.ug-core command allow
-
-    # Lets admins use the `ug` console command in game.
-    add_ace group.admin ug.admin allow
+    # Lets the permissions module apply groups and grants as ACEs. These are the only commands it runs.
+    add_ace resource.ug-core command.add_ace allow
+    add_ace resource.ug-core command.remove_ace allow
+    add_ace resource.ug-core command.add_principal allow
+    add_ace resource.ug-core command.remove_principal allow
     ```
 
+    The `admin` group of `config/permissions.lua` has `ug.admin`, which lets admins use the `ug` console command in game.
+
     <Warning>
-      Without `add_ace resource.ug-core command allow`, permission grants cannot be applied. ug-core reports it in red at boot.
+      Without these ACEs, permission grants cannot be applied. ug-core reports it in red at boot. `add_ace resource.ug-core command allow` works too, but grants every command.
     </Warning>
   </Step>
 

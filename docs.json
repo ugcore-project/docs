@@ -79,6 +79,7 @@
                 "pages": [
                   "index",
                   "introduction",
+                  "txadmin",
                   "installation",
                   "quickstart",
                   "architecture"
@@ -665,6 +666,10 @@
       {
         "header": "Docs",
         "items": [
+          {
+            "label": "Deploy with txAdmin",
+            "href": "/txadmin"
+          },
           {
             "label": "Quickstart",
             "href": "/quickstart"

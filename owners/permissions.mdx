@@ -9,13 +9,18 @@ UgCore permissions are FiveM ACEs, and UgCore groups are ACE principals. Every A
 
 ## Setup
 
-ug-core needs permission to run `add_ace`, `add_principal` and their `remove_` versions:
+ug-core needs permission to run `add_ace`, `add_principal` and their `remove_` versions. Grant those four and nothing else:
 
 ```bash server.cfg
-add_ace resource.ug-core command allow
+add_ace resource.ug-core command.add_ace allow
+add_ace resource.ug-core command.remove_ace allow
+add_ace resource.ug-core command.add_principal allow
+add_ace resource.ug-core command.remove_principal allow
 ```
 
-Without it, boot prints `ug-core cannot run add_ace. Add add_ace resource.ug-core command allow to server.cfg.` in red, and nothing can be applied.
+The [txAdmin recipe](/txadmin) writes these lines to `permissions.cfg`. `add_ace resource.ug-core command allow` also works, but grants every command.
+
+Without them, boot prints `ug-core cannot run add_ace. Add add_ace resource.ug-core command allow to server.cfg.` in red, and nothing can be applied.
 
 ## Groups
 
